@@ -19,8 +19,8 @@ Dottie is an intelligent healthcare assistant designed to help patients analyze 
 
 ## Resources
 
-- [Dottie Overview PDF](/pdfs/Dottie.pdf)
-- [Dottie Image Guide PDF](/pdfs/Dottie_IMG.pdf)
+- [Dottie Overview PDF](/img/pdfs/Dottie.pdf)
+- [Dottie Image Guide PDF](/img/pdfs/Dottie_IMG.pdf)
 
 ## Azure Systems Design
 
