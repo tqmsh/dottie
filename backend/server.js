@@ -1,6 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -20,7 +22,13 @@ app.get('/api/hello', (req, res) => {
 // Define port
 const PORT = process.env.PORT || 5000;
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running in development mode on port ${PORT}`);
-}); 
+// Export app for testing
+export default app;
+
+// Start server only if this file is run directly
+const currentFilePath = fileURLToPath(import.meta.url);
+if (process.argv[1] === currentFilePath) {
+  app.listen(PORT, () => {
+    console.log(`Server running in development mode on port ${PORT}`);
+  });
+} 
