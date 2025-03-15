@@ -1,29 +1,53 @@
 // @ts-check
-import { test, expect } from "@playwright/test";
+import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import supertest from 'supertest';
+import app from '../server.js';
+import { createServer } from 'http';
 
-// Force sequential running of tests
-test.describe.configure({ mode: "serial" });
+// Create a supertest instance
+const request = supertest(app);
 
-test.describe("API Comprehensive Tests", () => {
-  // Store assessmentId for use across tests
-  let assessmentId;
+// Store assessmentId for use across tests
+let assessmentId;
+// Store server instance
+let server;
 
+// Start server before all tests
+beforeAll(async () => {
+  server = createServer(app);
+  await new Promise(resolve => {
+    server.listen(5000, () => {
+      console.log('Test server started on port 5000');
+      resolve();
+    });
+  });
+});
+
+// Close server after all tests
+afterAll(async () => {
+  await new Promise(resolve => {
+    server.close(() => {
+      console.log('Test server closed');
+      resolve();
+    });
+  });
+});
+
+describe("API Comprehensive Tests", () => {
   // Test the hello endpoint
-  test("should return Hello World message with correct format", async ({
-    request,
-  }) => {
+  test("should return Hello World message with correct format", async () => {
     // Send a request to the API endpoint
     const response = await request.get("/api/hello");
 
     // Verify the status code is 200 (OK)
-    expect(response.status()).toBe(200);
+    expect(response.status).toBe(200);
 
     // Verify response headers indicate JSON content type
-    const contentType = response.headers()["content-type"];
+    const contentType = response.headers['content-type'];
     expect(contentType).toContain("application/json");
 
     // Parse the response body as JSON
-    const responseBody = await response.json();
+    const responseBody = response.body;
 
     // Verify the message matches what we expect
     expect(responseBody).toHaveProperty("message");
@@ -32,20 +56,20 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test error case - endpoint not found
-  test("should return 404 for non-existent endpoint", async ({ request }) => {
+  test("should return 404 for non-existent endpoint", async () => {
     // Send a request to a non-existent API endpoint
     const response = await request.get("/api/non-existent-endpoint");
 
     // Verify the status code is 404 (Not Found)
-    expect(response.status()).toBe(404);
+    expect(response.status).toBe(404);
   });
 
   // Test starting a new assessment
-  test("should start a new assessment", async ({ request }) => {
+  test("should start a new assessment", async () => {
     const response = await request.post("/api/assessment/start");
 
-    expect(response.status()).toBe(201);
-    const body = await response.json();
+    expect(response.status).toBe(201);
+    const body = response.body;
 
     expect(body).toHaveProperty("assessmentId");
     expect(body).toHaveProperty("question");
@@ -59,21 +83,19 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to question 1
-  test("should accept answer to question 1 and return question 2", async ({
-    request,
-  }) => {
+  test("should accept answer to question 1 and return question 2", async () => {
     // Use this format for all request.post calls
-    const response = await request.post("/api/assessment/answer", {
-      headers: { "Content-Type": "application/json" },
-      data: {
+    const response = await request
+      .post("/api/assessment/answer")
+      .set("Content-Type", "application/json")
+      .send({
         assessmentId,
         questionId: 1,
         answer: "15_17",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("question");
     expect(body.question.id).toBe(2);
@@ -82,20 +104,17 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to question 2
-  test("should accept answer to question 2 and return question 3", async ({
-    request,
-  }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should accept answer to question 2 and return question 3", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 2,
         answer: "26_30",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("question");
     expect(body.question.id).toBe(3);
@@ -106,20 +125,17 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to question 3
-  test("should accept answer to question 3 and return question 4", async ({
-    request,
-  }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should accept answer to question 3 and return question 4", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 3,
         answer: "4_5",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("question");
     expect(body.question.id).toBe(4);
@@ -130,20 +146,17 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to question 4
-  test("should accept answer to question 4 and return question 5", async ({
-    request,
-  }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should accept answer to question 4 and return question 5", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 4,
         answer: "moderate",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("question");
     expect(body.question.id).toBe(5);
@@ -152,20 +165,17 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to question 5
-  test("should accept answer to question 5 and return question 6", async ({
-    request,
-  }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should accept answer to question 5 and return question 6", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 5,
         answer: "moderate",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("question");
     expect(body.question.id).toBe(6);
@@ -176,23 +186,20 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test submitting answer to final question
-  test("should accept answer to question 6 and indicate completion", async ({
-    request,
-  }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should accept answer to question 6 and indicate completion", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 6,
         answer: {
           physical: ["Bloating", "Headaches"],
           emotional: ["Mood swings", "Irritability"],
         },
-      },
-    });
+      });
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("complete");
     expect(body.complete).toBe(true);
@@ -202,15 +209,13 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test getting assessment results
-  test("should retrieve assessment results with analysis and recommendations", async ({
-    request,
-  }) => {
+  test("should retrieve assessment results with analysis and recommendations", async () => {
     const response = await request.get(
       `/api/assessment/results/${assessmentId}`
     );
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
+    expect(response.status).toBe(200);
+    const body = response.body;
 
     expect(body).toHaveProperty("assessmentId");
     expect(body.assessmentId).toBe(assessmentId);
@@ -244,32 +249,29 @@ test.describe("API Comprehensive Tests", () => {
   });
 
   // Test error handling - non-existent assessment
-  test("should handle request for non-existent assessment", async ({
-    request,
-  }) => {
+  test("should handle request for non-existent assessment", async () => {
     const response = await request.get(
       "/api/assessment/results/non-existent-id"
     );
 
-    expect(response.status()).toBe(404);
-    const body = await response.json();
+    expect(response.status).toBe(404);
+    const body = response.body;
 
     expect(body).toHaveProperty("error");
     expect(body.error).toBe("Assessment not found");
   });
 
   // Test error handling - submitting answer to invalid question
-  test("should reject answer for invalid question", async ({ request }) => {
-    const response = await request.post("/api/assessment/answer", {
-      data: {
-        // Use data property
+  test("should reject answer for invalid question", async () => {
+    const response = await request
+      .post("/api/assessment/answer")
+      .send({
         assessmentId: assessmentId,
         questionId: 999, // Non-existent question
         answer: "some_answer",
-      },
-    });
+      });
 
-    expect(response.status()).toBe(400);
+    expect(response.status).toBe(400);
     // Your implementation might return a different status code
     // Update the test based on how your API handles this case
   });
