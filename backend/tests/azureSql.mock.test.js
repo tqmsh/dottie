@@ -67,4 +67,4 @@ describe('Azure SQL Connection (Mocked)', () => {
     await db.destroy();
     expect(db.destroy).toHaveBeenCalled();
   });
-}); 
+});
