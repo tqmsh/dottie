@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import initializeDatabase from "./db/init.js";
+import db from "./db/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -21,8 +24,22 @@ app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello World from Dottie API!" });
 });
 
+// Database status endpoint
+app.get("/api/db-status", async (req, res) => {
+  try {
+    // Try to query the database
+    await db.raw("SELECT 1");
+    res.json({ status: "connected" });
+  } catch (error) {
+    console.error("Database connection error:", error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
 // Add assessment routes
 app.use("/api/assessment", assessmentRoutes);
+// Add user routes
+app.use("/api/users", userRoutes);
 
 // Add this for debugging - log all requests
 app.use((req, res, next) => {
@@ -52,7 +69,18 @@ export default app;
 // Start server only if this file is run directly
 const currentFilePath = fileURLToPath(import.meta.url);
 if (process.argv[1] === currentFilePath) {
-  app.listen(PORT, () => {
-    console.log(`Server running in development mode on port ${PORT}`);
-  });
+  // Initialize database before starting server
+  try {
+    // Only create tables, don't close connection
+    await db.raw('SELECT 1');
+    console.log("Database connection successful");
+    
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`Server running in development mode on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to database:", error);
+    process.exit(1);
+  }
 }
