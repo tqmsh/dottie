@@ -77,4 +77,4 @@ describe('Database Connection', () => {
     // Reset for other tests
     process.env.NODE_ENV = 'development';
   });
-}); 
+});
