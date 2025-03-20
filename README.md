@@ -74,6 +74,23 @@ The interface balances friendly engagement with medical credibility, using acces
 - **backend**: Express.js API server with API endpoints
 - **frontend**: (Coming soon) User interface for the Dottie application
 
+### Architecture
+
+#### Database
+Dottie uses a dual-database approach to simplify development while maintaining production readiness:
+
+- **Development**: SQLite for local development (no setup required)
+- **Production**: Azure SQL Database for scalable cloud deployment
+- **ORM**: Knex.js provides a unified query interface across both database types
+
+This architecture allows developers to work locally without needing to set up a database server, while ensuring a smooth transition to production with Azure SQL.
+
+#### Backend
+- **API Server**: Express.js handles HTTP requests and routing
+- **Data Models**: Knex.js models for database interaction
+- **Authentication**: (Coming soon) JWT-based authentication
+- **Middleware**: Express middleware for request processing
+
 ### Getting Started
 
 #### Backend Setup
@@ -87,18 +104,25 @@ The interface balances friendly engagement with medical credibility, using acces
    npm install
    ```
 
-3. Run the development server:
+3. Initialize the database:
+   ```
+   npm run db:init
+   ```
+
+4. Run the development server:
    ```
    npm run dev
    ```
 
-4. Run tests:
+5. Run tests:
    ```
    npm test
    ```
 
 ### Technologies Used
 - **Backend**: Node.js, Express.js
+- **Database**: SQLite (dev), Azure SQL (production)
+- **ORM**: Knex.js for database queries
 - **Testing**: Vitest, Supertest
 - **Documentation**: Docusaurus (see `/docs` directory)
 
