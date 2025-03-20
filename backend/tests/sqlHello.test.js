@@ -34,4 +34,5 @@ describe('SQL Hello Endpoint', () => {
     expect(result).toBeInstanceOf(Array);
     expect(result[0]).toHaveProperty('message', 'Hello World from Test!');
   });
-}); 
+});
+
