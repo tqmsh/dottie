@@ -5,6 +5,8 @@
  * @param {object} db - Knex database instance
  */
 export async function createTables(db) {
+  const isSQLite = db.client.config.client === 'sqlite3';
+  
   // Users table
   if (!(await db.schema.hasTable('users'))) {
     await db.schema.createTable('users', (table) => {
@@ -28,11 +30,15 @@ export async function createTables(db) {
       table.integer('flow_level'); // 1-5 scale
       table.timestamps(true, true);
       
-      // In SQLite, foreign keys need to be enabled separately
-      try {
+      // Foreign key handling based on database type
+      if (!isSQLite) {
         table.foreign('user_id').references('users.id');
-      } catch (error) {
-        console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+      } else {
+        try {
+          table.foreign('user_id').references('users.id');
+        } catch (error) {
+          console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+        }
       }
     });
     console.log('Created period_logs table');
@@ -49,11 +55,15 @@ export async function createTables(db) {
       table.text('notes');
       table.timestamps(true, true);
       
-      // In SQLite, foreign keys need to be enabled separately
-      try {
+      // Foreign key handling based on database type
+      if (!isSQLite) {
         table.foreign('user_id').references('users.id');
-      } catch (error) {
-        console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+      } else {
+        try {
+          table.foreign('user_id').references('users.id');
+        } catch (error) {
+          console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+        }
       }
     });
     console.log('Created symptoms table');
@@ -69,22 +79,28 @@ export async function createTables(db) {
       table.text('recommendations');
       table.timestamps(true, true);
       
-      // In SQLite, foreign keys need to be enabled separately
-      try {
+      // Foreign key handling based on database type
+      if (!isSQLite) {
         table.foreign('user_id').references('users.id');
-      } catch (error) {
-        console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+      } else {
+        try {
+          table.foreign('user_id').references('users.id');
+        } catch (error) {
+          console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+        }
       }
     });
     console.log('Created assessments table');
   }
   
   // Enable foreign keys in SQLite
-  try {
-    await db.raw('PRAGMA foreign_keys = ON');
-    console.log('Enabled SQLite foreign keys');
-  } catch (error) {
-    console.warn('Warning: Could not enable foreign keys in SQLite:', error.message);
+  if (isSQLite) {
+    try {
+      await db.raw('PRAGMA foreign_keys = ON');
+      console.log('Enabled SQLite foreign keys');
+    } catch (error) {
+      console.warn('Warning: Could not enable foreign keys in SQLite:', error.message);
+    }
   }
 }
 

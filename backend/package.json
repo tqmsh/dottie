@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "db:init": "node scripts/initDb.js"
+    "db:init": "node scripts/initDb.js",
+    "db:azure:create": "node scripts/createAzureDb.js",
+    "db:azure:init": "cross-env NODE_ENV=production node scripts/initDb.js"
   },
   "keywords": [],
   "author": "",
@@ -21,11 +23,15 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "knex": "^3.1.0",
+    "mssql": "^10.0.2",
+    "node-fetch": "^3.3.2",
     "sqlite3": "^5.1.7",
+    "tedious": "^16.7.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.9",
     "supertest": "^7.0.0",
     "vitest": "^3.0.8"
