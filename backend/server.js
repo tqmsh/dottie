@@ -24,6 +24,32 @@ app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello World from Dottie API!" });
 });
 
+// Azure SQL test endpoint
+app.get("/api/sql-hello", async (req, res) => {
+  try {
+    // Try to query the database
+    const result = await db.raw("SELECT 'Hello World from Azure SQL!' AS message");
+    // Different DB providers return results in different formats
+    const message = db.client.config.client === 'mssql' 
+      ? result[0].message 
+      : result[0]?.message || 'Hello from Database!';
+    
+    res.json({ 
+      message,
+      dbType: db.client.config.client,
+      isConnected: true
+    });
+  } catch (error) {
+    console.error("Database query error:", error);
+    res.status(500).json({ 
+      status: "error", 
+      message: error.message,
+      dbType: db.client.config.client,
+      isConnected: false
+    });
+  }
+});
+
 // Database status endpoint
 app.get("/api/db-status", async (req, res) => {
   try {
