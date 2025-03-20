@@ -36,9 +36,15 @@ Dottie is a user-friendly application designed to help individuals understand th
 | Endpoint                                | Method | Description                                       |
 | --------------------------------------- | ------ | ------------------------------------------------- |
 | `/api/hello`                            | GET    | Test endpoint to verify API is working            |
+| `/api/db-status`                        | GET    | Check database connection status                  |
 | `/api/assessment/start`                 | POST   | Start a new assessment and get the first question |
 | `/api/assessment/answer`                | POST   | Submit an answer and receive the next question    |
 | `/api/assessment/results/:assessmentId` | GET    | Get final assessment results                      |
+| `/api/users`                            | GET    | Get list of all users                             |
+| `/api/users/:id`                        | GET    | Get user by ID                                    |
+| `/api/users`                            | POST   | Create a new user                                 |
+| `/api/users/:id`                        | PUT    | Update a user                                     |
+| `/api/users/:id`                        | DELETE | Delete a user                                     |
 
 ### Data Flow
 
@@ -143,6 +149,38 @@ Dottie is a user-friendly application designed to help individuals understand th
 }
 ```
 
+## Database Architecture
+
+### Overview
+
+Dottie uses a dual-database approach that simplifies local development while maintaining production readiness:
+
+- **Development**: SQLite (local file-based database)
+- **Production**: Azure SQL Database (cloud-based)
+
+This architecture allows developers to work without setting up an external database server, while ensuring a smooth transition to the cloud for production.
+
+### Data Models
+
+The database includes the following tables:
+
+- **users**: User account information (id, username, email, password_hash, age)
+- **period_logs**: Menstrual cycle tracking (id, user_id, start_date, end_date, flow_level)
+- **symptoms**: Symptom tracking (id, user_id, date, type, severity, notes)
+- **assessments**: Assessment results (id, user_id, date, result_category, recommendations)
+
+### Technology Stack
+
+- **ORM**: Knex.js provides a unified query interface for both SQLite and Azure SQL
+- **Migrations**: Database schema defined in `db/migrations/initialSchema.js`
+- **Configuration**: Environment-based configuration in `db/index.js`
+
+### Environment Configuration
+
+The database connection is determined by environment variables:
+- `NODE_ENV=development`: Uses SQLite (default)
+- `NODE_ENV=production` + `AZURE_SQL_CONNECTION_STRING`: Uses Azure SQL
+
 ## Getting Started
 
 ### Prerequisites
@@ -170,17 +208,39 @@ cd dottie/backend
 npm install
 ```
 
-4. Start the development server:
+4. Set up environment variables:
+   - Copy `.env-layout.txt` to `.env`
+   - Update values as needed
+
+5. Initialize the database:
+
+```bash
+npm run db:init
+```
+
+6. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-5. The API will be available at `http://localhost:5000`
+7. The API will be available at `http://localhost:5000`
 
 ## Testing
 
-Run tests using Playwright:
+Run all tests:
+
+```bash
+npm test
+```
+
+Run specific tests:
+
+```bash
+npm test -- "UserModel"
+```
+
+Run API tests with Playwright:
 
 ```bash
 npx playwright test --project=api
@@ -194,12 +254,24 @@ Or manually test using Postman by importing the collection file `Dottie-API.post
 backend/
 ├── controllers/        # Request handlers
 │   └── assessmentController.js
+├── db/                 # Database configuration
+│   ├── index.js        # Connection setup
+│   └── migrations/     # Schema definitions
+├── models/             # Data models
+│   └── User.js
 ├── services/           # Business logic
+│   ├── dbService.js    # Database operations
 │   └── assessmentService.js
 ├── routes/             # API route definitions
-│   └── assessmentRoutes.js
-├── tests/              # Automated tests
-│   └── api-comprehensive.test.js
+│   ├── assessmentRoutes.js
+│   └── userRoutes.js
+├── scripts/            # Utility scripts
+│   └── initDb.js
+├── test/               # API tests
+│   └── unit/           # Unit tests
+├── tests/              # Model tests
+├── .env                # Environment variables (not in repo)
+├── .env-layout.txt     # Environment template
 └── server.js           # Main application entry point
 ```
 
