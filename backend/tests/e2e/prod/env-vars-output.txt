@@ -1,0 +1,10 @@
+Testing environment variables...
+NODE_ENV: production
+Azure SQL Configuration:
+AZURE_SQL_SERVER: Not set
+AZURE_SQL_DATABASE: Not set
+AZURE_SQL_USER: Not set
+AZURE_SQL_PASSWORD: Not set
+isProduction: true
+useAzure: undefined
+Conclusion: The application would use SQLite
