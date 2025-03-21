@@ -37,14 +37,17 @@ Dottie is a user-friendly application designed to help individuals understand th
 | --------------------------------------- | ------ | ------------------------------------------------- |
 | `/api/hello`                            | GET    | Test endpoint to verify API is working            |
 | `/api/db-status`                        | GET    | Check database connection status                  |
-| `/api/assessment/start`                 | POST   | Start a new assessment and get the first question |
-| `/api/assessment/answer`                | POST   | Submit an answer and receive the next question    |
-| `/api/assessment/results/:assessmentId` | GET    | Get final assessment results                      |
-| `/api/users`                            | GET    | Get list of all users                             |
-| `/api/users/:id`                        | GET    | Get user by ID                                    |
-| `/api/users`                            | POST   | Create a new user                                 |
-| `/api/users/:id`                        | PUT    | Update a user                                     |
-| `/api/users/:id`                        | DELETE | Delete a user                                     |
+| `/api/auth/signup`                      | POST   | Register a new user account, create new user                       |
+| `/api/auth/login`                       | POST   | Authenticate user and get access token           |
+| `/api/auth/logout`                      | POST   | Logout user and invalidate token                 |
+| `/api/auth/users`                            | GET    | Get list of all users                             |
+| `/api/auth/users/:id`                        | GET    | Get user by ID                                    |
+| `/api/auth/users/:id`                        | PUT    | Update a user                                     |
+| `/api/auth/users/:id`                        | DELETE | Delete a user                                     |
+| `/api/assessment/send`               | POST   | Send assessment results from frontend context     |
+| `/api/assessment/list`                  | GET    | Get list of all assessments for current user      |
+| `/api/assessment/:id`                   | GET    | Get detailed view of a specific assessment        |
+
 
 ### Data Flow
 
