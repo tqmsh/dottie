@@ -8,8 +8,13 @@ dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// SQLite database file path
-const dbPath = path.resolve(__dirname, '../dev.sqlite3');
+// Determine if we're in test mode
+const isTestMode = process.env.TEST_MODE === 'true';
+
+// SQLite database file paths
+const mainDbPath = path.resolve(__dirname, '../dev.sqlite3');
+const testDbPath = path.resolve(__dirname, '../test.sqlite3');
+const dbPath = isTestMode ? testDbPath : mainDbPath;
 
 // Determine database configuration based on environment
 const isProduction = process.env.NODE_ENV === 'production';
