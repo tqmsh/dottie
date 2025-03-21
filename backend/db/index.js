@@ -19,7 +19,7 @@ const useAzure = isProduction && process.env.AZURE_SQL_SERVER && process.env.AZU
 let dbConfig;
 
 if (useAzure) {
-  // Azure SQL configuration
+  // Azure SQL configuration with static connection pool
   dbConfig = {
     client: 'mssql',
     connection: {
@@ -28,16 +28,25 @@ if (useAzure) {
       user: process.env.AZURE_SQL_USER,
       password: process.env.AZURE_SQL_PASSWORD,
       options: {
-        encrypt: true, // Use this if you're on Azure
-        trustServerCertificate: false
+        encrypt: true,
+        trustServerCertificate: false,
+        enableArithAbort: true,
+        connectTimeout: 30000, // 30 seconds
+        requestTimeout: 30000  // 30 seconds
       }
     },
     pool: {
-      min: 2,
-      max: 10
-    }
+      min: 2,         // Minimum connections in pool
+      max: 10,        // Maximum connections in pool
+      idleTimeoutMillis: 300000,  // How long a connection can be idle before being removed (5 minutes)
+      acquireTimeoutMillis: 30000, // Maximum time to acquire a connection (30 seconds)
+      createTimeoutMillis: 30000,  // Maximum time to create a connection (30 seconds)
+      createRetryIntervalMillis: 200, // Time between connection creation retries
+      propagateCreateError: false  // Don't crash the pool on connection errors
+    },
+    acquireConnectionTimeout: 60000 // How long to wait for a connection from the pool (60 seconds)
   };
-  console.log('Using Azure SQL database');
+  console.log('Using Azure SQL database with static connection pool');
 } else {
   // SQLite configuration (local development)
   dbConfig = {
@@ -52,5 +61,21 @@ if (useAzure) {
 
 // Initialize database connection
 const db = knex(dbConfig);
+
+// Handle connection errors
+db.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
+
+// Verify connection on startup
+if (useAzure) {
+  db.raw('SELECT 1')
+    .then(() => {
+      console.log('Successfully connected to Azure SQL Database');
+    })
+    .catch((err) => {
+      console.error('Failed to connect to Azure SQL Database:', err);
+    });
+}
 
 export default db;
