@@ -27,21 +27,23 @@ Some tests are direct Node.js scripts that can be executed directly:
 
 ```bash
 # To test against production Azure SQL database
-$env:NODE_ENV="production"; node --experimental-vm-modules tests/e2e/prod/test-db.js
+$env:NODE_ENV="production"; node --experimental-vm-modules tests/e2e/prod/test-db-final.js
 
-# To test against development SQLite database
-$env:NODE_ENV="development"; node --experimental-vm-modules tests/e2e/prod/test-db.js
+# To check environment variables loading
+node --experimental-vm-modules tests/e2e/prod/test-env-vars.js
 ```
 
 ## Available Script Tests
 
-- **test-db.js** - Tests database connectivity and lists available tables
-- **test-db-output.js** - Similar to test-db.js but writes results to a file
+- **test-db-final.js** - Complete database test that correctly loads environment variables and tests connectivity
+- **test-env-vars.js** - Tests environment variable loading and configuration
+- **azureSql.prod.test.js** - Vitest suite for Azure SQL testing
 
 ## Output Files
 
 Some tests generate output files:
-- `db-tables-output.txt` - Contains database table information
+- `db-prod-test-output.txt` - Contains production database test results
+- `env-vars-output.txt` - Contains environment variables test results
 
 ## When to Use Each Approach
 
@@ -59,11 +61,19 @@ Some tests generate output files:
 
 ## Important Notes
 
-1. Azure SQL connection may time out if:
-   - Your IP is not whitelisted in Azure SQL firewall
-   - Connection details in .env are incorrect
-   - Network connectivity issues exist
+1. **Azure SQL Connection Prerequisites**:
+   - Your IP **must be whitelisted** in Azure SQL firewall
+   - Connection details in .env must be correct
+   - You must have network connectivity to Azure
 
-2. Set proper environment variables:
+2. **Environment Variable Loading**:
+   - `test-db-final.js` ensures environment variables are loaded before database connection
+   - Use `test-env-vars.js` to verify environment variables are loaded correctly
+
+3. **Connection Timeout Issues**:
+   - Azure SQL connections typically time out if your IP is not whitelisted
+   - Test results are saved to files even when connections time out
+
+4. **Environment Settings**:
    - `$env:NODE_ENV="production"` for Azure SQL
    - `$env:NODE_ENV="development"` for SQLite 
