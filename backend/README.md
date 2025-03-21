@@ -174,25 +174,41 @@ npm run dev
 
 ## Testing
 
+The codebase is set up with a comprehensive test suite organized by test type:
+
+```
+tests/
+├── unit/          # Unit tests for individual components
+├── e2e/           # End-to-end tests
+│   ├── dev/       # Development environment tests (SQLite)
+│   └── prod/      # Production environment tests (Azure SQL)
+```
+
+### Running Tests
+
 Run all tests:
 
 ```bash
 npm test
 ```
 
-Run specific tests:
+Run specific test types:
 
 ```bash
-npm test -- "UserModel"
+# Unit tests only
+npm run test:unit
+
+# All end-to-end tests
+npm run test:e2e
+
+# Development environment tests
+npm run test:e2e:dev
+
+# Production environment tests
+npm run test:e2e:prod
 ```
 
-Run API tests with Playwright:
-
-```bash
-npx playwright test --project=api
-```
-
-Or manually test using Postman by importing the collection file `Dottie-API.postman_collection.json`.
+You can also manually test using Postman by importing the collection file `Dottie-API.postman_collection.json`.
 
 ## Project Structure
 
@@ -213,9 +229,9 @@ backend/
 │   └── userRoutes.js
 ├── scripts/            # Utility scripts
 │   └── initDb.js
-├── test/               # API tests
-│   └── unit/           # Unit tests
-├── tests/              # Model tests
+├── tests/              # Test files (organized by type)
+│   ├── unit/           # Unit tests
+│   └── e2e/            # End-to-end tests
 ├── .env                # Environment variables (not in repo)
 ├── .env-layout.txt     # Environment template
 └── server.js           # Main application entry point
