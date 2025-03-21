@@ -57,92 +57,30 @@ API endpoints cover 3 key functionalities:
 
 ### Data Flow
 
-1. Client starts assessment → Server creates unique assessment ID
-2. Client submits answers → Server stores data and returns next question
-3. After final question → Server analyzes all answers
-4. Client requests results → Server provides analysis and recommendations
+1. Client gathers assessment data from frontend context
+2. Client sends complete assessment data in one request
+3. Server processes and stores the assessment
+4. Client can retrieve assessment results and history
 
-## Answer Format Examples
+## Assessment Data Format
 
-### Question 1: Age
+The assessment data is sent as a single object containing all answers:
 
-```javascript
-{
-  "assessmentId": "your-assessment-id",
-  "questionId": 1,
-  "answer": "15_17"  // Options: "under_12", "12_14", "15_17", "18_24", "over_24"
-}
-```
-
-### Question 2: Menstrual Cycle Length
+At this point, recommendations are handled on the frontend with `if-else` statements.
 
 ```javascript
 {
-  "assessmentId": "your-assessment-id",
-  "questionId": 2,
-  "answer": "26_30"  // Options: "less_than_21", "21_25", "26_30", "31_35", "more_than_35", "irregular"
-}
-```
-
-### Question 3: Period Duration
-
-```javascript
-{
-  "assessmentId": "your-assessment-id",
-  "questionId": 3,
-  "answer": "4_5"  // Options: "1_3", "4_5", "6_7", "more_than_7"
-}
-```
-
-### Question 4: Flow Heaviness
-
-```javascript
-{
-  "assessmentId": "your-assessment-id",
-  "questionId": 4,
-  "answer": "moderate"  // Options: "light", "moderate", "heavy", "very_heavy"
-}
-```
-
-### Question 5: Pain Level
-
-```javascript
-{
-  "assessmentId": "your-assessment-id",
-  "questionId": 5,
-  "answer": "moderate"  // Options: "none", "mild", "moderate", "severe", "debilitating"
-}
-```
-
-### Question 6: Symptoms
-
-```javascript
-{
-  "assessmentId": "your-assessment-id",
-  "questionId": 6,
-  "answer": {
-    "physical": ["Bloating", "Headaches", "Fatigue"],  // Select all that apply
-    "emotional": ["Mood swings", "Irritability", "Anxiety"]  // Select all that apply
-  }
-}
-```
-
-## Example Response
-
-```json
-{
-  "assessmentId": "unique-id",
-  "results": {
-    "status": "Developing Normally",
-    "cycleDetails": {
-      "age": "Young adult",
-      "cycleLength": "26-30 days",
-      "periodDuration": "4-5 days",
-      "symptoms": ["Bloating", "Mood swings"],
-      "painLevel": "Moderate",
-      "flowHeaviness": "Moderate"
-    },
-    "analysis": "Your cycle length is within the normal range. Your period duration is within the normal range.",
+  "userId": "user-id",
+  "assessmentData": {
+    "age": "15_17",  // Options: "under_12", "12_14", "15_17", "18_24", "over_24"
+    "cycleLength": "26_30",  // Options: "less_than_21", "21_25", "26_30", "31_35", "more_than_35", "irregular"
+    "periodDuration": "4_5",  // Options: "1_3", "4_5", "6_7", "more_than_7"
+    "flowHeaviness": "moderate",  // Options: "light", "moderate", "heavy", "very_heavy"
+    "painLevel": "moderate",  // Options: "none", "mild", "moderate", "severe", "debilitating"
+    "symptoms": {
+      "physical": ["Bloating", "Headaches", "Fatigue"],  // Select all that apply
+      "emotional": ["Mood swings", "Irritability", "Anxiety"]  // Select all that apply
+    }
     "recommendations": [
       {
         "title": "Track Your Cycle",
@@ -153,8 +91,7 @@ API endpoints cover 3 key functionalities:
         "description": "Over-the-counter pain relievers like ibuprofen can help with cramps."
       }
     ]
-  },
-  "completedAt": "2025-03-15T18:30:00.000Z"
+  }
 }
 ```
 
@@ -288,30 +225,43 @@ backend/
 
 ### Frontend Integration
 
-#### Starting an Assessment
+#### Submitting Assessment Data
 
 ```javascript
-const startAssessment = async () => {
-  const response = await fetch("http://localhost:5000/api/assessment/start", {
+const submitAssessment = async (assessmentData) => {
+  const response = await fetch("http://localhost:5000/api/assessment/send", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": "Bearer your-access-token"
     },
+    body: JSON.stringify(assessmentData)
   });
   return await response.json();
 };
 ```
 
-#### Submitting Answers
+#### Getting Assessment History
 
 ```javascript
-const submitAnswer = async (assessmentId, questionId, answer) => {
-  const response = await fetch("http://localhost:5000/api/assessment/answer", {
-    method: "POST",
+const getAssessmentHistory = async () => {
+  const response = await fetch("http://localhost:5000/api/assessment/list", {
     headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ assessmentId, questionId, answer }),
+      "Authorization": "Bearer your-access-token"
+    }
+  });
+  return await response.json();
+};
+```
+
+#### Getting Assessment Details
+
+```javascript
+const getAssessmentDetails = async (assessmentId) => {
+  const response = await fetch(`http://localhost:5000/api/assessment/${assessmentId}`, {
+    headers: {
+      "Authorization": "Bearer your-access-token"
+    }
   });
   return await response.json();
 };
