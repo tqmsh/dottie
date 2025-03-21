@@ -1,5 +1,13 @@
 import db from '../../../db/index.js';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Explicitly load environment variables from the backend root
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, '../../../');
+dotenv.config({ path: path.join(rootDir, '.env') });
 
 async function testDB() {
   const output = [];
@@ -12,10 +20,11 @@ async function testDB() {
   
   // Print environment info
   logOutput(`NODE_ENV: ${process.env.NODE_ENV}`);
+  logOutput(`Using .env from: ${path.join(rootDir, '.env')}`);
   
   // Set a shorter timeout for quicker feedback
   const timeout = setTimeout(() => {
-    logOutput('Database connection test timed out after 5 seconds');
+    logOutput('Database connection test timed out after 15 seconds');
     
     // Try to get information about the Azure SQL configuration
     if (process.env.NODE_ENV === 'production') {
@@ -30,7 +39,7 @@ async function testDB() {
     fs.writeFileSync('db-connection-error.txt', output.join('\n'));
     console.log('Error information written to db-connection-error.txt');
     process.exit(1);
-  }, 5000);
+  }, 15000);
   
   try {
     // First check if connection is working

@@ -1,5 +1,6 @@
 Testing database connection...
 NODE_ENV: production
+Using .env from: C:\Projects\dottie\backend\.env
 Database connection successful!
 Database client: sqlite3
 Available tables:
