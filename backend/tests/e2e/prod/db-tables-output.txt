@@ -1,0 +1,21 @@
+Testing database connection...
+Database connection successful!
+Database client: sqlite3
+Available tables:
+[
+  {
+    "TABLE_NAME": "test_table"
+  },
+  {
+    "TABLE_NAME": "users"
+  },
+  {
+    "TABLE_NAME": "period_logs"
+  },
+  {
+    "TABLE_NAME": "symptoms"
+  },
+  {
+    "TABLE_NAME": "assessments"
+  }
+]
