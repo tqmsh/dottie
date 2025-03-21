@@ -1,9 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import app from '../server.js';
-import db from '../db/index.js';
+import app from '../../../server.js';
+import db from '../../../db/index.js';
 
-describe('Azure SQL Production Connection', () => {
+// Use conditional testing based on environment
+const hasAzureCredentials = process.env.AZURE_SQL_SERVER && 
+                           process.env.AZURE_SQL_DATABASE && 
+                           process.env.AZURE_SQL_USER && 
+                           process.env.AZURE_SQL_PASSWORD;
+
+// Skip all tests if Azure credentials aren't available
+const testFunction = hasAzureCredentials ? describe : describe.skip;
+
+testFunction('Azure SQL Production Connection', () => {
   let server;
 
   beforeAll(() => {
