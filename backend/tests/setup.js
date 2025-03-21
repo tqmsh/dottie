@@ -1,4 +1,7 @@
 // Test setup file for initializing database
+// Set test mode before importing db
+process.env.TEST_MODE = 'true';
+
 import db from '../db/index.js';
 import { createTables } from '../db/migrations/initialSchema.js';
 

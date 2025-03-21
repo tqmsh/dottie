@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import initializeDatabase from "./db/init.js";
 import db from "./db/index.js";
 
@@ -62,9 +63,9 @@ app.get("/api/db-status", async (req, res) => {
   }
 });
 
-// Add assessment routes
+// Add routes with correct mappings
 app.use("/api/assessment", assessmentRoutes);
-// Add user routes
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
 // Add this for debugging - log all requests

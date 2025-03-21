@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 describe('Database Connection', () => {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const dbPath = path.resolve(__dirname, '../dev.sqlite3');
+  const dbPath = path.resolve(__dirname, '../../dev.sqlite3');
   let sqliteDb;
 
   beforeAll(() => {

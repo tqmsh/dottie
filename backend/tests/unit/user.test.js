@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import User from '../models/User.js';
-import db from '../db/index.js';
-import { createTables, dropTables } from '../db/migrations/initialSchema.js';
+import User from '../../models/User.js';
+import db from '../../db/index.js';
+import { createTables, dropTables } from '../../db/migrations/initialSchema.js';
 
 describe('User Model', () => {
   const testUser = {

@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../server.js';
+import app from '../../../server.js';
 import { createServer } from 'http';
 
 // Create a supertest instance
@@ -36,8 +36,8 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-// Skip these comprehensive tests for now
-describe.skip("API Comprehensive Tests", () => {
+// Changed from describe.skip to describe to enable tests
+describe("API Comprehensive Tests", () => {
   // Test the hello endpoint
   test("should return Hello World message with correct format", async () => {
     // Send a request to the API endpoint

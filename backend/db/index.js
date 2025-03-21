@@ -8,7 +8,10 @@ dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// SQLite database file path
+// Determine if we're in test mode
+const isTestMode = process.env.TEST_MODE === 'true';
+
+// SQLite database file path - Use the same file for both dev and test
 const dbPath = path.resolve(__dirname, '../dev.sqlite3');
 
 // Determine database configuration based on environment
