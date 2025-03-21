@@ -1,4 +1,5 @@
 Testing database connection...
+NODE_ENV: production
 Database connection successful!
 Database client: sqlite3
 Available tables:
