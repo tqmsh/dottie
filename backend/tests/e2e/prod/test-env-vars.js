@@ -1,8 +1,13 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Explicitly load environment variables
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, '../../../');
+
+// Explicitly load environment variables from the backend root
+dotenv.config({ path: path.join(rootDir, '.env') });
 
 async function testEnvVars() {
   const output = [];
@@ -13,6 +18,7 @@ async function testEnvVars() {
 
   logOutput('Testing environment variables...');
   logOutput(`NODE_ENV: ${process.env.NODE_ENV}`);
+  logOutput(`.env file path: ${path.join(rootDir, '.env')}`);
   
   // Check Azure SQL config variables
   logOutput('Azure SQL Configuration:');
