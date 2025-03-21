@@ -33,6 +33,12 @@ Dottie is a user-friendly application designed to help individuals understand th
 
 ### API Endpoints
 
+API endpoints cover 3 key functionalities:
+
+1. Testing endpoints (hello and db-status)
+2. User Authentication
+3. Assessment
+
 | Endpoint                                | Method | Description                                       |
 | --------------------------------------- | ------ | ------------------------------------------------- |
 | `/api/hello`                            | GET    | Test endpoint to verify API is working            |
