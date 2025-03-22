@@ -3,18 +3,21 @@ import { render, screen } from '@testing-library/react'
 import App from './App'
 
 describe('App', () => {
-  it('renders heading', () => {
+  it('renders the age verification page by default', () => {
     render(<App />)
-    expect(screen.getByText(/Welcome to Dottie/i)).toBeInTheDocument()
+    expect(screen.getByText(/What is your age range\?/i)).toBeInTheDocument()
   })
   
-  it('renders the count button', () => {
+  it('renders age options', () => {
     render(<App />)
-    expect(screen.getByText(/count is/i)).toBeInTheDocument()
+    expect(screen.getByText(/Under 13 years/i)).toBeInTheDocument()
+    expect(screen.getByText(/13-17 years/i)).toBeInTheDocument()
+    expect(screen.getByText(/18-24 years/i)).toBeInTheDocument()
   })
   
-  it('renders the HMR instruction', () => {
+  it('renders navigation buttons', () => {
     render(<App />)
-    expect(screen.getByText(/Edit.*and save to test HMR/i)).toBeInTheDocument()
+    expect(screen.getByText(/Back/i)).toBeInTheDocument()
+    expect(screen.getByText(/Continue/i)).toBeInTheDocument()
   })
 }) 
