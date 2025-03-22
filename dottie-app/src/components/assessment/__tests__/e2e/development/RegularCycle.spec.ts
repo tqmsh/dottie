@@ -106,13 +106,32 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
     
-    // Select Fatigue using checkbox
-    await page.locator('button[role="checkbox"][id="physical-fatigue"]').click();
-    await page.waitForTimeout(500);
+    // Select Fatigue - adding additional logging and fallback methods
+    console.log('Trying to select symptom: Fatigue');
+    
+    // Wait for the symptoms page to be fully loaded with its checkboxes
+    await page.waitForSelector('button[role="checkbox"]', { timeout: 10000 });
+    
+    try {
+      // First try to click the checkbox directly
+      const fatigueCheckbox = page.locator('button[role="checkbox"][id="physical-fatigue"]');
+      await fatigueCheckbox.waitFor({ state: 'visible', timeout: 5000 });
+      await fatigueCheckbox.click();
+    } catch (e) {
+      console.log('Failed to click the checkbox directly, trying to click the containing div');
+      // Try clicking the label/container instead
+      const fatigueContainer = page.locator('label:has-text("Fatigue")').first();
+      await fatigueContainer.waitFor({ state: 'visible', timeout: 5000 });
+      await fatigueContainer.click();
+    }
+    
+    await page.waitForTimeout(1000); // Longer wait to ensure selection is registered
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
     
-    // Click Continue Assessment button
-    await page.locator('button:has-text("Complete Assessment")').click();
+    // Ensure the Complete Assessment button is visible and clickable
+    const completeButton = page.locator('button:has-text("Complete Assessment")');
+    await completeButton.waitFor({ state: 'visible', timeout: 10000 });
+    await completeButton.click();
     
     // 7. Results
     await page.waitForURL(`**${assessmentPaths.results}**`);
