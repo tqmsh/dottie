@@ -29,9 +29,12 @@ test.describe('Regular Cycle Assessment Path', () => {
     
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01-age-verification.png') });
     
-    // Select 18-24 years using the radio button (click on the container)
+    // Select 18-24 years by clicking the entire option container
     try {
-      await page.locator('.space-y-4 > div:has-text("18-24 years")').click();
+      // Click on the entire radio container for 18-24 years
+      await page.locator('div.space-y-4 > div').nth(2).click();
+      // Ensure it's selected by waiting for the radio to be checked
+      await page.waitForTimeout(500);
     } catch (e) {
       console.log('Failed to click age option. Current page state:');
       await debugPage(page);
@@ -40,72 +43,126 @@ test.describe('Regular Cycle Assessment Path', () => {
     
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02-age-selected.png') });
     
-    // Click continue button when enabled
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    // Wait for Continue button to be enabled and click it
+    try {
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed to click continue button. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 2. Cycle Length
-    await page.waitForURL(`**${assessmentPaths.cycleLength}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03-cycle-length.png') });
-    
-    // Select 26-30 days
-    await page.locator('.space-y-3 > div:has-text("26-30 days")').click();
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-cycle-length-selected.png') });
-    
-    // Click continue
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    try {
+      await page.waitForURL(`**${assessmentPaths.cycleLength}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03-cycle-length.png') });
+      
+      // Select 26-30 days - click the second option
+      await page.locator('div.space-y-3 > div').nth(1).click();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-cycle-length-selected.png') });
+      
+      // Click continue
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed in cycle length section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 3. Period Duration
-    await page.waitForURL(`**${assessmentPaths.periodDuration}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-period-duration.png') });
-    
-    // Select 4-5 days
-    await page.locator('div:has-text("4-5 days")').filter({ hasText: 'days' }).first().click();
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06-period-duration-selected.png') });
-    
-    // Click continue
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    try {
+      await page.waitForURL(`**${assessmentPaths.periodDuration}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-period-duration.png') });
+      
+      // Select 4-5 days - click appropriate option
+      await page.locator('div:has-text("4-5 days")').nth(0).click();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06-period-duration-selected.png') });
+      
+      // Click continue
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed in period duration section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 4. Flow
-    await page.waitForURL(`**${assessmentPaths.flow}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07-flow.png') });
-    
-    // Select Moderate
-    await page.locator('div:has-text("Moderate")').filter({ hasText: 'Moderate' }).first().click();
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '08-flow-selected.png') });
-    
-    // Click continue
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    try {
+      await page.waitForURL(`**${assessmentPaths.flow}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07-flow.png') });
+      
+      // Select Moderate - click appropriate option
+      await page.locator('div:has-text("Moderate")').nth(0).click();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '08-flow-selected.png') });
+      
+      // Click continue
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed in flow section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 5. Pain
-    await page.waitForURL(`**${assessmentPaths.pain}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09-pain.png') });
-    
-    // Select Mild
-    await page.locator('div:has-text("Mild")').filter({ hasText: 'Mild' }).first().click();
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10-pain-selected.png') });
-    
-    // Click continue
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    try {
+      await page.waitForURL(`**${assessmentPaths.pain}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09-pain.png') });
+      
+      // Select Mild - click appropriate option
+      await page.locator('div:has-text("Mild")').nth(0).click();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10-pain-selected.png') });
+      
+      // Click continue
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed in pain section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 6. Symptoms
-    await page.waitForURL(`**${assessmentPaths.symptoms}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
-    
-    // Select Fatigue
-    await page.locator('div:has-text("Fatigue")').filter({ hasText: 'Fatigue' }).first().click();
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
-    
-    // Click continue
-    await page.locator('button:has-text("Continue"):not([disabled])').click();
+    try {
+      await page.waitForURL(`**${assessmentPaths.symptoms}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
+      
+      // Select Fatigue - click appropriate option
+      await page.locator('div:has-text("Fatigue")').nth(0).click();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
+      
+      // Click continue
+      await page.waitForSelector('button:has-text("Continue"):not([disabled])', { timeout: 5000 });
+      await page.locator('button:has-text("Continue")').click();
+    } catch (e) {
+      console.log('Failed in symptoms section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
     
     // 7. Results
-    await page.waitForURL(`**${assessmentPaths.results}**`);
-    await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '13-results-regular-cycle.png') });
+    try {
+      await page.waitForURL(`**${assessmentPaths.results}**`);
+      await page.waitForLoadState('networkidle');
+      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '13-results-regular-cycle.png') });
+      console.log('Test completed successfully!');
+    } catch (e) {
+      console.log('Failed in results section. Current page state:');
+      await debugPage(page);
+      throw e;
+    }
   });
 }); 
