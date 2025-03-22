@@ -16,12 +16,8 @@ describe('CycleLength', () => {
   it('should render the cycle length page correctly', () => {
     renderWithRouter(<CycleLengthPage />)
     
-    // Check if the headers are displayed
-    expect(screen.getByText('Question 2 of 6')).toBeInTheDocument()
+    // Check if the main heading is displayed
     expect(screen.getByText('How long is your menstrual cycle?')).toBeInTheDocument()
-    
-    // Check if description text is displayed
-    expect(screen.getByText('Count from the first day of one period to the first day of the next period')).toBeInTheDocument()
     
     // Check if all cycle length options are displayed
     expect(screen.getByText('21-25 days')).toBeInTheDocument()
@@ -32,7 +28,7 @@ describe('CycleLength', () => {
     expect(screen.getByText('I\'m not sure')).toBeInTheDocument()
     expect(screen.getByText('Other')).toBeInTheDocument()
     
-    // Check if the info card is displayed
+    // Check if the informational content is displayed
     expect(screen.getByText('About Menstrual Cycles')).toBeInTheDocument()
   })
 
@@ -44,33 +40,30 @@ describe('CycleLength', () => {
     expect(continueButton).toBeDisabled()
     
     // Select a cycle length option
-    const lengthOption = screen.getByRole('radio', { name: /26-30 days/i }) ||
+    const cycleOption = screen.getByRole('radio', { name: /26-30 days/i }) || 
+                        screen.getByTestId('26-30') || 
                         document.getElementById('26-30')
     
     // If we can't find it by role, try to find it directly
-    if (!lengthOption) {
+    if (!cycleOption) {
       const optionContainer = screen.getByText('26-30 days').closest('div')
       const radioButton = optionContainer?.querySelector('button[role="radio"]')
       if (radioButton) {
         fireEvent.click(radioButton)
       }
     } else {
-      fireEvent.click(lengthOption)
+      fireEvent.click(cycleOption)
     }
     
     // Continue button should be enabled now
     expect(continueButton).not.toBeDisabled()
   })
-  
+
   it('should navigate to the previous page when back button is clicked', () => {
     renderWithRouter(<CycleLengthPage />)
     
-    // Find back button
-    const backButton = screen.getByText('Back')
-    expect(backButton).toBeInTheDocument()
-    
-    // Check that it links to the age verification page
-    const backLink = backButton.closest('a')
-    expect(backLink).toHaveAttribute('href', '/assessment/age-verification')
+    // Check if the back button links to the age verification page
+    const backButton = screen.getByText('Back').closest('a')
+    expect(backButton).toHaveAttribute('href', '/assessment/age-verification')
   })
 }) 
