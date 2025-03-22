@@ -8,12 +8,15 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**', 'app/**'],
+    include: ['src/**/*.test.{ts,tsx}', 'app/**/__tests__/**/*.test.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/dist/**'],
+    deps: {
+      inline: ['lucide-react', 'react-router-dom']
+    }
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './')
     }
   }
-}) 
+})
