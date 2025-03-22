@@ -32,7 +32,6 @@ export const assessmentPaths = {
 // Debug helper
 export const debugPage = async (page: Page) => {
   console.log('Current URL:', page.url());
-  console.log('Page Content:', await page.content());
   console.log('Page Title:', await page.title());
   
   // Log all text content
@@ -44,6 +43,29 @@ export const debugPage = async (page: Page) => {
   console.log('Buttons found:', buttons.length);
   for (const button of buttons) {
     console.log('Button text:', await button.textContent());
+    console.log('Button disabled:', await button.isDisabled());
+    console.log('Button attributes:', await button.evaluate(node => {
+      return Array.from(node.attributes).map(attr => `${attr.name}="${attr.value}"`).join(' ');
+    }));
+  }
+
+  // Log radio elements
+  console.log('\nRadio buttons and containers:');
+  const radioButtons = await page.locator('button[role="radio"]').all();
+  console.log('Radio buttons found:', radioButtons.length);
+  for (const radio of radioButtons) {
+    console.log('Radio value:', await radio.getAttribute('value'));
+    console.log('Radio checked:', await radio.getAttribute('aria-checked'));
+    console.log('Radio id:', await radio.getAttribute('id'));
+  }
+  
+  // Log all radio containers
+  console.log('\nRadio containers:');
+  const radioContainers = await page.locator('div.space-y-4 > div, div.space-y-3 > div').all();
+  console.log('Radio containers found:', radioContainers.length);
+  for (let i = 0; i < radioContainers.length; i++) {
+    const container = radioContainers[i];
+    console.log(`Container ${i} text:`, await container.textContent());
   }
 };
 
