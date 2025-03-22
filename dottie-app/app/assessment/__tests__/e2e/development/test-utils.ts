@@ -29,6 +29,24 @@ export const assessmentPaths = {
   results: `${assessmentBasePath}/results`,
 };
 
+// Debug helper
+export const debugPage = async (page: Page) => {
+  console.log('Current URL:', page.url());
+  console.log('Page Content:', await page.content());
+  console.log('Page Title:', await page.title());
+  
+  // Log all text content
+  const textContent = await page.evaluate(() => document.body.textContent);
+  console.log('Text Content:', textContent);
+  
+  // Log all buttons
+  const buttons = await page.locator('button').all();
+  console.log('Buttons found:', buttons.length);
+  for (const button of buttons) {
+    console.log('Button text:', await button.textContent());
+  }
+};
+
 // Setup session storage with test data
 export const setupSessionStorage = async (page: Page, data: Record<string, any>) => {
   await page.evaluate((sessionData) => {
