@@ -2,13 +2,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css'
 
 // Import assessment components
-import AgeVerification from './components/assessment/AgeVerification'
-import CycleLength from './components/assessment/CycleLength'
-import PeriodDuration from './components/assessment/PeriodDuration'
-import FlowLevel from './components/assessment/FlowLevel'
-import PainLevel from './components/assessment/PainLevel'
-import Symptoms from './components/assessment/Symptoms'
-import Results from './components/assessment/Results'
+import AgeVerification from './components/assessment/age-verification/page'
+import CycleLength from './components/assessment/cycle-length/page'
+import PeriodDuration from './components/assessment/period-duration/page'
+import FlowLevel from './components/assessment/flow/page'
+import PainLevel from './components/assessment/pain/page'
+import Symptoms from './components/assessment/symptoms/page'
+import Results from './components/assessment/results/page'
 
 function App() {
   return (

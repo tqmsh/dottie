@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DotIcon, ExternalLink, Heart } from "lucide-react"
@@ -11,7 +11,7 @@ export default function ResourcesPage() {
           <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link href="/" className="text-gray-500">
+        <Link to="/" className="text-gray-500">
           X
         </Link>
       </header>
@@ -149,9 +149,9 @@ export default function ResourcesPage() {
           </div>
           <div className="text-xs text-gray-500 mb-2">Your health information is private and secure.</div>
           <div className="flex justify-center gap-4 text-xs text-gray-500">
-            <Link href="#">Privacy Policy</Link>
-            <Link href="#">Terms of Use</Link>
-            <Link href="#">Contact Support</Link>
+            <Link to="#">Privacy Policy</Link>
+            <Link to="#">Terms of Use</Link>
+            <Link to="#">Contact Support</Link>
           </div>
         </footer>
       </main>
