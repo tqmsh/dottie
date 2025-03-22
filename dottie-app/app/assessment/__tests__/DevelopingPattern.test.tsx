@@ -44,7 +44,7 @@ describe('Developing Pattern Assessment Path (Adolescent Users)', () => {
     expect(screen.getByText('Your cycles are still establishing a regular pattern, which is normal during adolescence.')).toBeInTheDocument()
     
     // Check that metrics display correctly
-    expect(screen.getByText('13-17 years')).toBeInTheDocument()
+    expect(screen.getAllByText('13-17 years')[0]).toBeInTheDocument()
     
     // Check for recommendations specific to developing patterns
     expect(screen.getByText('Be Patient', { exact: false })).toBeInTheDocument()
