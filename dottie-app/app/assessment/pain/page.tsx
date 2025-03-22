@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -18,7 +18,7 @@ export default function PainPage() {
           <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link href="/" className="text-gray-500">
+        <Link to="/" className="text-gray-500">
           X
         </Link>
       </header>
@@ -114,14 +114,14 @@ export default function PainPage() {
         </p>
 
         <div className="flex justify-between w-full mt-auto">
-          <Link href="/assessment/flow">
+          <Link to="/assessment/flow">
             <Button variant="outline" className="flex items-center">
               <ChevronLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </Link>
 
-          <Link href={selectedPain ? "/assessment/symptoms" : "#"}>
+          <Link to={selectedPain ? "/assessment/symptoms" : "#"}>
             <Button className="bg-pink-500 hover:bg-pink-600 text-white" disabled={!selectedPain}>
               Continue
               <ChevronRight className="h-4 w-4 ml-2" />
