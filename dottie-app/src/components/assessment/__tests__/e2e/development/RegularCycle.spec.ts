@@ -29,9 +29,9 @@ test.describe('Regular Cycle Assessment Path', () => {
     
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01-age-verification.png') });
     
-    // Select 18-24 years using the radio button
+    // Select 18-24 years using the radio button (click on the container)
     try {
-      await page.locator('button#18-24').click();
+      await page.locator('.space-y-4 > div:has-text("18-24 years")').click();
     } catch (e) {
       console.log('Failed to click age option. Current page state:');
       await debugPage(page);
@@ -49,7 +49,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03-cycle-length.png') });
     
     // Select 26-30 days
-    await page.locator('input#26-30').click();
+    await page.locator('.space-y-3 > div:has-text("26-30 days")').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-cycle-length-selected.png') });
     
     // Click continue
@@ -61,7 +61,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-period-duration.png') });
     
     // Select 4-5 days
-    await page.locator('input#4-5').click();
+    await page.locator('div:has-text("4-5 days")').filter({ hasText: 'days' }).first().click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06-period-duration-selected.png') });
     
     // Click continue
@@ -73,7 +73,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07-flow.png') });
     
     // Select Moderate
-    await page.locator('input#moderate').click();
+    await page.locator('div:has-text("Moderate")').filter({ hasText: 'Moderate' }).first().click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '08-flow-selected.png') });
     
     // Click continue
@@ -85,7 +85,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09-pain.png') });
     
     // Select Mild
-    await page.locator('input#mild').click();
+    await page.locator('div:has-text("Mild")').filter({ hasText: 'Mild' }).first().click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10-pain-selected.png') });
     
     // Click continue
@@ -97,7 +97,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
     
     // Select Fatigue
-    await page.locator('input#fatigue').click();
+    await page.locator('div:has-text("Fatigue")').filter({ hasText: 'Fatigue' }).first().click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
     
     // Click continue
