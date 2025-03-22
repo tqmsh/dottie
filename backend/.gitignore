@@ -21,3 +21,5 @@ playwright-report/
 
 # azure sql json
 .azure_sql_json
+
+.venv/
