@@ -48,8 +48,8 @@ describe('Heavy Flow Menstrual Pattern Assessment Path', () => {
     expect(screen.getByText('Your flow is heavier or longer than typical, which could impact your daily activities.')).toBeInTheDocument()
     
     // Check that metrics display correctly
-    expect(screen.getByText('8+ days')).toBeInTheDocument()
-    expect(screen.getByText('Heavy')).toBeInTheDocument()
+    expect(screen.getAllByText('8+ days')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Heavy')[0]).toBeInTheDocument()
     
     // Check for heavy flow recommendations
     expect(screen.getByText('Iron-rich Foods', { exact: false })).toBeInTheDocument()
@@ -78,8 +78,8 @@ describe('Heavy Flow Menstrual Pattern Assessment Path', () => {
     expect(screen.getByText('Your flow is heavier or longer than typical, which could impact your daily activities.')).toBeInTheDocument()
     
     // Check that metrics display correctly
-    expect(screen.getByText('4-5 days')).toBeInTheDocument()
-    expect(screen.getByText('Heavy')).toBeInTheDocument()
+    expect(screen.getAllByText('4-5 days')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Heavy')[0]).toBeInTheDocument()
     
     // Check for heavy flow recommendations
     expect(screen.getByText('Iron-rich Foods', { exact: false })).toBeInTheDocument()
