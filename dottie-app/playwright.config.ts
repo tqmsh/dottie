@@ -1,17 +1,29 @@
 import { defineConfig, devices } from '@playwright/test';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
 
-// Create screenshot directory if it doesn't exist
-const screenshotDir = path.join(__dirname, 'test_screenshots/test_page');
-if (!fs.existsSync(screenshotDir)) {
-  fs.mkdirSync(screenshotDir, { recursive: true });
+// Get directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Create screenshot directories if they don't exist
+const testPageDir = path.join(__dirname, 'test_screenshots/test_page');
+const assessmentDir = path.join(__dirname, 'test_screenshots/assessment');
+
+if (!fs.existsSync(testPageDir)) {
+  fs.mkdirSync(testPageDir, { recursive: true });
+}
+
+if (!fs.existsSync(assessmentDir)) {
+  fs.mkdirSync(assessmentDir, { recursive: true });
 }
 
 // Reference: https://playwright.dev/docs/test-configuration
 export default defineConfig({
-  // Directory where tests are located
-  testDir: path.join(__dirname, 'tests/e2e'),
+  // Directory where tests are located - include both paths
+  testDir: './app',
+  testMatch: '**/__tests__/e2e/**/*.spec.ts',
   
   // Run tests in files in parallel
   fullyParallel: true,
@@ -55,6 +67,5 @@ export default defineConfig({
     timeout: 120000, // Increase timeout to 2 minutes to ensure API is fully ready
   },
   
-  // Screenshot output directory
-  outputDir: 'test_screenshots/test_page',
+  // Screenshot output directory is configured in the test files
 }); 
