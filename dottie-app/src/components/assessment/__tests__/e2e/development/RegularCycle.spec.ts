@@ -31,8 +31,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     
     // Select 18-24 years using the radio button
     try {
-      const ageOption = await page.locator('button[role="radio"][id="18-24"]');
-      await ageOption.click();
+      await page.locator('button#18-24').click();
     } catch (e) {
       console.log('Failed to click age option. Current page state:');
       await debugPage(page);
@@ -50,7 +49,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03-cycle-length.png') });
     
     // Select 26-30 days
-    await page.locator('button[role="radio"]:has-text("26-30 days")').click();
+    await page.locator('input#26-30').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-cycle-length-selected.png') });
     
     // Click continue
@@ -62,7 +61,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-period-duration.png') });
     
     // Select 4-5 days
-    await page.locator('button[role="radio"]:has-text("4-5 days")').click();
+    await page.locator('input#4-5').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '06-period-duration-selected.png') });
     
     // Click continue
@@ -74,7 +73,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07-flow.png') });
     
     // Select Moderate
-    await page.locator('button[role="radio"]:has-text("Moderate")').click();
+    await page.locator('input#moderate').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '08-flow-selected.png') });
     
     // Click continue
@@ -86,7 +85,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '09-pain.png') });
     
     // Select Mild
-    await page.locator('button[role="radio"]:has-text("Mild")').click();
+    await page.locator('input#mild').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '10-pain-selected.png') });
     
     // Click continue
@@ -98,7 +97,7 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
     
     // Select Fatigue
-    await page.locator('button[role="radio"]:has-text("Fatigue")').click();
+    await page.locator('input#fatigue').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
     
     // Click continue
