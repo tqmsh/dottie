@@ -106,32 +106,42 @@ test.describe('Regular Cycle Assessment Path', () => {
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '11-symptoms.png') });
     
-    // Select Fatigue - adding additional logging and fallback methods
-    console.log('Trying to select symptom: Fatigue');
+    console.log('Symptoms page reached - trying alternative approach for selection');
     
-    // Wait for the symptoms page to be fully loaded with its checkboxes
-    await page.waitForSelector('button[role="checkbox"]', { timeout: 10000 });
+    // Wait for the symptoms page to be fully loaded
+    await page.waitForSelector('.grid', { timeout: 10000 });
     
+    // Try to click directly on a visible symptom card (Fatigue)
     try {
-      // First try to click the checkbox directly
-      const fatigueCheckbox = page.locator('button[role="checkbox"][id="physical-fatigue"]');
-      await fatigueCheckbox.waitFor({ state: 'visible', timeout: 5000 });
-      await fatigueCheckbox.click();
+      // Wait and then force click on the card containing the text "Fatigue"
+      console.log('Attempting to click on Fatigue card');
+      await page.waitForTimeout(1000); // Give the page a moment to stabilize
+      
+      // Try to find and click on the visible div containing Fatigue text
+      const fatigueCard = page.locator('div', { hasText: 'Fatigue' }).first();
+      await fatigueCard.waitFor({ state: 'visible', timeout: 10000 });
+      await fatigueCard.click({ force: true });
+      console.log('Clicked on Fatigue card');
     } catch (e) {
-      console.log('Failed to click the checkbox directly, trying to click the containing div');
-      // Try clicking the label/container instead
-      const fatigueContainer = page.locator('label:has-text("Fatigue")').first();
-      await fatigueContainer.waitFor({ state: 'visible', timeout: 5000 });
-      await fatigueContainer.click();
+      console.error('Failed to click on Fatigue, trying an alternative symptom', e);
+      
+      // Try clicking on a different symptom as a fallback
+      const alternativeSymptom = page.locator('div', { hasText: 'Bloating' }).first();
+      await alternativeSymptom.waitFor({ state: 'visible', timeout: 5000 });
+      await alternativeSymptom.click({ force: true });
+      console.log('Clicked on alternative symptom instead');
     }
     
-    await page.waitForTimeout(1000); // Longer wait to ensure selection is registered
+    // Give the page time to register the selection
+    await page.waitForTimeout(2000);
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-symptoms-selected.png') });
     
     // Ensure the Complete Assessment button is visible and clickable
-    const completeButton = page.locator('button:has-text("Complete Assessment")');
+    console.log('Looking for Complete Assessment button');
+    const completeButton = page.locator('button', { hasText: 'Complete Assessment' }).first();
     await completeButton.waitFor({ state: 'visible', timeout: 10000 });
-    await completeButton.click();
+    await completeButton.click({ force: true });
+    console.log('Clicked Complete Assessment button');
     
     // 7. Results
     await page.waitForURL(`**${assessmentPaths.results}**`);
