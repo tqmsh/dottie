@@ -22,7 +22,7 @@ if (!fs.existsSync(assessmentDir)) {
 // Reference: https://playwright.dev/docs/test-configuration
 export default defineConfig({
   // Directory where tests are located - include both paths
-  testDir: './app',
+  testDir: './src',
   testMatch: '**/__tests__/e2e/**/*.spec.ts',
   
   // Run tests in files in parallel
