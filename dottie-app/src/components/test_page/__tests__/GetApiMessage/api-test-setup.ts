@@ -1,4 +1,18 @@
 import axios from 'axios';
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+
+// Get current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Calculate correct paths
+const projectRoot = path.resolve(__dirname, '../../../../..');
+const backendDir = path.join(projectRoot, 'backend');
+const serverPath = path.join(backendDir, 'server.js');
 
 // Configure axios for API tests
 const API_BASE_URL = 'http://localhost:5000';
@@ -18,6 +32,9 @@ export const isApiRunning = async (): Promise<boolean> => {
   }
 };
 
+// Global variable to keep track of the server process
+let serverProcess: ReturnType<typeof spawn> | null = null;
+
 // Helper to start API server when needed
 export const ensureApiRunning = async (): Promise<boolean> => {
   // First check if API is already running
@@ -28,17 +45,69 @@ export const ensureApiRunning = async (): Promise<boolean> => {
 
   console.log('⚠️ API server is not running. Starting server...');
   try {
-    // In a test environment, we can use this approach:
-    // 1. Create a special hook for starting the server
-    // 2. Try to use the API after a short delay
+    // Check if paths exist
+    if (!fs.existsSync(backendDir) || !fs.existsSync(serverPath)) {
+      console.error(`❌ Required paths not found. Backend: ${backendDir}, Server: ${serverPath}`);
+      return false;
+    }
     
-    // This starts the dev server using a child process
-    // Note: This would typically be handled by your test runner setup
-    // or by running the server separately before tests
+    console.log(`Backend directory: ${backendDir}`);
+    console.log(`Server file path: ${serverPath}`);
     
-    // Simple polling to wait for server to start (if started externally)
+    // Find the Node executable path - use process.execPath for actual path to node
+    const nodeExecutable = process.execPath;
+    console.log(`Using Node executable: ${nodeExecutable}`);
+    
+    // Start the server directly with Node
+    serverProcess = spawn(nodeExecutable, [serverPath], {
+      cwd: backendDir,
+      stdio: 'pipe', // Capture output to avoid cluttering the test output
+      env: { ...process.env, PORT: '5000' }
+    });
+    
+    // Log server output for debugging
+    serverProcess.stdout?.on('data', (data) => {
+      console.log(`Backend server: ${data.toString().trim()}`);
+    });
+    
+    serverProcess.stderr?.on('data', (data) => {
+      console.error(`Backend server error: ${data.toString().trim()}`);
+    });
+    
+    // Handle server exit
+    serverProcess.on('exit', (code) => {
+      console.log(`Backend server exited with code ${code}`);
+      serverProcess = null;
+    });
+    
+    // Handle the process exit to clean up the server
+    process.on('exit', () => {
+      if (serverProcess) {
+        console.log('Shutting down backend server...');
+        serverProcess.kill();
+      }
+    });
+    
+    // Handle termination signals
+    process.on('SIGINT', () => {
+      if (serverProcess) {
+        console.log('Received SIGINT. Shutting down backend server...');
+        serverProcess.kill();
+      }
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', () => {
+      if (serverProcess) {
+        console.log('Received SIGTERM. Shutting down backend server...');
+        serverProcess.kill();
+      }
+      process.exit(0);
+    });
+    
+    // Wait for the server to start with polling
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 10;
     
     while (attempts < maxAttempts) {
       attempts++;
@@ -53,6 +122,11 @@ export const ensureApiRunning = async (): Promise<boolean> => {
     }
     
     console.log('❌ Could not connect to API server after multiple attempts');
+    // If we couldn't connect, kill the server process
+    if (serverProcess) {
+      serverProcess.kill();
+      serverProcess = null;
+    }
     return false;
   } catch (error) {
     console.error('❌ Failed to start API server:', error);
@@ -67,7 +141,8 @@ export const conditionalApiTest = (
   skipInsteadOfFail = true
 ) => {
   return async () => {
-    const apiRunning = await isApiRunning();
+    // Try to ensure the API is running before each test
+    const apiRunning = await ensureApiRunning();
     
     if (!apiRunning) {
       const message = '⚠️ API server is not running, skipping test';
