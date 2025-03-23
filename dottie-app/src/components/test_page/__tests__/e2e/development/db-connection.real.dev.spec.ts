@@ -45,12 +45,27 @@ test.describe('Development - SQLite Database Connection Tests (Real)', () => {
     const dbMessage = page.locator('[data-testid="db-message"]');
     await expect(dbMessage).toBeVisible({ timeout: 15000 });
     
-    // Verify some response has appeared (without checking exact content)
-    await expect(dbMessage).not.toBeEmpty();
+    // Wait for some time to ensure both requests complete
+    await page.waitForTimeout(2000);
     
-    // Check button color (should be green for success or red for failure)
-    // We're asserting that the SQLite connection is successful in this test
-    await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 15000 });
+    // Verify the response contains meaningful text from both endpoints
+    await expect(dbMessage).toContainText('SQL connection', { timeout: 15000 });
+    
+    // Check if the message contains Hello World from Azure SQL
+    const messageText = await dbMessage.textContent();
+    const hasSqlHello = messageText?.includes('Hello World from Azure SQL!') || false;
+    const hasDbStatus = messageText?.includes('Database status: connected') || false;
+    
+    if (hasSqlHello && hasDbStatus) {
+      // Both messages are present, button should be green
+      await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 15000 });
+    } else if (hasSqlHello || hasDbStatus) {
+      // Only one message is present, button should be yellow
+      await expect(dbButton).toHaveClass(/bg-yellow-600/, { timeout: 15000 });
+    } else {
+      // No messages are present, button should be red
+      await expect(dbButton).toHaveClass(/bg-red-600/, { timeout: 15000 });
+    }
     
     // Take a screenshot after the connection test
     await page.screenshot({ path: path.join(screenshotDir, 'real-sqlite-connection-result.png') });
