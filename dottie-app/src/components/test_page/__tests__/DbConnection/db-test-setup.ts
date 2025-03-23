@@ -22,9 +22,15 @@ export const dbClient = axios.create({
   timeout: 3000,
 });
 
-// Simple mutex to prevent multiple test files from starting server simultaneously
-let startServerMutex = false;
-let startServerPromise: Promise<boolean> | null = null;
+// Global server state tracking - must be the same for all imported instances
+// These are deliberately kept outside the module scope so they're shared
+// Making these vars global so they're shared across all imports of this module
+// @ts-ignore - Intentionally using globalThis to share state across modules
+globalThis.__DB_SERVER_MUTEX = globalThis.__DB_SERVER_MUTEX || false;
+// @ts-ignore
+globalThis.__DB_SERVER_PROMISE = globalThis.__DB_SERVER_PROMISE || null;
+// @ts-ignore
+globalThis.__DB_SERVER_PROCESS = globalThis.__DB_SERVER_PROCESS || null;
 
 // Helper utility to check if the DB server endpoints are running
 export const isDbApiRunning = async (port = API_PORT): Promise<boolean> => {
@@ -57,26 +63,59 @@ export const isDbApiRunning = async (port = API_PORT): Promise<boolean> => {
   }
 };
 
-// Global variable to keep track of the server process
-let serverProcess: ReturnType<typeof spawn> | null = null;
+// Helper to safely check if a port is in use, without throwing unhandled errors
+const isPortInUse = async (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const net = require('net');
+    const tester = net.createServer()
+      .once('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      })
+      .once('listening', () => {
+        tester.close();
+        resolve(false);
+      })
+      .listen(port);
+  });
+};
+
+// Helper to get an available port, starting from the provided one
+const getAvailablePort = async (startPort: number): Promise<number> => {
+  let port = startPort;
+  while (await isPortInUse(port)) {
+    port++;
+    // Prevent infinite loop
+    if (port > startPort + 10) {
+      throw new Error(`Could not find available port after ${port}`);
+    }
+  }
+  return port;
+};
 
 // Helper to start API server when needed
 export const ensureDbApiRunning = async (): Promise<boolean> => {
-  // First check if DB API is already running
+  // First check if DB API is already running on the current port
   if (await isDbApiRunning()) {
     console.log('✅ DB API endpoints are already running');
     return true;
   }
 
-  // If another test is already trying to start the server, wait for that to complete
-  if (startServerMutex && startServerPromise) {
+  // @ts-ignore - Access global mutex
+  if (globalThis.__DB_SERVER_MUTEX && globalThis.__DB_SERVER_PROMISE) {
     console.log('⏳ Another test is already starting the API server. Waiting...');
-    return startServerPromise;
+    // @ts-ignore - Access global promise
+    return globalThis.__DB_SERVER_PROMISE;
   }
 
   // Acquire mutex and create a promise for others to wait on
-  startServerMutex = true;
-  startServerPromise = (async () => {
+  // @ts-ignore - Set global mutex
+  globalThis.__DB_SERVER_MUTEX = true;
+  // @ts-ignore - Set global promise
+  globalThis.__DB_SERVER_PROMISE = (async () => {
     console.log('🚀 Starting API server for DB tests...');
     try {
       // Check if paths exist
@@ -88,104 +127,95 @@ export const ensureDbApiRunning = async (): Promise<boolean> => {
       // Find the Node executable path - use process.execPath for actual path to node
       const nodeExecutable = process.execPath;
       
-      // Try starting the server with the default port
-      const startServer = (port: number): ReturnType<typeof spawn> => {
-        // Update DB client to use the current port
-        API_PORT = port;
-        dbClient.defaults.baseURL = `http://localhost:${port}`;
-        
+      // Check if the default port is already in use
+      const portInUse = await isPortInUse(API_PORT);
+      if (portInUse) {
+        // If port is in use, check if it's our API
+        const isOurApi = await isDbApiRunning(API_PORT);
+        if (isOurApi) {
+          console.log(`✅ Port ${API_PORT} is in use by our DB API, reusing it`);
+          return true;
+        } else {
+          // Find an available port
+          try {
+            const newPort = await getAvailablePort(API_PORT + 1);
+            console.log(`⚠️ Port ${API_PORT} is in use by another process. Using port ${newPort} instead.`);
+            API_PORT = newPort;
+            // Update the client's base URL
+            dbClient.defaults.baseURL = `http://localhost:${API_PORT}`;
+          } catch (error) {
+            console.error('❌ Failed to find available port:', error);
+            return false;
+          }
+        }
+      }
+      
+      // Try starting the server with the (potentially new) port
+      const startServer = (): ReturnType<typeof spawn> => {
         return spawn(nodeExecutable, [serverPath], {
           cwd: backendDir,
           stdio: 'pipe', // Capture output to avoid cluttering the test output
-          env: { ...process.env, PORT: port.toString() }
+          env: { ...process.env, PORT: API_PORT.toString() }
         });
       };
 
-      // Initial server start
-      serverProcess = startServer(API_PORT);
-      
-      let isPortInUse = false;
-      let secondAttemptMade = false;
+      // Start server with the available port
+      // @ts-ignore - Set global process
+      globalThis.__DB_SERVER_PROCESS = startServer();
+      // Reference the server process locally for cleaner code
+      // @ts-ignore
+      const serverProcess = globalThis.__DB_SERVER_PROCESS;
       
       // Log server output for debugging
-      serverProcess.stdout?.on('data', (data) => {
+      serverProcess.stdout?.on('data', (data: Buffer) => {
         console.log(`Backend server: ${data.toString().trim()}`);
       });
       
-      serverProcess.stderr?.on('data', (data) => {
+      // Handle errors more gracefully - no more unhandled error events
+      serverProcess.stderr?.on('data', (data: Buffer) => {
         const errorOutput = data.toString().trim();
-        console.error(`Backend server error: ${errorOutput}`);
-        
-        // Check for port already in use error
-        if (errorOutput.includes('EADDRINUSE') && !secondAttemptMade) {
-          isPortInUse = true;
-          secondAttemptMade = true;
-          
-          // Port is in use - check if it's our DB API already running
-          console.log(`Port ${API_PORT} is already in use. Checking if it's our DB API...`);
-          
-          // Try to connect to whatever is running on the port
-          isDbApiRunning(API_PORT).then(isRunning => {
-            if (isRunning) {
-              console.log(`✅ DB API appears to be already running on port ${API_PORT}`);
-              // Don't need to do anything, the existing server will be used
-            } else {
-              console.log(`⚠️ Something else is using port ${API_PORT}, but it's not our DB API.`);
-              
-              // Try an alternative port
-              const alternativePort = API_PORT + 1;
-              console.log(`Attempting to start server on alternative port ${alternativePort}...`);
-              
-              if (serverProcess) {
-                serverProcess.kill();
-                serverProcess = startServer(alternativePort);
-                
-                // Set up the listeners again for the new process
-                serverProcess.stdout?.on('data', (data) => {
-                  console.log(`Backend server: ${data.toString().trim()}`);
-                });
-                
-                serverProcess.stderr?.on('data', (data) => {
-                  console.error(`Backend server error: ${data.toString().trim()}`);
-                });
-                
-                serverProcess.on('exit', (code) => {
-                  console.log(`Backend server exited with code ${code}`);
-                  serverProcess = null;
-                });
-              }
-            }
-          });
+        // Don't log EADDRINUSE errors since we're handling them properly now
+        if (!errorOutput.includes('EADDRINUSE')) {
+          console.error(`Backend server error: ${errorOutput}`);
         }
       });
       
       // Handle server exit
-      serverProcess.on('exit', (code) => {
-        console.log(`Backend server exited with code ${code}`);
-        serverProcess = null;
+      serverProcess.on('exit', (code: number | null) => {
+        if (code !== 0) {
+          console.log(`Backend server exited with code ${code}`);
+        }
+        // @ts-ignore - Clear global process
+        globalThis.__DB_SERVER_PROCESS = null;
       });
       
       // Handle the process exit to clean up the server
       process.on('exit', () => {
-        if (serverProcess) {
+        // @ts-ignore
+        if (globalThis.__DB_SERVER_PROCESS) {
           console.log('Shutting down backend server...');
-          serverProcess.kill();
+          // @ts-ignore
+          globalThis.__DB_SERVER_PROCESS.kill();
         }
       });
       
       // Handle termination signals
       process.on('SIGINT', () => {
-        if (serverProcess) {
+        // @ts-ignore
+        if (globalThis.__DB_SERVER_PROCESS) {
           console.log('Received SIGINT. Shutting down backend server...');
-          serverProcess.kill();
+          // @ts-ignore
+          globalThis.__DB_SERVER_PROCESS.kill();
         }
         process.exit(0);
       });
       
       process.on('SIGTERM', () => {
-        if (serverProcess) {
+        // @ts-ignore
+        if (globalThis.__DB_SERVER_PROCESS) {
           console.log('Received SIGTERM. Shutting down backend server...');
-          serverProcess.kill();
+          // @ts-ignore
+          globalThis.__DB_SERVER_PROCESS.kill();
         }
         process.exit(0);
       });
@@ -208,9 +238,12 @@ export const ensureDbApiRunning = async (): Promise<boolean> => {
       
       console.log('❌ Could not connect to DB API server after multiple attempts');
       // If we couldn't connect, kill the server process
-      if (serverProcess) {
-        serverProcess.kill();
-        serverProcess = null;
+      // @ts-ignore
+      if (globalThis.__DB_SERVER_PROCESS) {
+        // @ts-ignore
+        globalThis.__DB_SERVER_PROCESS.kill();
+        // @ts-ignore
+        globalThis.__DB_SERVER_PROCESS = null;
       }
       return false;
     } catch (error) {
@@ -218,12 +251,15 @@ export const ensureDbApiRunning = async (): Promise<boolean> => {
       return false;
     } finally {
       // Release mutex
-      startServerMutex = false;
-      startServerPromise = null;
+      // @ts-ignore - Clear global mutex
+      globalThis.__DB_SERVER_MUTEX = false;
+      // @ts-ignore - Clear global promise
+      globalThis.__DB_SERVER_PROMISE = null;
     }
   })();
   
-  return startServerPromise;
+  // @ts-ignore - Return global promise
+  return globalThis.__DB_SERVER_PROMISE;
 };
 
 // Export a conditional testing function that only runs tests if DB API is available
