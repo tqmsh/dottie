@@ -20,7 +20,14 @@ export default function TestPage() {
     setApiStatus('idle');
     try {
       const response = await axios.get('/api/hello');
-      setApiMessage(`API connection successful\n${response.data.message}`);
+      console.log('API Response:', response.data);
+      
+      // Store the successful connection message and the API response message
+      if (response.data && response.data.message) {
+        setApiMessage(`API connection successful\nServer says: "${response.data.message}"`);
+      } else {
+        setApiMessage('API connection successful, but no message returned');
+      }
       setApiStatus('success');
     } catch (error) {
       console.error('API connection error:', error);
