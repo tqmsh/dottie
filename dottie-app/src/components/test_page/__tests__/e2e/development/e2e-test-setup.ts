@@ -248,8 +248,8 @@ export const ensureApiServerRunning = async (): Promise<boolean> => {
         }
       }
       
-      console.log('❌ Could not connect to API server after multiple attempts');
-      // If we couldn't connect, kill the server process
+      console.error('❌ API server failed to start within the timeout period');
+      // Try to shut down the server if it's still running
       // @ts-ignore
       if (globalThis.__E2E_SERVER_PROCESS) {
         // @ts-ignore
@@ -259,37 +259,46 @@ export const ensureApiServerRunning = async (): Promise<boolean> => {
       }
       return false;
     } catch (error) {
-      console.error('❌ Failed to start API server:', error);
+      console.error('❌ Error starting API server:', error);
       return false;
     } finally {
-      // Release mutex
+      // Release the mutex
       // @ts-ignore - Clear global mutex
       globalThis.__E2E_SERVER_MUTEX = false;
-      // @ts-ignore - Clear global promise
-      globalThis.__E2E_SERVER_PROMISE = null;
     }
   })();
   
-  // @ts-ignore - Return global promise
+  // Wait for the server to start
+  // @ts-ignore - Return the global promise
   return globalThis.__E2E_SERVER_PROMISE;
 };
 
-// Setup function to be called in Playwright tests
-export async function setupApiForPlaywright(): Promise<void> {
-  const apiStarted = await ensureApiServerRunning();
-  if (!apiStarted) {
-    throw new Error('Failed to start API server for E2E tests');
+// Setup API server for Playwright tests
+export const setupApiForPlaywright = async (): Promise<void> => {
+  console.log('🚀 Starting API server for tests...');
+  const isRunning = await ensureApiServerRunning();
+  if (!isRunning) {
+    throw new Error('Failed to start API server for Playwright tests');
   }
-}
+};
 
-// Cleanup function to be called after tests
-export async function teardownApiForPlaywright(): Promise<void> {
-  // @ts-ignore
+// Teardown API server after Playwright tests
+export const teardownApiForPlaywright = async (): Promise<void> => {
+  // @ts-ignore - Check if process exists
   if (globalThis.__E2E_SERVER_PROCESS) {
     console.log('Shutting down backend server...');
-    // @ts-ignore
+    // @ts-ignore - Kill process
     globalThis.__E2E_SERVER_PROCESS.kill();
-    // @ts-ignore
+    // @ts-ignore - Clear process
     globalThis.__E2E_SERVER_PROCESS = null;
   }
+};
+
+// For testing this file directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  (async () => {
+    console.log('Testing API server startup...');
+    await setupApiForPlaywright();
+    console.log('API server setup complete. Press Ctrl+C to exit.');
+  })();
 } 
