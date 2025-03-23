@@ -76,16 +76,10 @@ app.use("/api/assessment", assessmentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-// Add this for debugging - log all requests
-app.use((req, res, next) => {
-  console.log(`Request: ${req.method} ${req.path}`);
-  console.log(`Body: ${JSON.stringify(req.body)}`);
-  next();
-});
-
 // Add this after your routes setup
 app.use((req, res, next) => {
-  console.log(`Testing route validation: ${req.method} ${req.path} - 🔍 route not registered \n ✅ ...this is expected in 404 tests)`);
+  // Only log this in test mode if needed for debugging
+  // console.log(`Testing route validation: ${req.method} ${req.path} - 🔍 route not registered \n ✅ ...this is expected in 404 tests)`);
   res.status(404).json({ error: "Not found" });
 });
 
