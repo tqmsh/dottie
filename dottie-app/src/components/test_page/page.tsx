@@ -35,11 +35,12 @@ export default function TestPage() {
     setLoading((prev) => ({ ...prev, db: true }));
     setDbStatus('idle');
     try {
-      // For testing build only - don't make actual API call
-      setDbMessage('Database connection test placeholder');
+      const response = await axios.get('/api/db-status');
+      setDbMessage(response.data.message || 'Database connection successful');
       setDbStatus('success');
     } catch (error) {
-      setDbMessage('An error occurred');
+      console.error('Database connection error:', error);
+      setDbMessage('Could not connect to SQLite database');
       setDbStatus('error');
     } finally {
       setLoading((prev) => ({ ...prev, db: false }));
