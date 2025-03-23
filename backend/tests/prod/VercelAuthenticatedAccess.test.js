@@ -64,13 +64,24 @@ describe('Vercel Authenticated API Access Tests', () => {
     const response = await fetch(dbEndpoint);
     console.log(`Database test endpoint status: ${response.status}`);
     
+    // Fail if the endpoint doesn't exist
+    if (response.status === 404) {
+      throw new Error('Database test endpoint not found (404)');
+    }
+    
     try {
       if (response.status === 200) {
         const data = await response.json();
         console.log('Database connection response:', data);
         expect(data).toBeDefined();
+        
+        // Actually test the database connection result
+        if (data.success) {
+          expect(data.success).toBe(true);
+        } else {
+          throw new Error('Database connection failed: ' + (data.message || 'No error message provided'));
+        }
       } else {
-        // Test will still pass - we're testing connectivity
         console.log(`Database endpoint returned non-200 status: ${response.status}`);
         try {
           const responseText = await response.text();
@@ -78,9 +89,12 @@ describe('Vercel Authenticated API Access Tests', () => {
         } catch (error) {
           console.log(`Error reading response: ${error.message}`);
         }
+        
+        throw new Error(`Database endpoint returned non-200 status: ${response.status}`);
       }
     } catch (error) {
       console.log(`Error processing response: ${error.message}`);
+      throw error; // Re-throw to fail the test
     }
   }, 15000);  // 15 second timeout for this test
 }); 

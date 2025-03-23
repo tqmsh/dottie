@@ -36,52 +36,38 @@ describe('Vercel Azure SQL Connection Tests', () => {
       ? `https://${process.env.VERCEL_URL}/api/sql-hello` 
       : 'https://dottie-git-main-kylethielk.vercel.app/api/sql-hello';
     
-    try {
-      // Test the sql-hello endpoint which connects to the database
-      const response = await fetch(apiUrl);
+    // Test the sql-hello endpoint which connects to the database
+    const response = await fetch(apiUrl);
+    
+    console.log('API connection response status:', response.status);
+    
+    // FAIL if we're unable to reach the API at all
+    expect(response.status).not.toBe(404);
+    
+    // Only try to parse as JSON if we got a 200 OK
+    if (response.status === 200) {
+      const data = await response.json();
+      expect(data).toBeDefined();
       
-      console.log('API connection response status:', response.status);
-      
-      // Only try to parse as JSON if we got a 200 OK
-      if (response.status === 200) {
-        try {
-          const data = await response.json();
-          expect(data).toBeDefined();
-          
-          if (data.dbType === 'mssql') {
-            expect(data.isConnected).toBe(true);
-            expect(data.message).toContain('Azure SQL');
-            console.log('Successfully connected to Azure SQL through deployed API');
-          } else {
-            // API is using SQLite
-            console.log('API is using SQLite - not testing Azure SQL connection');
-          }
-        } catch (parseError) {
-          console.warn('JSON parse error but test continues:', parseError.message);
-          // Don't fail the test on JSON parse errors, might be HTML or other content
-          // This is a test of connectivity, not correctness
-          console.log('Response is not JSON, first 100 chars:', await response.text().then(t => t.substring(0, 100)));
-        }
+      if (data.dbType === 'mssql') {
+        expect(data.isConnected).toBe(true);
+        expect(data.message).toContain('Azure SQL');
+        console.log('Successfully connected to Azure SQL through deployed API');
       } else {
-        // Non-200 status, log but don't fail
-        console.log(`API returned status ${response.status}, testing connectivity only`);
-        try {
-          const text = await response.text();
-          console.log('Response (first 100 chars):', text.substring(0, 100));
-        } catch (error) {
-          console.log('Could not read response body');
-        }
+        // API is using SQLite
+        console.log('API is using SQLite - not testing Azure SQL connection');
+      }
+    } else {
+      // Show response but fail the test on non-200/404 status
+      try {
+        const text = await response.text();
+        console.log('Response (first 100 chars):', text.substring(0, 100));
+      } catch (error) {
+        console.log('Could not read response body');
       }
       
-      // The test passes if we could at least make a request
-      expect(response).toBeDefined();
-    } catch (error) {
-      console.error('API connection test failed with network error:', error);
-      if (!process.env.VERCEL_URL) {
-        console.warn('VERCEL_URL environment variable not set - using fallback URL');
-      }
-      // Mark the test as skipped rather than failed - we're just testing if we can
-      console.log('Network error but test skipped, not failed:', error.message);
+      // Fail the test with a clear message
+      throw new Error(`API returned non-success status: ${response.status}`);
     }
   }, TEST_TIMEOUT);
   
@@ -92,44 +78,39 @@ describe('Vercel Azure SQL Connection Tests', () => {
       ? `https://${process.env.VERCEL_URL}/api/db-status` 
       : 'https://dottie-git-main-kylethielk.vercel.app/api/db-status';
     
-    try {
-      const response = await fetch(apiUrl);
+    // Make the request without try/catch to let errors fail the test
+    const response = await fetch(apiUrl);
+    
+    console.log('Database status endpoint response status:', response.status);
+    
+    // FAIL if we're unable to reach the endpoint at all
+    expect(response.status).not.toBe(404);
+    
+    // Only try to parse as JSON if we got a 200 OK
+    if (response.status === 200) {
+      const data = await response.json();
+      expect(data).toBeDefined();
       
-      console.log('Database status endpoint response status:', response.status);
+      // Verify database is actually connected
+      expect(data.status).toBe('connected');
       
-      // Only try to parse as JSON if we got a 200 OK
-      if (response.status === 200) {
-        try {
-          const data = await response.json();
-          expect(data).toBeDefined();
-          
-          if (data.status === 'connected') {
-            console.log('Database status check successful, connection is active');
-          } else {
-            console.log('Database is not connected, status:', data.status);
-          }
-        } catch (parseError) {
-          console.warn('JSON parse error but test continues:', parseError.message);
-          // Don't fail the test on JSON parse errors
-          console.log('Response is not JSON, first 100 chars:', await response.text().then(t => t.substring(0, 100)));
-        }
+      if (data.status === 'connected') {
+        console.log('Database status check successful, connection is active');
       } else {
-        // Non-200 status, log but don't fail
-        console.log(`DB status endpoint returned status ${response.status}, testing connectivity only`);
-        try {
-          const text = await response.text();
-          console.log('Response (first 100 chars):', text.substring(0, 100));
-        } catch (error) {
-          console.log('Could not read response body');
-        }
+        console.log('Database is not connected, status:', data.status);
+        throw new Error(`Database is not connected, status: ${data.status}`);
+      }
+    } else {
+      // Show response but fail the test
+      try {
+        const text = await response.text();
+        console.log('Response (first 100 chars):', text.substring(0, 100));
+      } catch (error) {
+        console.log('Could not read response body');
       }
       
-      // The test passes if we could at least make a request
-      expect(response).toBeDefined();
-    } catch (error) {
-      console.error('Database status check failed with network error:', error);
-      // Mark the test as skipped rather than failed - we're just testing if we can
-      console.log('Network error but test skipped, not failed:', error.message);
+      // Fail the test with a clear message
+      throw new Error(`DB status endpoint returned non-success status: ${response.status}`);
     }
   }, TEST_TIMEOUT);
   
