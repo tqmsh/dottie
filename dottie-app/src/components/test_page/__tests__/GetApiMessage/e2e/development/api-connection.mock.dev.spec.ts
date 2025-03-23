@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { getScreenshotPath, getLegacyScreenshotPath } from '../../../screenshot-helpers';
+import path from 'path';
 
 // Mock test suite for the API message functionality
 test.describe('Development - API Message Connection Tests (Mocked)', () => {
+  // Configure screenshot directory with new structure
+  const baseScreenshotDir = path.join(process.cwd(), 'test_screenshots');
+  const newScreenshotDir = path.join(baseScreenshotDir, 'development', 'test_page', 'api-connection', 'mock');
+  const legacyScreenshotDir = path.join(baseScreenshotDir, 'test_page');
+
   // Setup: Navigate to the test page before each test
   test.beforeEach(async ({ page }) => {
     await page.goto('/test');
@@ -15,12 +20,12 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
   test('should display API section with correct button state', async ({ page }) => {
     // Take a screenshot of the initial page using new path structure
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'mock', 'initial-state.png') 
+      path: path.join(newScreenshotDir, 'initial-state.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('mock-api-initial-state.png')
+      path: path.join(legacyScreenshotDir, 'mock-api-initial-state.png')
     });
     
     // Check that the API section title is visible
@@ -37,12 +42,12 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     
     // Take a screenshot of the API section
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'mock', 'section.png')
+      path: path.join(newScreenshotDir, 'section.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('mock-api-section.png')
+      path: path.join(legacyScreenshotDir, 'mock-api-section.png')
     });
   });
 
@@ -65,12 +70,12 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     
     // Take a screenshot after the error - new path
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'mock', 'connection-error.png')
+      path: path.join(newScreenshotDir, 'connection-error.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('mock-api-connection-error.png')
+      path: path.join(legacyScreenshotDir, 'mock-api-connection-error.png')
     });
   });
 
@@ -103,12 +108,12 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     
     // Take a screenshot after the success
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'mock', 'connection-success.png')
+      path: path.join(newScreenshotDir, 'connection-success.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('mock-api-connection-success.png')
+      path: path.join(legacyScreenshotDir, 'mock-api-connection-success.png')
     });
   });
 }); 
