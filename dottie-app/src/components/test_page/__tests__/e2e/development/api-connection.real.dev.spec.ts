@@ -45,11 +45,11 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     const apiMessage = page.locator('[data-testid="api-message"]');
     await expect(apiMessage).toBeVisible({ timeout: 10000 });
     
-    // Verify some response has appeared (without checking exact content)
-    await expect(apiMessage).not.toBeEmpty();
+    // Verify the message contains both the success message and the actual API message
+    await expect(apiMessage).toContainText('API connection successful', { timeout: 10000 });
+    await expect(apiMessage).toContainText('Hello World from Dottie API!', { timeout: 10000 });
     
-    // Check button color (should be green for success or red for failure)
-    // We're asserting that the API connection is successful in this test
+    // Check button color (should be green for success)
     await expect(apiButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
     
     // Take a screenshot after the connection test
