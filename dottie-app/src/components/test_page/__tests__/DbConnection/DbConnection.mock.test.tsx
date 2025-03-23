@@ -15,7 +15,7 @@ describe('DbConnection (Mock)', () => {
   it('fetches SQL hello message successfully', async () => {
     // Setup
     const mockData = {
-      message: 'Hello World from Azure SQL!',
+      message: 'Hello World from SQLite!',
       dbType: 'sqlite3',
       isConnected: true
     };

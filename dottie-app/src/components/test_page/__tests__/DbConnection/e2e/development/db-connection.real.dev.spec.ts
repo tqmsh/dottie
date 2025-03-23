@@ -93,7 +93,7 @@ test.describe('Development - SQLite Database Connection Tests (Real)', () => {
     // Verify the specific messages are displayed in the correct order
     await expect(dbMessage).toContainText('SQL connection successful', { timeout: 10000 });
     await expect(dbMessage).toContainText('Database status: connected', { timeout: 10000 });
-    await expect(dbMessage).toContainText('SQLite message retrieved: "Hello World from Azure SQL!"', { timeout: 10000 });
+    await expect(dbMessage).toContainText('SQLite message retrieved: "Hello World from SQLite!"', { timeout: 10000 });
     
     // Check button color (should be green for success)
     await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 10000 });

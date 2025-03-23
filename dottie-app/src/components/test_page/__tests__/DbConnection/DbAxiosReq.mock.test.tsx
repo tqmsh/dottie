@@ -15,7 +15,7 @@ describe('DbAxiosReq (Mock)', () => {
   it('makes correct GET request to sql-hello endpoint', async () => {
     // Setup
     const mockData = { 
-      message: 'Hello World from Azure SQL!', 
+      message: 'Hello World from SQLite!', 
       dbType: 'sqlite3',
       isConnected: true
     };

@@ -65,7 +65,7 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          message: 'Hello World from Azure SQL!',
+          message: 'Hello World from SQLite!',
           dbType: 'sqlite3',
           isConnected: true
         })
@@ -95,7 +95,7 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
     // Verify the specific messages are displayed in the correct order
     await expect(dbMessage).toContainText('SQL connection successful', { timeout: 10000 });
     await expect(dbMessage).toContainText('Database status: connected', { timeout: 10000 });
-    await expect(dbMessage).toContainText('SQLite message retrieved: "Hello World from Azure SQL!"', { timeout: 10000 });
+    await expect(dbMessage).toContainText('SQLite message retrieved: "Hello World from SQLite!"', { timeout: 10000 });
     
     // Verify the button turns green (has the success class)
     await expect(dbButton).toHaveClass(/bg-green-600/);
