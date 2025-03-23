@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import db from '../../db/index.js';
+import db from '../../../db/index.js';
 import sql from 'mssql';
 
 describe('Azure SQL Local Connection Test', () => {

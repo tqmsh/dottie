@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import express from 'express';
-import serverlessTestRoutes from '../../routes/serverlessTestRoutes.js';
+import serverlessTestRoutes from '../../../routes/serverlessTestRoutes.js';
 import request from 'supertest';
 
 describe('Serverless API Endpoints', () => {
