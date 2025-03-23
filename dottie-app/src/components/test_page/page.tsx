@@ -11,7 +11,7 @@ export default function TestPage() {
     db: false,
   });
   const [apiStatus, setApiStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [dbStatus, setDbStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [dbStatus, setDbStatus] = useState<'idle' | 'success' | 'error' | 'partial'>('idle');
 
   const environment = process.env.NODE_ENV || 'development';
 
@@ -19,8 +19,8 @@ export default function TestPage() {
     setLoading((prev) => ({ ...prev, api: true }));
     setApiStatus('idle');
     try {
-      const response = await axios.get('/api/message');
-      setApiMessage(response.data.message || 'API connection successful');
+      const response = await axios.get('/api/hello');
+      setApiMessage(`API connection successful\n${response.data.message}`);
       setApiStatus('success');
     } catch (error) {
       console.error('API connection error:', error);
@@ -34,17 +34,44 @@ export default function TestPage() {
   const testDbConnection = async () => {
     setLoading((prev) => ({ ...prev, db: true }));
     setDbStatus('idle');
+    let statusCount = 0;
+    let combinedMessage = '';
+
     try {
-      const response = await axios.get('/api/db-status');
-      setDbMessage(response.data.message || 'Database connection successful');
-      setDbStatus('success');
+      // First API call
+      const sqlResponse = await axios.get('/api/sql-hello');
+      if (sqlResponse.data.message) {
+        combinedMessage += `SQL connection successful\n${sqlResponse.data.message}\n`;
+        statusCount++;
+      }
     } catch (error) {
-      console.error('Database connection error:', error);
-      setDbMessage('Could not connect to SQLite database');
-      setDbStatus('error');
-    } finally {
-      setLoading((prev) => ({ ...prev, db: false }));
+      console.error('SQL connection error:', error);
+      combinedMessage += 'Could not connect to SQL database\n';
     }
+
+    try {
+      // Second API call
+      const statusResponse = await axios.get('/api/db-status');
+      if (statusResponse.data.status === 'connected') {
+        combinedMessage += `Database status: ${statusResponse.data.status}`;
+        statusCount++;
+      }
+    } catch (error) {
+      console.error('Database status error:', error);
+      combinedMessage += 'Could not get database status';
+    }
+
+    // Set message and status based on results
+    setDbMessage(combinedMessage.trim());
+    if (statusCount === 2) {
+      setDbStatus('success');
+    } else if (statusCount === 1) {
+      setDbStatus('partial');
+    } else {
+      setDbStatus('error');
+    }
+
+    setLoading((prev) => ({ ...prev, db: false }));
   };
 
   const getApiButtonClass = () => {
@@ -57,6 +84,7 @@ export default function TestPage() {
   const getDbButtonClass = () => {
     const baseClass = "w-full px-4 py-2 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed";
     if (dbStatus === 'success') return `${baseClass} bg-green-600 hover:bg-green-700`;
+    if (dbStatus === 'partial') return `${baseClass} bg-yellow-600 hover:bg-yellow-700`;
     if (dbStatus === 'error') return `${baseClass} bg-red-600 hover:bg-red-700`;
     return `${baseClass} bg-blue-600 hover:bg-blue-700`;
   };
@@ -83,7 +111,7 @@ export default function TestPage() {
             
             {apiMessage && (
               <div className="mt-4 p-4 bg-gray-700 rounded-md" data-testid="api-message">
-                <p>{apiMessage}</p>
+                <p className="whitespace-pre-line">{apiMessage}</p>
               </div>
             )}
           </div>
@@ -102,7 +130,7 @@ export default function TestPage() {
             
             {dbMessage && (
               <div className="mt-4 p-4 bg-gray-700 rounded-md" data-testid="db-message">
-                <p>{dbMessage}</p>
+                <p className="whitespace-pre-line">{dbMessage}</p>
               </div>
             )}
           </div>
