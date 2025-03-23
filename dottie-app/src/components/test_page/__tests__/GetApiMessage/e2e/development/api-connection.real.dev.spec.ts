@@ -1,12 +1,9 @@
 import { test, expect } from '@playwright/test';
-import path from 'path';
+import { getScreenshotPath, getLegacyScreenshotPath } from '../../../screenshot-helpers';
 import { setupApiForPlaywright, teardownApiForPlaywright } from '../../../e2e/development/e2e-test-setup';
 
 // Real test suite for the API message functionality
 test.describe('Development - API Message Connection Tests (Real)', () => {
-  // Configure screenshot directory
-  const screenshotDir = path.join(process.cwd(), 'test_screenshots/test_page');
-
   // Setup API server before all tests
   test.beforeAll(async () => {
     await setupApiForPlaywright();
@@ -27,8 +24,15 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
   });
 
   test('should display API section with correct button state', async ({ page }) => {
-    // Take a screenshot of the initial page
-    await page.screenshot({ path: path.join(screenshotDir, 'real-api-initial-state.png') });
+    // Take a screenshot of the initial page using new path structure
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'real', 'initial-state.png') 
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('real-api-initial-state.png')
+    });
     
     // Check that the API section title is visible
     const apiTitle = page.locator('h2:has-text("API Connection Test")');
@@ -43,7 +47,14 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     await expect(apiButton).toHaveClass(/bg-blue-600/);
     
     // Take a screenshot of the API section
-    await page.screenshot({ path: path.join(screenshotDir, 'real-api-section.png') });
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'real', 'section.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('real-api-section.png')
+    });
   });
 
   test('should connect to real API and verify success', async ({ page }) => {
@@ -69,7 +80,14 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     // Check button color (should be green for success)
     await expect(apiButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
     
-    // Take a screenshot after the connection test
-    await page.screenshot({ path: path.join(screenshotDir, 'real-api-connection-result.png') });
+    // Take a screenshot after the connection test - new path
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'real', 'connection-result.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('real-api-connection-result.png')
+    });
   });
 }); 

@@ -102,6 +102,13 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     await expect(apiButton).toHaveClass(/bg-green-600/);
     
     // Take a screenshot after the success
-    await page.screenshot({ path: path.join(screenshotDir, 'mock-api-connection-success.png') });
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'mock', 'connection-success.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('mock-api-connection-success.png')
+    });
   });
 }); 
