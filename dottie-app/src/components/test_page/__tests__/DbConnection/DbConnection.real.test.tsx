@@ -31,6 +31,14 @@ describe('DbConnection (Real API)', () => {
       expect(response.data).toHaveProperty('isConnected');
       expect(typeof response.data.message).toBe('string');
       expect(response.data.isConnected).toBe(true);
+      
+      // In development environment, we should get SQLite message
+      if (response.data.dbType === 'sqlite3') {
+        expect(response.data.message).toBe('Hello World from SQLite!');
+      } else if (response.data.dbType === 'mssql') {
+        expect(response.data.message).toBe('Hello World from Azure SQL!');
+      }
+      
       console.log('SQL response message:', response.data.message);
       console.log('Database type:', response.data.dbType);
     })
