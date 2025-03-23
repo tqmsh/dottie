@@ -34,22 +34,22 @@ if (useAzure) {
         encrypt: true,
         trustServerCertificate: false,
         enableArithAbort: true,
-        connectTimeout: 30000, // 30 seconds
-        requestTimeout: 30000  // 30 seconds
+        connectTimeout: 15000, // Reduced from 30 seconds to 15 seconds for serverless
+        requestTimeout: 15000  // Reduced timeout for serverless
       }
     },
     pool: {
-      min: 2,         // Minimum connections in pool
-      max: 10,        // Maximum connections in pool
-      idleTimeoutMillis: 300000,  // How long a connection can be idle before being removed (5 minutes)
-      acquireTimeoutMillis: 30000, // Maximum time to acquire a connection (30 seconds)
-      createTimeoutMillis: 30000,  // Maximum time to create a connection (30 seconds)
-      createRetryIntervalMillis: 200, // Time between connection creation retries
-      propagateCreateError: false  // Don't crash the pool on connection errors
+      min: 0,         // Start with no connections for serverless (reduced from 2)
+      max: 5,         // Reduced max connections for serverless (was 10)
+      idleTimeoutMillis: 60000,  // Reduced idle timeout (was 300000)
+      acquireTimeoutMillis: 15000, // Reduced acquisition timeout (was 30000)
+      createTimeoutMillis: 15000,  // Reduced creation timeout (was 30000)
+      createRetryIntervalMillis: 200,
+      propagateCreateError: false
     },
-    acquireConnectionTimeout: 60000 // How long to wait for a connection from the pool (60 seconds)
+    acquireConnectionTimeout: 30000 // Reduced from 60000
   };
-  // console.log('Using Azure SQL database with static connection pool');
+  console.log('Using Azure SQL database');
 } else {
   // SQLite configuration (local development)
   dbConfig = {
@@ -59,7 +59,7 @@ if (useAzure) {
     },
     useNullAsDefault: true
   };
-  // Log could be added here: console.log('Using SQLite database');
+  console.log('Using SQLite database');
 }
 
 // Initialize database connection
@@ -70,11 +70,15 @@ db.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
-// Verify connection on startup
-if (useAzure) {
+// Only verify connection in non-serverless environment
+// Check if we're in a serverless environment (Vercel)
+const isServerless = process.env.VERCEL === '1';
+
+// Verify connection in non-serverless environments
+if (useAzure && !isServerless) {
   db.raw('SELECT 1')
     .then(() => {
-      // console.log('Successfully connected to Azure SQL Database');
+      console.log('Successfully connected to Azure SQL Database');
     })
     .catch((err) => {
       console.error('Failed to connect to Azure SQL Database:', err);
