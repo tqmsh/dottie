@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { getScreenshotPath, getLegacyScreenshotPath } from '../../../screenshot-helpers';
+import path from 'path';
 import { setupApiForPlaywright, teardownApiForPlaywright } from '../../../e2e/development/e2e-test-setup';
 
 // Real test suite for the API message functionality
 test.describe('Development - API Message Connection Tests (Real)', () => {
+  // Configure screenshot directory with new structure
+  const baseScreenshotDir = path.join(process.cwd(), 'test_screenshots');
+  const newScreenshotDir = path.join(baseScreenshotDir, 'development', 'test_page', 'api-connection', 'real');
+  const legacyScreenshotDir = path.join(baseScreenshotDir, 'test_page');
+
   // Setup API server before all tests
   test.beforeAll(async () => {
     await setupApiForPlaywright();
@@ -26,12 +31,12 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
   test('should display API section with correct button state', async ({ page }) => {
     // Take a screenshot of the initial page using new path structure
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'real', 'initial-state.png') 
+      path: path.join(newScreenshotDir, 'initial-state.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('real-api-initial-state.png')
+      path: path.join(legacyScreenshotDir, 'real-api-initial-state.png')
     });
     
     // Check that the API section title is visible
@@ -48,12 +53,12 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     
     // Take a screenshot of the API section
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'real', 'section.png')
+      path: path.join(newScreenshotDir, 'section.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('real-api-section.png')
+      path: path.join(legacyScreenshotDir, 'real-api-section.png')
     });
   });
 
@@ -82,12 +87,12 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     
     // Take a screenshot after the connection test - new path
     await page.screenshot({ 
-      path: getScreenshotPath('development', 'api-connection', 'real', 'connection-result.png')
+      path: path.join(newScreenshotDir, 'connection-result.png')
     });
     
     // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: getLegacyScreenshotPath('real-api-connection-result.png')
+      path: path.join(legacyScreenshotDir, 'real-api-connection-result.png')
     });
   });
 }); 
