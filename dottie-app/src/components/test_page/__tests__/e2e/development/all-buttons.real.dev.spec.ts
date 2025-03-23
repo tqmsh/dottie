@@ -30,7 +30,8 @@ test.describe('Development - Real Connection Tests', () => {
     
     // Verify the API message includes the expected text
     await expect(apiMessage).toContainText('API connection successful', { timeout: 10000 });
-    await expect(apiMessage).toContainText('Hello World from Dottie API!', { timeout: 10000 });
+    await expect(apiMessage).toContainText('Server says:', { timeout: 10000 });
+    await expect(apiMessage).toContainText('Hello World from Dottie API', { timeout: 10000 });
     await expect(apiButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
     
     // Take screenshot after API connection
