@@ -7,7 +7,7 @@ describe('Vercel API Access Tests', () => {
   const TEST_TIMEOUT = 15000;
   
   // Define the API URL - update this with your actual URL
-  const API_URL = 'https://dottie-ff3i8e1lq-lmcreans-projects.vercel.app';
+  const API_URL = 'https://dottie-api-zeta.vercel.app';
   
   // Test 1: Check basic API access
   it('should be able to reach the API', async () => {
