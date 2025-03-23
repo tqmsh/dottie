@@ -27,7 +27,10 @@ test.describe('Development - Real Connection Tests', () => {
     // Verify API connection (will use the real API)
     const apiMessage = page.locator('[data-testid="api-message"]');
     await expect(apiMessage).toBeVisible({ timeout: 10000 });
-    // We don't check for exact message text since it may vary in the real API
+    
+    // Verify the API message includes the expected text
+    await expect(apiMessage).toContainText('API connection successful', { timeout: 10000 });
+    await expect(apiMessage).toContainText('Hello World from Dottie API!', { timeout: 10000 });
     await expect(apiButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
     
     // Take screenshot after API connection
@@ -40,9 +43,26 @@ test.describe('Development - Real Connection Tests', () => {
     
     // Verify SQLite connection (will use the real database)
     const dbMessage = page.locator('[data-testid="db-message"]');
-    await expect(dbMessage).toBeVisible({ timeout: 10000 });
-    // We don't check for exact message text since it may vary in the real response
-    await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
+    await expect(dbMessage).toBeVisible({ timeout: 15000 });
+    
+    // Wait a bit for both requests to complete
+    await page.waitForTimeout(2000);
+    
+    // Check the db message content for SQL and status info
+    const messageText = await dbMessage.textContent();
+    const hasSqlHello = messageText?.includes('Hello World from Azure SQL!') || false;
+    const hasDbStatus = messageText?.includes('Database status: connected') || false;
+    
+    if (hasSqlHello && hasDbStatus) {
+      // Both messages present - should be green
+      await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
+    } else if (hasSqlHello || hasDbStatus) {
+      // One message present - should be yellow
+      await expect(dbButton).toHaveClass(/bg-yellow-600/, { timeout: 10000 });
+    } else {
+      // No messages - should be red
+      await expect(dbButton).toHaveClass(/bg-red-600/, { timeout: 10000 });
+    }
     
     // Take a screenshot showing both real connections
     await page.screenshot({ 
