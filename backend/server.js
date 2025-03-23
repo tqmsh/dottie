@@ -6,7 +6,7 @@ import { dirname } from "path";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import initializeDatabase from "./db/init.js";
+import serverlessTestRoutes from "./routes/serverlessTestRoutes.js";
 import db from "./db/index.js";
 
 // Load environment variables
@@ -23,6 +23,20 @@ app.use(express.json());
 // Routes
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello World from Dottie API!" });
+});
+
+// Simple serverless test endpoint
+app.get("/api/serverless-test", (req, res) => {
+  const now = new Date();
+  res.json({ 
+    message: "Serverless function is working!",
+    timestamp: now.toISOString(),
+    environment: {
+      node_env: process.env.NODE_ENV || 'not set',
+      is_vercel: process.env.VERCEL === '1' ? 'Yes' : 'No',
+      region: process.env.VERCEL_REGION || 'unknown'
+    }
+  });
 });
 
 // Azure SQL test endpoint
@@ -75,6 +89,7 @@ app.get("/api/db-status", async (req, res) => {
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/serverless-test", serverlessTestRoutes);
 
 // Add this after your routes setup
 app.use((req, res, next) => {
@@ -89,27 +104,26 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Server error" });
 });
 
-// Define port
+// For local development
 const PORT = process.env.PORT || 5000;
 
-// Export app for testing
-export default app;
-
-// Start server only if this file is run directly
+// Start server only if this file is run directly (not in serverless mode)
 const currentFilePath = fileURLToPath(import.meta.url);
 if (process.argv[1] === currentFilePath) {
-  // Initialize database before starting server
+  // Initialize database connection when running as a standalone server
   try {
-    // Only create tables, don't close connection
     await db.raw('SELECT 1');
     console.log("Database connection successful");
     
-    // Start the server
+    // Start server after DB connection is verified
     app.listen(PORT, () => {
-      console.log(`Server running in development mode on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Failed to connect to database:", error);
     process.exit(1);
   }
 }
+
+// Export for serverless environment
+export default app;
