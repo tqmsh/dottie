@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 // This file tests basic access to the Vercel-deployed API
 describe('Vercel API Access Tests', () => {
   // Set a longer timeout for these tests since we're dealing with remote servers
-  const TEST_TIMEOUT = 15000;
+  const TEST_TIMEOUT = 60000; // 60 seconds
   
   // Define the API URL - update this with your actual URL
   const API_URL = 'https://dottie-api-zeta.vercel.app';

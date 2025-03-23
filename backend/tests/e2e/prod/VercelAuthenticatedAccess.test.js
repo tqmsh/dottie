@@ -7,6 +7,9 @@ describe('Vercel Authenticated API Access Tests', () => {
     ? `https://${process.env.VERCEL_URL}/api` 
     : 'https://dottie-api-zeta.vercel.app/api';
 
+  // Set longer timeout for production tests
+  const TEST_TIMEOUT = 60000; // 60 seconds
+
   it('should authenticate and access protected endpoints', async () => {
     // Step 1: Authenticate to get a token
     const loginResponse = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -55,7 +58,7 @@ describe('Vercel Authenticated API Access Tests', () => {
         console.log(`Error reading response: ${error.message}`);
       }
     }
-  }, 15000);  // 15 second timeout for this test
+  }, TEST_TIMEOUT);
 
   it('should test the SQL database connection through API', async () => {
     // Test a specific database access endpoint
@@ -118,5 +121,5 @@ describe('Vercel Authenticated API Access Tests', () => {
       console.log(`Error processing response: ${error.message}`);
       throw error; // Re-throw to fail the test
     }
-  }, 15000);  // 15 second timeout for this test
+  }, TEST_TIMEOUT);
 }); 

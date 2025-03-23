@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 // This file tests Azure SQL connection in the Vercel environment
 describe('Vercel Azure SQL Connection Tests', () => {
   // Set a longer timeout for these tests since we're dealing with remote servers
-  const TEST_TIMEOUT = 15000;
+  const TEST_TIMEOUT = 60000; // 60 seconds
   
   // Test 1: Local connection to Azure SQL
   it('should connect to Azure SQL locally', async () => {
