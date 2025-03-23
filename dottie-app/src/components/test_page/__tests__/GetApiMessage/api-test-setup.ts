@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Calculate correct paths
-const projectRoot = path.resolve(__dirname, '../../../../..');
+const projectRoot = path.resolve(__dirname, '../../../../../..');
 const backendDir = path.join(projectRoot, 'backend');
 const serverPath = path.join(backendDir, 'server.js');
 
