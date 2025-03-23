@@ -21,6 +21,7 @@ export default function TestPage() {
     try {
       const response = await axios.get('/api/hello');
       console.log('API Response:', response.data);
+      console.log('API Response Full:', JSON.stringify(response, null, 2));
       
       // Store the successful connection message and the API response message
       if (response.data && response.data.message) {
@@ -31,6 +32,7 @@ export default function TestPage() {
       setApiStatus('success');
     } catch (error) {
       console.error('API connection error:', error);
+      console.error('API connection error details:', JSON.stringify(error, null, 2));
       setApiMessage('Could not connect to API');
       setApiStatus('error');
     } finally {

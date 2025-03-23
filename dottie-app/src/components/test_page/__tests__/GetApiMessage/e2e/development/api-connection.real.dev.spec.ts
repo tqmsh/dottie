@@ -63,6 +63,20 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
   });
 
   test('should connect to real API and verify success', async ({ page }) => {
+    // Enable console logging from the page to see the API response
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    
+    // Monitor network requests
+    await page.route('**/api/hello', route => {
+      console.log('API Request intercepted:', route.request().url());
+      route.continue();
+    });
+    
+    await page.route('**/api/hello', route => {
+      route.continue();
+      console.log('API Response intercepted');
+    });
+    
     // Click the API test button
     const apiButton = page.locator('[data-testid="test-api-button"]');
     await expect(apiButton).toBeVisible();
@@ -79,8 +93,8 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     // Verify the message contains the success message
     await expect(apiMessage).toContainText('API connection successful', { timeout: 10000 });
     
-    // Handle the "no message" case as success
-    await expect(apiMessage).toContainText('API connection successful', { timeout: 10000 });
+    // Verify the specific message from the API
+    await expect(apiMessage).toContainText('Hello World from Dottie API!', { timeout: 10000 });
     
     // Check button color (should be green for success)
     await expect(apiButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
