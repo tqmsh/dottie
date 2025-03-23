@@ -1,11 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterEach } from 'vitest';
 import axios from 'axios';
+import { isApiRunning, conditionalApiTest } from './api-test-setup';
 
 // Test interceptors to examine requests before they're sent
 describe('AxiosBeforeReq (Real API)', () => {
-  // Store original adapter to restore after tests
-  const originalAdapter = axios.defaults.adapter;
+  let apiAvailable = false;
   let requestConfig: any = null;
+  
+  beforeAll(async () => {
+    // Check if API is available before running tests
+    apiAvailable = await isApiRunning();
+    if (!apiAvailable) {
+      console.log('⚠️ API is not available. Some tests will be skipped.');
+    } else {
+      console.log('✅ API is available. Running real API tests.');
+    }
+  });
   
   beforeEach(() => {
     // Reset captured request
@@ -27,8 +37,8 @@ describe('AxiosBeforeReq (Real API)', () => {
     axios.interceptors.request.clear();
   });
 
-  it('prepares real request with correct URL', async () => {
-    try {
+  it('prepares real request with correct URL',
+    conditionalApiTest('prepares real request with correct URL', async () => {
       // Start the request
       const requestPromise = axios.get('/api/hello');
       
@@ -39,15 +49,11 @@ describe('AxiosBeforeReq (Real API)', () => {
       
       // Wait for completion
       await requestPromise;
-    } catch (error) {
-      console.error('API request failed:', error);
-      // Fail test if API is not available
-      expect(error).toBeFalsy();
-    }
-  });
+    })
+  );
 
-  it('prepares real request with custom headers', async () => {
-    try {
+  it('prepares real request with custom headers',
+    conditionalApiTest('prepares real request with custom headers', async () => {
       // Custom headers
       const headers = {
         'Content-Type': 'application/json',
@@ -64,15 +70,11 @@ describe('AxiosBeforeReq (Real API)', () => {
       
       // Wait for completion
       await requestPromise;
-    } catch (error) {
-      console.error('API request with headers failed:', error);
-      // Fail test if API is not available
-      expect(error).toBeFalsy();
-    }
-  });
+    })
+  );
 
-  it('configures timeout for real requests', async () => {
-    try {
+  it('configures timeout for real requests',
+    conditionalApiTest('configures timeout for real requests', async () => {
       // Start request with timeout
       const requestPromise = axios.get('/api/hello', { timeout: 5000 });
       
@@ -82,10 +84,6 @@ describe('AxiosBeforeReq (Real API)', () => {
       
       // Wait for completion
       await requestPromise;
-    } catch (error) {
-      console.error('API request with timeout failed:', error);
-      // Fail test if API is not available
-      expect(error).toBeFalsy();
-    }
-  });
+    })
+  );
 }); 
