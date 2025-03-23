@@ -10,10 +10,10 @@ When the user clicks the "Test SQLite Connection" button:
    - `/api/sql-hello` - Tests the database connection by running a simple query
    - `/api/db-status` - Verifies the database is connected
 
-2. Upon success, the following messages should be displayed:
+2. Upon success, the following messages should be displayed in this order:
    - "SQL connection successful" - Generic success message
-   - "Hello World from Azure SQL!" - The message returned from the SQL query
    - "Database status: connected" - The status from the db-status endpoint
+   - "SQLite message retrieved: "Hello World from Azure SQL!"" - The message returned from the SQL query
 
 3. The button should turn green to indicate success.
 

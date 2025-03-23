@@ -92,10 +92,10 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
     const dbMessage = page.locator('[data-testid="db-message"]');
     await expect(dbMessage).toBeVisible();
     
-    // Verify the specific messages are displayed
+    // Verify the specific messages are displayed in the correct order
     await expect(dbMessage).toContainText('SQL connection successful', { timeout: 10000 });
-    await expect(dbMessage).toContainText('Hello World from Azure SQL!', { timeout: 10000 });
     await expect(dbMessage).toContainText('Database status: connected', { timeout: 10000 });
+    await expect(dbMessage).toContainText('SQLite message retrieved: "Hello World from Azure SQL!"', { timeout: 10000 });
     
     // Verify the button turns green (has the success class)
     await expect(dbButton).toHaveClass(/bg-green-600/);

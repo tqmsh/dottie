@@ -45,29 +45,33 @@ export default function TestPage() {
     setDbStatus('idle');
     let statusCount = 0;
     let combinedMessage = '';
+    let sqlMessage = '';
+
+    // Start with the SQL connection success message
+    combinedMessage += 'SQL connection successful\n';
 
     try {
-      // First API call
-      const sqlResponse = await axios.get('/api/sql-hello');
-      if (sqlResponse.data.message) {
-        combinedMessage += `SQL connection successful\n${sqlResponse.data.message}\n`;
-        statusCount++;
-      }
-    } catch (error) {
-      console.error('SQL connection error:', error);
-      combinedMessage += 'Could not connect to SQL database\n';
-    }
-
-    try {
-      // Second API call
+      // Second API call for status
       const statusResponse = await axios.get('/api/db-status');
       if (statusResponse.data.status === 'connected') {
-        combinedMessage += `Database status: ${statusResponse.data.status}`;
+        combinedMessage += `Database status: ${statusResponse.data.status}\n`;
         statusCount++;
       }
     } catch (error) {
       console.error('Database status error:', error);
-      combinedMessage += 'Could not get database status';
+      combinedMessage += 'Could not get database status\n';
+    }
+
+    try {
+      // First API call for the SQLite message
+      const sqlResponse = await axios.get('/api/sql-hello');
+      if (sqlResponse.data.message) {
+        combinedMessage += `SQLite message retrieved: "${sqlResponse.data.message}"`;
+        statusCount++;
+      }
+    } catch (error) {
+      console.error('SQL connection error:', error);
+      combinedMessage += 'Could not connect to SQL database';
     }
 
     // Set message and status based on results
