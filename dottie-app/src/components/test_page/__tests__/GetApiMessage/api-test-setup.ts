@@ -40,13 +40,11 @@ export const isApiRunning = async (port = API_PORT): Promise<boolean> => {
       });
       
       clearTimeout(timeoutId);
-      return response.ok;
+      return response.status === 200;
     } catch (error) {
       // Silently fail - expected when server isn't running
-      // This approach prevents JSDOM from throwing AggregateError
-      return false;
-    } finally {
       clearTimeout(timeoutId);
+      return false;
     }
   } catch (error) {
     // Fallback error handler - should not be triggered with the approach above
@@ -74,7 +72,7 @@ export const ensureApiRunning = async (): Promise<boolean> => {
   // Acquire mutex and create a promise for others to wait on
   startServerMutex = true;
   startServerPromise = (async () => {
-    console.log('⚠️ API server is not running. Starting server...');
+    console.log('🚀 Starting API server for tests...');
     try {
       // Check if paths exist
       if (!fs.existsSync(backendDir) || !fs.existsSync(serverPath)) {
@@ -82,12 +80,13 @@ export const ensureApiRunning = async (): Promise<boolean> => {
         return false;
       }
       
-      console.log(`Backend directory: ${backendDir}`);
-      console.log(`Server file path: ${serverPath}`);
+      // Skip verbose path logs unless debugging is needed
+      // console.log(`Backend directory: ${backendDir}`);
+      // console.log(`Server file path: ${serverPath}`);
       
       // Find the Node executable path - use process.execPath for actual path to node
       const nodeExecutable = process.execPath;
-      console.log(`Using Node executable: ${nodeExecutable}`);
+      // console.log(`Using Node executable: ${nodeExecutable}`);
       
       // Try starting the server with the default port
       const startServer = (port: number): ReturnType<typeof spawn> => {
@@ -197,7 +196,7 @@ export const ensureApiRunning = async (): Promise<boolean> => {
       
       while (attempts < maxAttempts) {
         attempts++;
-        console.log(`Checking if API is up (attempt ${attempts}/${maxAttempts})...`);
+        console.log(`◌ Waiting for API server to start... (${attempts}/${maxAttempts})`);
         
         await new Promise(resolve => setTimeout(resolve, 1000));
         
