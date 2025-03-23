@@ -23,7 +23,7 @@ if (!fs.existsSync(assessmentDir)) {
 export default defineConfig({
   // Directory where tests are located - include both paths
   testDir: './src',
-  testMatch: '**/__tests__/e2e/**/*.spec.ts',
+  testMatch: '**/__tests__/**/*.spec.ts',
   
   // Run tests in files in parallel
   fullyParallel: true,
