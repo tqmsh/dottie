@@ -67,6 +67,7 @@ test.describe('Development - API Message Connection Tests (Real)', () => {
     if (messageText?.includes('but no message returned')) {
       // This is the fallback case when API returns no message
       await expect(apiMessage).toContainText('API connection successful, but no message returned', { timeout: 10000 });
+      console.log('WARNING: API returned no message - this is acceptable but not ideal');
     } else {
       // This is the successful case with an API message
       await expect(apiMessage).toContainText('Server says:', { timeout: 10000 });

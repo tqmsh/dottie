@@ -37,7 +37,7 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
 
   test('should show error message when API connection fails in development', async ({ page }) => {
     // Intercept the API call and mock a failed response
-    await page.route('/api/message', route => route.abort('failed'));
+    await page.route('/api/hello', route => route.abort('failed'));
     
     // Click the API test button
     const apiButton = page.locator('[data-testid="test-api-button"]');
@@ -58,12 +58,12 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
 
   test('should show success message when API connection succeeds in development', async ({ page }) => {
     // Intercept the API call and mock a successful response
-    await page.route('/api/message', route => {
+    await page.route('/api/hello', route => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          message: 'API is running in DEVELOPMENT mode (MOCKED)',
+          message: 'Hello World from Dottie API!',
           version: '1.0.0',
           timestamp: new Date().toISOString()
         })
@@ -78,7 +78,7 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     // Wait for the success message to appear
     const apiMessage = page.locator('[data-testid="api-message"]');
     await expect(apiMessage).toBeVisible();
-    await expect(apiMessage).toContainText('API is running in DEVELOPMENT mode');
+    await expect(apiMessage).toContainText('Hello World from Dottie API');
     
     // Verify the button turns green (has the success class)
     await expect(apiButton).toHaveClass(/bg-green-600/);
