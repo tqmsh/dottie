@@ -30,7 +30,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await new Promise((resolve) => {
     server.close(() => {
-      console.log('Test server closed');
+      console.log('API Comprehensive Test server closed');
       resolve();
     });
   });
