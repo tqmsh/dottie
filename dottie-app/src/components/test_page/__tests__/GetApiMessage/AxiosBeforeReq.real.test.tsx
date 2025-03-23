@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, beforeAll, afterEach } from 'vitest';
 import axios from 'axios';
-import { isApiRunning, conditionalApiTest, apiClient } from './api-test-setup';
+import { isApiRunning, conditionalApiTest, apiClient, ensureApiRunning } from './api-test-setup';
 
 // Test interceptors to examine requests before they're sent
 describe('AxiosBeforeReq (Real API)', () => {
@@ -8,8 +8,8 @@ describe('AxiosBeforeReq (Real API)', () => {
   let requestConfig: any = null;
   
   beforeAll(async () => {
-    // Check if API is available before running tests
-    apiAvailable = await isApiRunning();
+    // Try to ensure API is running before tests
+    apiAvailable = await ensureApiRunning();
     if (!apiAvailable) {
       console.log('⚠️ API is not available. Some tests will be skipped.');
     } else {
