@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { setupApiForPlaywright, teardownApiForPlaywright } from './e2e-test-setup';
+import { setupApiForPlaywright, teardownApiForPlaywright } from '../../../e2e/development/e2e-test-setup';
 
 // Real test suite for the API message functionality
 test.describe('Development - API Message Connection Tests (Real)', () => {
