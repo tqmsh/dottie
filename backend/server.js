@@ -70,14 +70,14 @@ app.use("/api/users", userRoutes);
 
 // Add this for debugging - log all requests
 app.use((req, res, next) => {
-  console.log(`📝 Request: ${req.method} ${req.path}`);
-  console.log(`📦 Body: ${JSON.stringify(req.body)}`);
+  console.log(`Request: ${req.method} ${req.path}`);
+  console.log(`Body: ${JSON.stringify(req.body)}`);
   next();
 });
 
 // Add this after your routes setup
 app.use((req, res, next) => {
-  console.log(`✅ Testing route validation: ${req.method} ${req.path} - 🔍 route not registered (expected in 404 tests)`);
+  console.log(`Testing route validation: ${req.method} ${req.path} - 🔍 route not registered \n ✅ ...this is expected in 404 tests)`);
   res.status(404).json({ error: "Not found" });
 });
 
