@@ -36,7 +36,8 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
   });
 
   test('should show error message when SQLite connection fails in development', async ({ page }) => {
-    // Intercept the DB call and mock a failed response
+    // Intercept both DB calls and mock failed responses
+    await page.route('/api/sql-hello', route => route.abort('failed'));
     await page.route('/api/db-status', route => route.abort('failed'));
     
     // Click the SQLite test button
@@ -47,7 +48,8 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
     // Wait for the error message to appear
     const dbMessage = page.locator('[data-testid="db-message"]');
     await expect(dbMessage).toBeVisible();
-    await expect(dbMessage).toContainText('Could not connect to SQLite database');
+    await expect(dbMessage).toContainText('Could not connect to SQL database');
+    await expect(dbMessage).toContainText('Could not get database status');
     
     // Verify the button turns red (has the error class)
     await expect(dbButton).toHaveClass(/bg-red-600/);
@@ -57,20 +59,26 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
   });
 
   test('should show success message when SQLite connection succeeds in development', async ({ page }) => {
-    // Intercept the DB call and mock a successful response
+    // Intercept the API/sql-hello call with the expected message
+    await page.route('/api/sql-hello', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Hello World from Azure SQL!',
+          dbType: 'sqlite3',
+          isConnected: true
+        })
+      });
+    });
+    
+    // Intercept the API/db-status call
     await page.route('/api/db-status', route => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          message: 'SQLite database is connected and operational in DEVELOPMENT mode (MOCKED)',
-          status: 'healthy',
-          data: {
-            id: 1,
-            name: 'test_record',
-            created_at: new Date().toISOString()
-          },
-          timestamp: new Date().toISOString()
+          status: 'connected'
         })
       });
     });
@@ -83,8 +91,11 @@ test.describe('Development - SQLite Database Connection Tests (Mocked)', () => {
     // Wait for the success message to appear
     const dbMessage = page.locator('[data-testid="db-message"]');
     await expect(dbMessage).toBeVisible();
-    await expect(dbMessage).toContainText('connected and operational');
-    await expect(dbMessage).toContainText('DEVELOPMENT');
+    
+    // Verify the specific messages are displayed
+    await expect(dbMessage).toContainText('SQL connection successful', { timeout: 10000 });
+    await expect(dbMessage).toContainText('Hello World from Azure SQL!', { timeout: 10000 });
+    await expect(dbMessage).toContainText('Database status: connected', { timeout: 10000 });
     
     // Verify the button turns green (has the success class)
     await expect(dbButton).toHaveClass(/bg-green-600/);

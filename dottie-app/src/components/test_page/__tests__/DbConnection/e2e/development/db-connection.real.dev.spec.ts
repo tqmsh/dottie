@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 import { setupApiForPlaywright, teardownApiForPlaywright } from '../../../e2e/development/e2e-test-setup';
 
-// Real test suite for the SQLite database connection
+// Real test suite for the database connection functionality
 test.describe('Development - SQLite Database Connection Tests (Real)', () => {
   // Configure screenshot directory with new structure
   const baseScreenshotDir = path.join(process.cwd(), 'test_screenshots');
@@ -29,14 +29,14 @@ test.describe('Development - SQLite Database Connection Tests (Real)', () => {
   });
 
   test('should display SQLite section with correct button state', async ({ page }) => {
-    // Take a screenshot of the initial page - new path
+    // Take a screenshot of the initial page using new path structure
     await page.screenshot({ 
       path: path.join(newScreenshotDir, 'initial-state.png')
     });
     
-    // Keep backward compatibility
+    // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: path.join(legacyScreenshotDir, 'real-sqlite-initial-state.png')
+      path: path.join(legacyScreenshotDir, 'real-db-initial-state.png')
     });
     
     // Check that the SQLite section title is visible
@@ -51,78 +51,61 @@ test.describe('Development - SQLite Database Connection Tests (Real)', () => {
     // Verify button has the default blue style initially
     await expect(dbButton).toHaveClass(/bg-blue-600/);
     
-    // Take a screenshot of the SQLite section - new path
+    // Take a screenshot of the SQLite section
     await page.screenshot({ 
       path: path.join(newScreenshotDir, 'section.png')
     });
     
-    // Keep backward compatibility
+    // Maintain backward compatibility for now
     await page.screenshot({ 
-      path: path.join(legacyScreenshotDir, 'real-sqlite-section.png')
+      path: path.join(legacyScreenshotDir, 'real-db-section.png')
     });
   });
 
-  test('should connect to real SQLite database and verify success', async ({ page }) => {
-    // This test is flaky, so we'll retry it a few times
-    await test.step('Click DB button and wait for result', async () => {
-      // Initial screenshot - new path
-      await page.screenshot({ 
-        path: path.join(newScreenshotDir, 'before-click.png')
-      });
-      
-      // Keep backward compatibility
-      await page.screenshot({ 
-        path: path.join(legacyScreenshotDir, 'real-sqlite-before-click.png')
-      });
-
-      // Locate the button and message area
-      const dbButton = page.locator('[data-testid="test-db-button"]');
-      
-      // Make sure the button is visible and enabled before clicking
-      await expect(dbButton).toBeVisible();
-      await expect(dbButton).not.toBeDisabled();
-      
-      // Click the button and take a screenshot immediately after
-      console.log('Clicking DB button...');
-      await dbButton.click();
-      
-      // Wait briefly to let the UI update to show loading state
-      await page.waitForTimeout(1000);
-      
-      // New path
-      await page.screenshot({ 
-        path: path.join(newScreenshotDir, 'after-click.png')
-      });
-      
-      // Keep backward compatibility
-      await page.screenshot({ 
-        path: path.join(legacyScreenshotDir, 'real-sqlite-after-click.png')
-      });
-      
-      // Watch for button text change to confirm click registered
-      const buttonText = await dbButton.textContent();
-      console.log('Button text after click:', buttonText);
-      
-      // Check if there's any response visible already
-      const messageElement = page.locator('[data-testid="db-message"]');
-      
-      // Give the API more time to respond
-      console.log('Waiting longer for API response...');
-      await page.waitForTimeout(10000);
-      
-      // Take a screenshot after waiting - new path
-      await page.screenshot({ 
-        path: path.join(newScreenshotDir, 'after-waiting.png')
-      });
-      
-      // Keep backward compatibility
-      await page.screenshot({ 
-        path: path.join(legacyScreenshotDir, 'real-sqlite-after-waiting.png')
-      });
-      
-      // Try to find the message element again
-      const isVisible = await messageElement.isVisible().catch(() => false);
-      console.log('DB Message visible after waiting:', isVisible);
+  test('should connect to real database and verify success', async ({ page }) => {
+    // Enable console logging from the page to see the API responses
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    
+    // Monitor network requests for both database endpoints
+    await page.route('**/api/sql-hello', route => {
+      console.log('SQL Hello Request intercepted:', route.request().url());
+      route.continue();
+    });
+    
+    await page.route('**/api/db-status', route => {
+      console.log('DB Status Request intercepted:', route.request().url());
+      route.continue();
+    });
+    
+    // Click the SQLite test button
+    const dbButton = page.locator('[data-testid="test-db-button"]');
+    await expect(dbButton).toBeVisible();
+    await dbButton.click();
+    
+    // Wait for the response to appear
+    const dbMessage = page.locator('[data-testid="db-message"]');
+    await expect(dbMessage).toBeVisible({ timeout: 10000 });
+    
+    // Get the actual message text
+    const messageText = await dbMessage.textContent();
+    console.log('DB Message:', messageText);
+    
+    // Verify the specific messages are displayed
+    await expect(dbMessage).toContainText('SQL connection successful', { timeout: 10000 });
+    await expect(dbMessage).toContainText('Hello World from Azure SQL!', { timeout: 10000 });
+    await expect(dbMessage).toContainText('Database status: connected', { timeout: 10000 });
+    
+    // Check button color (should be green for success)
+    await expect(dbButton).toHaveClass(/bg-green-600/, { timeout: 10000 });
+    
+    // Take a screenshot after the connection test - new path
+    await page.screenshot({ 
+      path: path.join(newScreenshotDir, 'connection-result.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: path.join(legacyScreenshotDir, 'real-db-connection-result.png')
     });
   });
 }); 
