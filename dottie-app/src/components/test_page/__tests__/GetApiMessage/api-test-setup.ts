@@ -14,18 +14,19 @@ const projectRoot = path.resolve(__dirname, '../../../../../..');
 const backendDir = path.join(projectRoot, 'backend');
 const serverPath = path.join(backendDir, 'server.js');
 
-// Configure axios for API tests
-const API_BASE_URL = 'http://localhost:5000';
+// Configure axios for API tests - default port with ability to change it
+let API_PORT = 5000;
+const API_BASE_URL = `http://localhost:${API_PORT}`;
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 3000,
 });
 
 // Helper utility to check if the API server is running
-export const isApiRunning = async (): Promise<boolean> => {
+export const isApiRunning = async (port = API_PORT): Promise<boolean> => {
   try {
-    // Use the full URL with port 5000 where the backend API is running
-    await apiClient.get('/api/hello', { timeout: 1000 });
+    // Use the full URL with the specified port where the backend API is running
+    await axios.get(`http://localhost:${port}/api/hello`, { timeout: 1000 });
     return true;
   } catch (error) {
     return false;
@@ -58,12 +59,24 @@ export const ensureApiRunning = async (): Promise<boolean> => {
     const nodeExecutable = process.execPath;
     console.log(`Using Node executable: ${nodeExecutable}`);
     
-    // Start the server directly with Node
-    serverProcess = spawn(nodeExecutable, [serverPath], {
-      cwd: backendDir,
-      stdio: 'pipe', // Capture output to avoid cluttering the test output
-      env: { ...process.env, PORT: '5000' }
-    });
+    // Try starting the server with the default port
+    const startServer = (port: number): ReturnType<typeof spawn> => {
+      // Update API client to use the current port
+      API_PORT = port;
+      apiClient.defaults.baseURL = `http://localhost:${port}`;
+      
+      return spawn(nodeExecutable, [serverPath], {
+        cwd: backendDir,
+        stdio: 'pipe', // Capture output to avoid cluttering the test output
+        env: { ...process.env, PORT: port.toString() }
+      });
+    };
+
+    // Initial server start
+    serverProcess = startServer(API_PORT);
+    
+    let isPortInUse = false;
+    let secondAttemptMade = false;
     
     // Log server output for debugging
     serverProcess.stdout?.on('data', (data) => {
@@ -71,7 +84,50 @@ export const ensureApiRunning = async (): Promise<boolean> => {
     });
     
     serverProcess.stderr?.on('data', (data) => {
-      console.error(`Backend server error: ${data.toString().trim()}`);
+      const errorOutput = data.toString().trim();
+      console.error(`Backend server error: ${errorOutput}`);
+      
+      // Check for port already in use error
+      if (errorOutput.includes('EADDRINUSE') && !secondAttemptMade) {
+        isPortInUse = true;
+        secondAttemptMade = true;
+        
+        // Port is in use - check if it's our API already running
+        console.log(`Port ${API_PORT} is already in use. Checking if it's our API...`);
+        
+        // Try to connect to whatever is running on the port
+        isApiRunning(API_PORT).then(isRunning => {
+          if (isRunning) {
+            console.log(`✅ API appears to be already running on port ${API_PORT}`);
+            // Don't need to do anything, the existing server will be used
+          } else {
+            console.log(`⚠️ Something else is using port ${API_PORT}, but it's not our API.`);
+            
+            // Try an alternative port
+            const alternativePort = API_PORT + 1;
+            console.log(`Attempting to start server on alternative port ${alternativePort}...`);
+            
+            if (serverProcess) {
+              serverProcess.kill();
+              serverProcess = startServer(alternativePort);
+              
+              // Set up the listeners again for the new process
+              serverProcess.stdout?.on('data', (data) => {
+                console.log(`Backend server: ${data.toString().trim()}`);
+              });
+              
+              serverProcess.stderr?.on('data', (data) => {
+                console.error(`Backend server error: ${data.toString().trim()}`);
+              });
+              
+              serverProcess.on('exit', (code) => {
+                console.log(`Backend server exited with code ${code}`);
+                serverProcess = null;
+              });
+            }
+          }
+        });
+      }
     });
     
     // Handle server exit
@@ -115,8 +171,8 @@ export const ensureApiRunning = async (): Promise<boolean> => {
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (await isApiRunning()) {
-        console.log('✅ API server is now running');
+      if (await isApiRunning(API_PORT)) {
+        console.log(`✅ API server is now running on port ${API_PORT}`);
         return true;
       }
     }
