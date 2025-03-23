@@ -1,11 +1,8 @@
 import { test, expect } from '@playwright/test';
-import path from 'path';
+import { getScreenshotPath, getLegacyScreenshotPath } from '../../../screenshot-helpers';
 
 // Mock test suite for the API message functionality
 test.describe('Development - API Message Connection Tests (Mocked)', () => {
-  // Configure screenshot directory
-  const screenshotDir = path.join(process.cwd(), 'test_screenshots/test_page');
-
   // Setup: Navigate to the test page before each test
   test.beforeEach(async ({ page }) => {
     await page.goto('/test');
@@ -16,8 +13,15 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
   });
 
   test('should display API section with correct button state', async ({ page }) => {
-    // Take a screenshot of the initial page
-    await page.screenshot({ path: path.join(screenshotDir, 'mock-api-initial-state.png') });
+    // Take a screenshot of the initial page using new path structure
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'mock', 'initial-state.png') 
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('mock-api-initial-state.png')
+    });
     
     // Check that the API section title is visible
     const apiTitle = page.locator('h2:has-text("API Connection Test")');
@@ -32,7 +36,14 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     await expect(apiButton).toHaveClass(/bg-blue-600/);
     
     // Take a screenshot of the API section
-    await page.screenshot({ path: path.join(screenshotDir, 'mock-api-section.png') });
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'mock', 'section.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('mock-api-section.png')
+    });
   });
 
   test('should show error message when API connection fails in development', async ({ page }) => {
@@ -52,8 +63,15 @@ test.describe('Development - API Message Connection Tests (Mocked)', () => {
     // Verify the button turns red (has the error class)
     await expect(apiButton).toHaveClass(/bg-red-600/);
     
-    // Take a screenshot after the error
-    await page.screenshot({ path: path.join(screenshotDir, 'mock-api-connection-error.png') });
+    // Take a screenshot after the error - new path
+    await page.screenshot({ 
+      path: getScreenshotPath('development', 'api-connection', 'mock', 'connection-error.png')
+    });
+    
+    // Maintain backward compatibility for now
+    await page.screenshot({ 
+      path: getLegacyScreenshotPath('mock-api-connection-error.png')
+    });
   });
 
   test('should show success message when API connection succeeds in development', async ({ page }) => {
