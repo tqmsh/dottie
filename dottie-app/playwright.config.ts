@@ -7,23 +7,47 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create screenshot directories if they don't exist
+// Create screenshot directories if they don't exist - with improved structure
+const createDirIfNotExists = (dirPath: string): void => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+// Create base screenshot directories
+const screenshotsBaseDir = path.join(__dirname, 'test_screenshots');
+createDirIfNotExists(screenshotsBaseDir);
+
+// Create environment directories
+const envs = ['development', 'production'];
+const testTypes = ['test_page'];
+const componentTests = ['api-connection', 'database-connection', 'both-connections'];
+const testModes = ['mock', 'real'];
+
+// Create the full directory structure
+envs.forEach(env => {
+  testTypes.forEach(testType => {
+    componentTests.forEach(component => {
+      testModes.forEach(mode => {
+        const dir = path.join(screenshotsBaseDir, env, testType, component, mode);
+        createDirIfNotExists(dir);
+      });
+    });
+  });
+});
+
+// For backward compatibility during transition, keep the old directories too
 const testPageDir = path.join(__dirname, 'test_screenshots/test_page');
 const assessmentDir = path.join(__dirname, 'test_screenshots/assessment');
 
-if (!fs.existsSync(testPageDir)) {
-  fs.mkdirSync(testPageDir, { recursive: true });
-}
-
-if (!fs.existsSync(assessmentDir)) {
-  fs.mkdirSync(assessmentDir, { recursive: true });
-}
+createDirIfNotExists(testPageDir);
+createDirIfNotExists(assessmentDir);
 
 // Reference: https://playwright.dev/docs/test-configuration
 export default defineConfig({
   // Directory where tests are located - include both paths
   testDir: './src',
-  testMatch: '**/__tests__/e2e/**/*.spec.ts',
+  testMatch: '**/__tests__/**/*.spec.ts',
   
   // Run tests in files in parallel
   fullyParallel: true,
@@ -66,6 +90,4 @@ export default defineConfig({
     stderr: 'pipe',
     timeout: 120000, // Increase timeout to 2 minutes to ensure API is fully ready
   },
-  
-  // Screenshot output directory is configured in the test files
 }); 

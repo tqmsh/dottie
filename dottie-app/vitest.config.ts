@@ -11,7 +11,11 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}', 'app/**/__tests__/**/*.test.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**'],
     deps: {
-      inline: ['lucide-react', 'react-router-dom']
+      optimizer: {
+        web: {
+          include: ['lucide-react', 'react-router-dom']
+        }
+      }
     }
   },
   resolve: {

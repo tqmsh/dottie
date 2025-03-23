@@ -17,7 +17,6 @@ export async function createTables(db) {
       table.integer('age');
       table.timestamps(true, true);
     });
-    console.log('Created users table');
   }
 
   // Periods tracking table
@@ -41,7 +40,6 @@ export async function createTables(db) {
         }
       }
     });
-    console.log('Created period_logs table');
   }
 
   // Symptoms tracking table
@@ -66,7 +64,6 @@ export async function createTables(db) {
         }
       }
     });
-    console.log('Created symptoms table');
   }
 
   // Assessment results table
@@ -90,14 +87,12 @@ export async function createTables(db) {
         }
       }
     });
-    console.log('Created assessments table');
   }
   
   // Enable foreign keys in SQLite
   if (isSQLite) {
     try {
       await db.raw('PRAGMA foreign_keys = ON');
-      console.log('Enabled SQLite foreign keys');
     } catch (error) {
       console.warn('Warning: Could not enable foreign keys in SQLite:', error.message);
     }

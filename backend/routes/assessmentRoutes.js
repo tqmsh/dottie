@@ -7,11 +7,11 @@ import {
 
 const router = express.Router();
 
-// Add logging middleware
-router.use((req, res, next) => {
-  console.log(`Assessment route: ${req.method} ${req.path}`);
-  next();
-});
+// Remove logging middleware
+// router.use((req, res, next) => {
+//   console.log(`Assessment route: ${req.method} ${req.path}`);
+//   next();
+// });
 
 // Simple in-memory store for testing assessments
 const assessments = [];

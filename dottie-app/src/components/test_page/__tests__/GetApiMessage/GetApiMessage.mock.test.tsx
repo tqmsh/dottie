@@ -7,7 +7,7 @@ const mockedAxios = axios as unknown as {
   get: vi.MockedFunction<typeof axios.get> 
 };
 
-describe('GetApiMessage', () => {
+describe('GetApiMessage (Mock)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

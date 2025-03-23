@@ -33,7 +33,6 @@ describe('User API Endpoints', () => {
       
       // Skip test if no users exist
       if (usersResponse.body.length === 0) {
-        console.log('No users found, skipping test');
         return;
       }
       
@@ -49,7 +48,6 @@ describe('User API Endpoints', () => {
       
       // Skip test if no users exist
       if (usersResponse.body.length === 0) {
-        console.log('No users found, skipping test');
         return;
       }
       
@@ -81,7 +79,6 @@ describe('User API Endpoints', () => {
       
       // Skip if no users found
       if (response.body.length === 0) {
-        console.log('No users found, skipping test');
         return;
       }
       

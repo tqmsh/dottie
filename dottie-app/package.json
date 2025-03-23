@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest",
     "test:screenshots": "npx playwright test --project=safari",
-    "test:e2e:dev:regular": "npx playwright test src/components/assessment/__tests__/e2e/development/RegularCycle.spec.ts --headed --timeout=120000"
+    "test:e2e:dev:regular": "npx playwright test src/components/assessment/__tests__/e2e/development/RegularCycle.spec.ts --headed --timeout=120000",
+    "test:api": "node start-api-and-test.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

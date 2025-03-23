@@ -9,6 +9,8 @@ import FlowLevel from './components/assessment/flow/page'
 import PainLevel from './components/assessment/pain/page'
 import Symptoms from './components/assessment/symptoms/page'
 import Results from './components/assessment/results/page'
+// Import TestPage component
+import TestPage from './components/test_page/page'
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
           <Route path="/assessment/pain" element={<PainLevel />} />
           <Route path="/assessment/symptoms" element={<Symptoms />} />
           <Route path="/assessment/results" element={<Results />} />
+          <Route path="/test" element={<TestPage />} />
         </Routes>
       </main>
     </Router>

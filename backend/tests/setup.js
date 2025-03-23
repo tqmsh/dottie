@@ -11,9 +11,9 @@ import { createTables } from '../db/migrations/initialSchema.js';
  */
 export async function initTestDatabase() {
   try {
-    console.log('Setting up test database...');
+    // console.log('Setting up test database...');
     await createTables(db);
-    console.log('Test database setup complete');
+    // console.log('Test database setup complete');
     return true;
   } catch (error) {
     console.error('Error setting up test database:', error);
@@ -26,12 +26,12 @@ export async function initTestDatabase() {
  */
 export async function clearDatabase() {
   try {
-    console.log('Clearing test database...');
+    // console.log('Clearing test database...');
     await db('assessments').delete();
     await db('symptoms').delete();
     await db('period_logs').delete();
     await db('users').delete();
-    console.log('Test database cleared');
+    // console.log('Test database cleared');
     return true;
   } catch (error) {
     console.error('Error clearing test database:', error);

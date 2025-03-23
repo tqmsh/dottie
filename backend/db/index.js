@@ -49,7 +49,7 @@ if (useAzure) {
     },
     acquireConnectionTimeout: 60000 // How long to wait for a connection from the pool (60 seconds)
   };
-  console.log('Using Azure SQL database with static connection pool');
+  // console.log('Using Azure SQL database with static connection pool');
 } else {
   // SQLite configuration (local development)
   dbConfig = {
@@ -59,7 +59,7 @@ if (useAzure) {
     },
     useNullAsDefault: true
   };
-  console.log('Using SQLite database');
+  // Log could be added here: console.log('Using SQLite database');
 }
 
 // Initialize database connection
@@ -74,7 +74,7 @@ db.on('error', (err) => {
 if (useAzure) {
   db.raw('SELECT 1')
     .then(() => {
-      console.log('Successfully connected to Azure SQL Database');
+      // console.log('Successfully connected to Azure SQL Database');
     })
     .catch((err) => {
       console.error('Failed to connect to Azure SQL Database:', err);

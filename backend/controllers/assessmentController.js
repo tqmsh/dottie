@@ -35,13 +35,11 @@ export const submitAnswer = (req, res) => {
 
   // First check if assessment exists
   if (!assessmentId || !assessments[assessmentId]) {
-    console.log("Assessment not found", assessmentId);
     return res.status(404).json({ error: "Assessment not found" });
   }
 
   // Then check if question is valid before storing the answer
   if (questionId > 6 || questionId < 1) {
-    console.log("Invalid question ID:", questionId);
     return res.status(400).json({ error: "Invalid question ID" });
   }
 
@@ -91,10 +89,6 @@ export const submitAnswer = (req, res) => {
 // Get assessment results
 export const getResults = (req, res) => {
   const { assessmentId } = req.params;
-
-  // Log for debugging
-  console.log("Getting results for:", assessmentId);
-  console.log("Available assessments:", Object.keys(assessments));
 
   if (!assessmentId || !assessments[assessmentId]) {
     return res.status(404).json({ error: "Assessment not found" });

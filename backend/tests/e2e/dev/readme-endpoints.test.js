@@ -29,10 +29,11 @@ const createMockToken = (userId) => {
 // Start server before all tests
 beforeAll(async () => {
   server = createServer(app);
-  await new Promise((/** @type {() => void} */ resolve) => {
+  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
     server.listen(TEST_PORT, () => {
+      // Keep this log for server start notification
       console.log(`README endpoints test server started on port ${TEST_PORT}`);
-      resolve();
+      resolve(true);
     });
   });
 
@@ -43,10 +44,11 @@ beforeAll(async () => {
 
 // Close server after all tests
 afterAll(async () => {
-  await new Promise((/** @type {() => void} */ resolve) => {
+  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
     server.close(() => {
+      // Keep this log for server close notification
       console.log('README endpoints test server closed');
-      resolve();
+      resolve(true);
     });
   });
 }, 15000); // Increased timeout to 15 seconds
@@ -87,12 +89,6 @@ describe("README API Endpoints Tests", () => {
         .post("/api/auth/signup")
         .send(userData);
 
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 500) {
-        console.log("Skipping signup test - endpoint not fully implemented");
-        return;
-      }
-
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("id");
     });
@@ -108,12 +104,6 @@ describe("README API Endpoints Tests", () => {
         .post("/api/auth/login")
         .send(loginData);
 
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 401) {
-        console.log("Skipping login test - endpoint not fully implemented");
-        return;
-      }
-
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("token");
     });
@@ -124,12 +114,6 @@ describe("README API Endpoints Tests", () => {
         .get("/api/auth/users")
         .set("Authorization", `Bearer ${testToken}`);
 
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 403) {
-        console.log("Skipping users list test - endpoint not fully implemented");
-        return;
-      }
-
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
     });
@@ -139,12 +123,6 @@ describe("README API Endpoints Tests", () => {
       const response = await request
         .get(`/api/auth/users/${testUserId}`)
         .set("Authorization", `Bearer ${testToken}`);
-
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 403) {
-        console.log("Skipping get user test - endpoint not fully implemented");
-        return;
-      }
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("id");
@@ -161,27 +139,15 @@ describe("README API Endpoints Tests", () => {
         .set("Authorization", `Bearer ${testToken}`)
         .send(updateData);
 
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 403) {
-        console.log("Skipping update user test - endpoint not fully implemented");
-        return;
-      }
-
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("username");
     });
 
-    // Test user logout - this might just invalidate the token on the server side
+    // Test user logout
     test("POST /api/auth/logout - should log out user", async () => {
       const response = await request
         .post("/api/auth/logout")
         .set("Authorization", `Bearer ${testToken}`);
-
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 403) {
-        console.log("Skipping logout test - endpoint not fully implemented");
-        return;
-      }
 
       expect(response.status).toBe(200);
       // Might have a success message
@@ -239,10 +205,6 @@ describe("README API Endpoints Tests", () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      
-      // Mock assessment in our implementation always returns an empty array,
-      // so we'll skip this check for now
-      // expect(response.body.length).toBeGreaterThan(0);
     });
 
     // Test getting a specific assessment by ID
@@ -257,17 +219,11 @@ describe("README API Endpoints Tests", () => {
       expect(response.body).toHaveProperty("assessmentData");
     });
 
-    // Test deleting a user - with simpler expectations
+    // Test deleting a user
     test("DELETE /api/auth/users/:id - should delete user", async () => {
       const response = await request
         .delete(`/api/auth/users/${testUserId}`)
         .set("Authorization", `Bearer ${testToken}`);
-
-      // Skip the test if the endpoint isn't fully implemented yet
-      if (response.status === 404 || response.status === 403) {
-        console.log("Skipping delete user test - endpoint not fully implemented");
-        return;
-      }
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("message");
