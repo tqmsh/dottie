@@ -67,8 +67,8 @@ describe('DbAxiosReq (Real)', () => {
         expect(error.response).toBeDefined();
         expect(error.response.status).toBe(404);
         
-        // Log error for debugging
-        console.log('Non-existent endpoint error:', {
+        // Log error for debugging with reassuring emoji
+        console.log('✅ Expected 404 test worked correctly! Non-existent endpoint returns proper error:', {
           status: error.response.status,
           data: error.response.data
         });

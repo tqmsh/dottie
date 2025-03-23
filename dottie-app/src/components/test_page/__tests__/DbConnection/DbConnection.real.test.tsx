@@ -63,6 +63,7 @@ describe('DbConnection (Real API)', () => {
         // We expect this to fail with 404
         expect(error.response).toBeDefined();
         expect(error.response.status).toBe(404);
+        console.log('✅ Expected 404 test worked correctly! Error handling test passed successfully.');
       }
     })
   );
