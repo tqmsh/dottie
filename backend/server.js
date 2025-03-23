@@ -70,8 +70,8 @@ app.use("/api/users", userRoutes);
 
 // Add this for debugging - log all requests
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log("Body:", req.body);
+  console.log(`${req.method} ${req.path}`);
+  console.log(`Body: ${JSON.stringify(req.body)}`);
   next();
 });
 
