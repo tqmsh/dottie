@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import axios from 'axios';
-import { isApiRunning, conditionalApiTest } from './api-test-setup';
+import { isApiRunning, conditionalApiTest, apiClient } from './api-test-setup';
 
 describe('AxiosAfterReq (Real API)', () => {
   let apiAvailable = false;
@@ -22,7 +22,7 @@ describe('AxiosAfterReq (Real API)', () => {
   it('processes successful response data from real API correctly',
     conditionalApiTest('processes successful response data from real API correctly', async () => {
       // Make a real API call
-      const response = await axios.get('/api/hello');
+      const response = await apiClient.get('/api/hello');
       
       // Verify successful response
       expect(response.status).toBe(200);
@@ -37,7 +37,7 @@ describe('AxiosAfterReq (Real API)', () => {
   it('processes complex nested response from real API',
     conditionalApiTest('processes complex nested response from real API', async () => {
       // The SQL hello endpoint returns a more complex response
-      const response = await axios.get('/api/sql-hello');
+      const response = await apiClient.get('/api/sql-hello');
       
       // Verify response structure
       expect(response.status).toBe(200);
@@ -54,17 +54,13 @@ describe('AxiosAfterReq (Real API)', () => {
     conditionalApiTest('handles real API error responses correctly', async () => {
       try {
         // Make a call to a non-existent endpoint
-        await axios.get('/api/non-existent-endpoint');
-        
-        // Should not reach here if API returns proper error
+        await apiClient.get('/api/not-found');
+        // Should not reach here
         expect(true).toBe(false);
       } catch (error: any) {
-        // Verify error handling
+        // Verify error structure
         expect(error.response).toBeDefined();
         expect(error.response.status).toBe(404);
-        
-        // Log actual error for debugging
-        console.log('Expected 404 error status:', error.response.status);
       }
     })
   );
@@ -72,16 +68,14 @@ describe('AxiosAfterReq (Real API)', () => {
   it('receives and processes headers from real API',
     conditionalApiTest('receives and processes headers from real API', async () => {
       // Make a real API call
-      const response = await axios.get('/api/hello');
+      const response = await apiClient.get('/api/hello');
       
-      // Verify headers exist
+      // Verify headers
       expect(response.headers).toBeDefined();
-      
-      // Common headers we expect to see
       expect(response.headers['content-type']).toContain('application/json');
       
-      // Log actual headers for debugging
-      console.log('Response headers:', Object.keys(response.headers).join(', '));
+      // Log headers for debugging
+      console.log('API response headers:', response.headers);
     })
   );
 }); 
