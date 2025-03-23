@@ -1,9 +1,17 @@
 import axios from 'axios';
 
+// Configure axios for API tests
+const API_BASE_URL = 'http://localhost:5000';
+export const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 3000,
+});
+
 // Helper utility to check if the API server is running
 export const isApiRunning = async (): Promise<boolean> => {
   try {
-    await axios.get('/api/hello', { timeout: 1000 });
+    // Use the full URL with port 5000 where the backend API is running
+    await apiClient.get('/api/hello', { timeout: 1000 });
     return true;
   } catch (error) {
     return false;
