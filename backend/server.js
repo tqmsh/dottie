@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 
 // Add this after your routes setup
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path} - not found`);
+  console.log(`${req.method} ${req.path} - 🔍 route not registered`);
   res.status(404).json({ error: "Not found" });
 });
 

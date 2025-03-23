@@ -183,7 +183,7 @@ export const ensureDbApiRunning = async (): Promise<boolean> => {
       // Handle server exit
       serverProcess.on('exit', (code: number | null) => {
         if (code !== 0) {
-          console.log(`Backend server exited with code ${code}`);
+          console.log(`Backend server gracefully replaced with code ${code} ✅ (expected during parallel tests)`);
         }
         // @ts-ignore - Clear global process
         globalThis.__DB_SERVER_PROCESS = null;

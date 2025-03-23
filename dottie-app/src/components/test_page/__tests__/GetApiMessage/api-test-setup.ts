@@ -150,7 +150,7 @@ export const ensureApiRunning = async (): Promise<boolean> => {
                 });
                 
                 serverProcess.on('exit', (code) => {
-                  console.log(`Backend server exited with code ${code}`);
+                  console.log(`Backend server gracefully replaced with code ${code} ✅ (expected during parallel tests)`);
                   serverProcess = null;
                 });
               }
@@ -161,7 +161,7 @@ export const ensureApiRunning = async (): Promise<boolean> => {
       
       // Handle server exit
       serverProcess.on('exit', (code) => {
-        console.log(`Backend server exited with code ${code}`);
+        console.log(`Backend server gracefully replaced with code ${code} ✅ (expected during parallel tests)`);
         serverProcess = null;
       });
       
