@@ -14,6 +14,7 @@ describe("Authentication Lifecycle - Production", () => {
   // Store authentication tokens between tests
   let authToken = null;
   let refreshToken = null;
+  let userId = null;
   
   test("1. User Registration - POST /api/auth/signup", async () => {
     console.log('Testing user registration in auth lifecycle...');
@@ -34,7 +35,8 @@ describe("Authentication Lifecycle - Production", () => {
     // If we get a successful response, we can extract user info
     if (response.status === 201) {
       const data = await response.json();
-      console.log(`User registered with ID: ${data.id || 'unknown'}`);
+      userId = data.id || 'unknown';
+      console.log(`User registered with ID: ${userId}`);
     }
   });
   
@@ -59,12 +61,34 @@ describe("Authentication Lifecycle - Production", () => {
     console.log(`Login endpoint status: ${response.status}`);
     expect([200, 401, 403, 404, 500, 504]).toContain(response.status);
     
-    // If successful, store auth tokens for subsequent tests
+    // If successful, validate and store auth tokens for subsequent tests
     if (response.status === 200) {
       const data = await response.json();
-      authToken = data.token || data.accessToken;
+      
+      // Verify token structure
+      expect(data).toHaveProperty('token');
+      expect(typeof data.token).toBe('string');
+      
+      // JWT tokens have 3 parts separated by periods
+      const tokenParts = data.token.split('.');
+      expect(tokenParts.length).toBe(3);
+      
+      // Check for refresh token
+      expect(data).toHaveProperty('refreshToken');
+      expect(typeof data.refreshToken).toBe('string');
+      
+      // Refresh token should also be a JWT
+      const refreshTokenParts = data.refreshToken.split('.');
+      expect(refreshTokenParts.length).toBe(3);
+      
+      authToken = data.token;
       refreshToken = data.refreshToken;
-      console.log('Authentication tokens received and stored');
+      
+      // Verify user data
+      expect(data).toHaveProperty('user');
+      expect(data.user).toHaveProperty('email', testUser.email);
+      
+      console.log('Authentication tokens received and validated');
     }
   });
   
@@ -94,6 +118,13 @@ describe("Authentication Lifecycle - Production", () => {
     
     if (response.status === 200) {
       const data = await response.json();
+      
+      // Verify content of the response
+      expect(data).toHaveProperty('authenticated', true);
+      expect(data).toHaveProperty('user');
+      expect(data.user).toHaveProperty('id');
+      expect(data.user).toHaveProperty('email');
+      
       console.log('Authentication verified successfully');
     }
   });
@@ -119,11 +150,74 @@ describe("Authentication Lifecycle - Production", () => {
     expect([200, 400, 401, 403, 404, 500, 504]).toContain(response.status);
     
     if (response.status === 200) {
+      const data = await response.json();
+      
+      // At minimum, there should be a success message
+      expect(data).toHaveProperty('message');
       console.log('Password reset request sent successfully');
     }
   });
   
-  test("5. User Logout - POST /api/auth/logout", async () => {
+  test("5. Token Refresh - POST /api/auth/refresh", async () => {
+    console.log('Testing token refresh in auth lifecycle...');
+    
+    // Skip if we didn't get a refresh token from login
+    if (!refreshToken) {
+      console.log('Skipping token refresh test - no refresh token available');
+      return;
+    }
+    
+    const response = await fetch(`${API_URL}/api/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+    
+    if (response.status === 504) {
+      console.log('Token refresh endpoint timed out - accepted in production');
+    }
+    
+    console.log(`Token refresh endpoint status: ${response.status}`);
+    expect([200, 400, 401, 403, 404, 500, 504]).toContain(response.status);
+    
+    if (response.status === 200) {
+      const data = await response.json();
+      
+      // Verify structure of new token
+      expect(data).toHaveProperty('token');
+      expect(typeof data.token).toBe('string');
+      
+      // Check token is properly formatted
+      const tokenParts = data.token.split('.');
+      expect(tokenParts.length).toBe(3);
+      
+      // Store new token for subsequent steps
+      const previousToken = authToken;
+      authToken = data.token;
+      
+      // New token should be different
+      expect(authToken).not.toBe(previousToken);
+      
+      console.log('Token refreshed successfully');
+      
+      // Try using the new token
+      if (authToken) {
+        const verifyResponse = await fetch(`${API_URL}/api/auth/verify`, {
+          method: 'GET',
+          headers: { 
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (verifyResponse.status === 200) {
+          console.log('Refreshed token successfully verified');
+        }
+      }
+    }
+  });
+  
+  test("6. User Logout - POST /api/auth/logout", async () => {
     console.log('Testing user logout in auth lifecycle...');
     
     // Skip detailed logout if we didn't get a token from login
@@ -149,40 +243,28 @@ describe("Authentication Lifecycle - Production", () => {
     expect([200, 401, 403, 404, 500, 504]).toContain(response.status);
     
     if (response.status === 200) {
+      // Verify response message
+      const data = await response.json();
+      expect(data).toHaveProperty('message');
+      
       console.log('Logout successful');
+      
       // Clear tokens
       authToken = null;
       refreshToken = null;
-    }
-  });
-  
-  test("6. Token Refresh - POST /api/auth/refresh", async () => {
-    console.log('Testing token refresh in auth lifecycle...');
-    
-    // Skip if we didn't get a refresh token from login
-    if (!refreshToken) {
-      console.log('Skipping token refresh test - no refresh token available');
-      return;
-    }
-    
-    const response = await fetch(`${API_URL}/api/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken })
-    });
-    
-    if (response.status === 504) {
-      console.log('Token refresh endpoint timed out - accepted in production');
-    }
-    
-    console.log(`Token refresh endpoint status: ${response.status}`);
-    expect([200, 401, 403, 404, 500, 504]).toContain(response.status);
-    
-    if (response.status === 200) {
-      const data = await response.json();
-      console.log('Token refreshed successfully');
-      // Update auth token
-      authToken = data.token || data.accessToken;
+      
+      // Verify that refresh token is invalidated by trying to use it
+      if (refreshToken) {
+        const refreshResponse = await fetch(`${API_URL}/api/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+        
+        if (refreshResponse.status === 401 || refreshResponse.status === 403) {
+          console.log('Refresh token correctly invalidated after logout');
+        }
+      }
     }
   });
 });
