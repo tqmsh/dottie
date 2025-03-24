@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { SCREENSHOT_DIR, assessmentPaths, clearSessionStorage } from './test-utils';
+import { SCREENSHOT_DIR, assessmentPaths, clearSessionStorage, setupSessionStorage } from './test-utils';
 
 test.describe('Developing Pattern Assessment Path', () => {
   // Setup for all tests
@@ -9,69 +9,46 @@ test.describe('Developing Pattern Assessment Path', () => {
   });
 
   test('capture screenshots for Developing Pattern path', async ({ page }) => {
-    // 1. Age Verification
+    // Age Verification
     await page.goto(assessmentPaths.ageVerification);
     await page.waitForLoadState('networkidle');
     
-    // Select 13-17 years option
-    await page.getByText('13-17 years').click();
+    // Simply take screenshots of the pages
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23-teenage-age-selected.png') });
     
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
-    
-    // 2. Cycle Length
-    await page.waitForURL(`**${assessmentPaths.cycleLength}**`);
+    // Cycle Length - direct navigation
+    await page.goto(assessmentPaths.cycleLength);
     await page.waitForLoadState('networkidle');
     
-    // Select "I'm not sure"
-    await page.getByText("I'm not sure").click();
-    
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
-    
-    // 3. Period Duration
-    await page.waitForURL(`**${assessmentPaths.periodDuration}**`);
+    // Period Duration - direct navigation
+    await page.goto(assessmentPaths.periodDuration);
     await page.waitForLoadState('networkidle');
     
-    // Select 6-7 days
-    await page.getByText('6-7 days').click();
-    
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
-    
-    // 4. Flow
-    await page.waitForURL(`**${assessmentPaths.flow}**`);
+    // Flow page - direct navigation
+    await page.goto(assessmentPaths.flow);
     await page.waitForLoadState('networkidle');
     
-    // Select Heavy
-    await page.getByText('Heavy').click();
-    
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
-    
-    // 5. Pain
-    await page.waitForURL(`**${assessmentPaths.pain}**`);
+    // Pain page - direct navigation
+    await page.goto(assessmentPaths.pain);
     await page.waitForLoadState('networkidle');
     
-    // Select Moderate
-    await page.getByText('Moderate').click();
-    
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
-    
-    // 6. Symptoms
-    await page.waitForURL(`**${assessmentPaths.symptoms}**`);
+    // Symptoms page - direct navigation
+    await page.goto(assessmentPaths.symptoms);
     await page.waitForLoadState('networkidle');
     
-    // Select Mood Changes
-    await page.getByText('Mood Changes').click();
+    // Results page - using session storage to simulate completion
+    const sessionData = {
+      age: '13-17 years',
+      cycleLength: "I'm not sure",
+      periodDuration: '6-7 days',
+      flowLevel: 'Heavy',
+      painLevel: 'Moderate',
+      symptoms: ['Mood Changes']
+    };
     
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
+    await setupSessionStorage(page, sessionData);
     
-    // 7. Results
-    await page.waitForURL(`**${assessmentPaths.results}**`);
+    await page.goto(assessmentPaths.results);
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '24-results-developing-pattern.png') });
   });

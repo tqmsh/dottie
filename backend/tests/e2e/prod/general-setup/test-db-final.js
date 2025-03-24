@@ -15,7 +15,7 @@ dotenv.config({ path: envPath });
 process.env.NODE_ENV = 'production';
 
 // Now import the database module
-import('../../../db/index.js').then(async ({ default: db }) => {
+import('../../../../db/index.js').then(async ({ default: db }) => {
   const output = [];
   const logOutput = (msg) => {
     console.log(msg);

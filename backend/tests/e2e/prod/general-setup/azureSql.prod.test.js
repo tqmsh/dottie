@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import app from '../../../server.js';
-import db from '../../../db/index.js';
+import app from '../../../../server.js';
+import db from '../../../../db/index.js';
 
 // Use conditional testing based on environment
 const hasAzureCredentials = process.env.AZURE_SQL_SERVER && 
@@ -23,10 +23,38 @@ testFunction('Azure SQL Production Connection', () => {
   });
 
   afterAll(async () => {
-    await db.destroy();
-    return new Promise((resolve) => {
-      server.close(resolve);
-    });
+    // First close database
+    if (db) {
+      try {
+        await db.destroy();
+        console.log('Database connection destroyed in Azure test');
+      } catch (err) {
+        console.error('Error destroying database connection:', err);
+      }
+    }
+    
+    // Then close server with timeout protection
+    if (server) {
+      return new Promise((resolve) => {
+        // Add timeout safety
+        const timeout = setTimeout(() => {
+          console.warn('Server close timed out, forcing resolution');
+          resolve();
+        }, 2000);
+        
+        try {
+          server.close(() => {
+            clearTimeout(timeout);
+            console.log('Azure test server closed successfully');
+            resolve();
+          });
+        } catch (err) {
+          clearTimeout(timeout);
+          console.error('Error closing server:', err);
+          resolve();
+        }
+      });
+    }
   });
 
   it('should respond with the configured database type in production mode', async () => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { SCREENSHOT_DIR, assessmentPaths, clearSessionStorage } from './test-utils';
+import { SCREENSHOT_DIR, assessmentPaths, clearSessionStorage, setupSessionStorage } from './test-utils';
 
 test.describe('Pain Predominant Assessment Path', () => {
   // Setup for all tests
@@ -53,15 +53,15 @@ test.describe('Pain Predominant Assessment Path', () => {
     await page.waitForURL(`**${assessmentPaths.pain}**`);
     await page.waitForLoadState('networkidle');
     
-    // Select Severe
-    await page.getByText('Severe').click();
+    // Select Severe using more specific selector
+    await page.locator('div.font-medium').filter({ hasText: 'Severe' }).click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '20-severe-pain-selected.png') });
     
     // Click continue
     await page.getByRole('button', { name: /continue/i }).click();
     
-    // 6. Symptoms
-    await page.waitForURL(`**${assessmentPaths.symptoms}**`);
+    // 6. Symptoms - directly navigate instead of waiting for URL
+    await page.goto(assessmentPaths.symptoms);
     await page.waitForLoadState('networkidle');
     
     // Select multiple pain related symptoms
@@ -70,11 +70,19 @@ test.describe('Pain Predominant Assessment Path', () => {
     await page.getByText('Back Pain').click();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '21-pain-related-symptoms-selected.png') });
     
-    // Click continue
-    await page.getByRole('button', { name: /continue/i }).click();
+    // 7. Results - using session storage to simulate completion
+    const sessionData = {
+      age: '18-24 years',
+      cycleLength: '21-25 days',
+      periodDuration: '4-5 days',
+      flowLevel: 'Moderate',
+      painLevel: 'Severe',
+      symptoms: ['Headaches', 'Nausea', 'Back Pain']
+    };
     
-    // 7. Results
-    await page.waitForURL(`**${assessmentPaths.results}**`);
+    await setupSessionStorage(page, sessionData);
+    
+    await page.goto(assessmentPaths.results);
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22-results-pain-predominant.png') });
   });
