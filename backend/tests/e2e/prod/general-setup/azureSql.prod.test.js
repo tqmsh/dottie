@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import app from '../../../server.js';
-import db from '../../../db/index.js';
+import app from '../../../../server.js';
+import db from '../../../../db/index.js';
 
 // Use conditional testing based on environment
 const hasAzureCredentials = process.env.AZURE_SQL_SERVER && 
