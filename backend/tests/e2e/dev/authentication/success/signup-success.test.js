@@ -3,6 +3,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
 import app from '../../../../../server.js';
 import { createServer } from 'http';
+import { initTestDatabase } from '../../../../setup.js';
 
 // Create a supertest instance
 const request = supertest(app);
@@ -15,6 +16,13 @@ const TEST_PORT = 5010;
 
 // Start server before all tests
 beforeAll(async () => {
+  // Initialize test database first
+  console.log('Initializing database for signup tests...');
+  const success = await initTestDatabase();
+  if (!success) {
+    throw new Error('Failed to initialize test database!');
+  }
+  
   server = createServer(app);
   await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
     server.listen(TEST_PORT, () => {
