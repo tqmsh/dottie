@@ -12,11 +12,11 @@ import authRoutes from "./routes/auth/index.js";
 import serverlessTestRoutes from "./routes/serverlessTestRoutes.js";
 
 // Import refactored endpoints
-import helloEndpoint from "./setup/hello.js";
-import serverlessTestEndpoint from "./setup/serverlessTest.js";
-import sqlHelloEndpoint from "./setup/database/sqlHello.js";
-import dbStatusEndpoint from "./setup/database/dbStatus.js";
-import errorHandlers from "./setup/errorHandlers.js";
+import helloEndpoint from "./routes/setup/hello.js";
+import serverlessTestEndpoint from "./routes/setup/serverlessTest.js";
+import sqlHelloEndpoint from "./routes/setup/database/sqlHello.js";
+import dbStatusEndpoint from "./routes/setup/database/dbStatus.js";
+import errorHandlers from "./routes/setup/errorHandlers.js";
 
 // Load environment variables
 dotenv.config();
