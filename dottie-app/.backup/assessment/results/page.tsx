@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DotIcon, MessageCircle, Heart, ChevronRight } from "lucide-react"
@@ -8,7 +9,7 @@ export default function ResultsPage() {
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+          <Image src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link href="/" className="text-gray-500">
