@@ -1,20 +1,18 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { X, Send } from "lucide-react"
+import { DotIcon, X, Send } from "lucide-react"
 
-type Message = {
+interface Message {
   id: string
   content: string
   sender: "user" | "ai"
   timestamp: Date
 }
 
-type ChatModalProps = {
+interface ChatModalProps {
   isOpen: boolean
   onClose: () => void
   userData?: {
@@ -82,7 +80,7 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
     }, 1000)
   }
 
-  const generateAIResponse = (userInput: string, userData?: any): string => {
+  const generateAIResponse = (userInput: string, userData?: ChatModalProps["userData"]): string => {
     const userInputLower = userInput.toLowerCase()
 
     // Check for cycle length related questions
@@ -133,6 +131,7 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
       <Card className="w-full max-w-md h-[80vh] flex flex-col bg-white rounded-xl overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
+            <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
             <span className="font-semibold text-pink-500">Ask Dottie</span>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">

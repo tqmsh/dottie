@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { DotIcon, MessageCircle, Heart, ChevronRight } from "lucide-react"
 import { useEffect, useState } from "react"
+import { ChatModal } from "@/components/chat-modal"
+
 
 // Define the types of menstrual patterns as per LogicTree.md
 type MenstrualPattern = 
@@ -156,6 +158,9 @@ const patternData: Record<MenstrualPattern, PatternInfo> = {
 }
 
 export default function ResultsPage() {
+
+  const [isChatOpen, setIsChatOpen] = useState(false)
+
   const [pattern, setPattern] = useState<MenstrualPattern>("developing")
   const [age, setAge] = useState<string>("14 years (Early to Late Adolescence)")
   const [cycleLength, setCycleLength] = useState<string>("21-32 days")
@@ -243,8 +248,8 @@ export default function ResultsPage() {
               </p>
             </div>
 
-            <div className="flex gap-3 mb-4">
-              <Button className="flex-1 bg-pink-500 hover:bg-pink-600">
+              <div className="flex gap-3 mb-4">
+              <Button className="flex-1 bg-pink-500 hover:bg-pink-600" onClick={() => setIsChatOpen(true)}>
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Ask Dottie
               </Button>
@@ -357,6 +362,14 @@ export default function ResultsPage() {
           </Button>
         </Link>
       </main>
+      <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} userData={{
+        age,
+        cycleLength,
+        periodDuration,
+        flowHeaviness: flowLevel,
+        painLevel,
+        symptoms
+      }} />
     </div>
   )
 }
