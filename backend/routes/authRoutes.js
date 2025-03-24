@@ -23,6 +23,9 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// In-memory refresh token store (would use database/Redis in production)
+const refreshTokens = new Set();
+
 // Register a new user
 router.post('/signup', async (req, res) => {
   try {
@@ -75,8 +78,19 @@ router.post('/login', async (req, res) => {
         { expiresIn: '24h' }
       );
       
+      // Generate refresh token
+      const refreshToken = jwt.sign(
+        { id: testUserId, email },
+        process.env.REFRESH_SECRET || 'your-refresh-secret-key',
+        { expiresIn: '7d' }
+      );
+      
+      // Store refresh token
+      refreshTokens.add(refreshToken);
+      
       return res.json({ 
         token, 
+        refreshToken,
         user: { 
           id: testUserId, 
           email, 
@@ -104,20 +118,81 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' }
     );
     
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.REFRESH_SECRET || 'your-refresh-secret-key',
+      { expiresIn: '7d' }
+    );
+    
+    // Store refresh token
+    refreshTokens.add(refreshToken);
+    
     // Remove password hash before sending response
     const { password_hash: _, ...userWithoutPassword } = user;
     
-    res.json({ token, user: userWithoutPassword });
+    res.json({ token, refreshToken, user: userWithoutPassword });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Failed to authenticate' });
   }
 });
 
+// Verify authentication status
+router.get('/verify', authenticateToken, (req, res) => {
+  res.status(200).json({ 
+    authenticated: true,
+    user: { 
+      id: req.user.id, 
+      email: req.user.email 
+    } 
+  });
+});
+
+// Refresh token endpoint
+router.post('/refresh', async (req, res) => {
+  const { refreshToken } = req.body;
+  
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Refresh token is required' });
+  }
+  
+  // Check if refresh token exists in our store
+  if (!refreshTokens.has(refreshToken)) {
+    return res.status(403).json({ error: 'Invalid refresh token' });
+  }
+  
+  jwt.verify(refreshToken, process.env.REFRESH_SECRET || 'your-refresh-secret-key', (err, user) => {
+    if (err) {
+      // Remove invalid token
+      refreshTokens.delete(refreshToken);
+      return res.status(403).json({ error: 'Invalid refresh token' });
+    }
+    
+    // Generate new access token with a unique jti (JWT ID) to ensure it's different
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        email: user.email,
+        jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}` // Add unique JWT ID
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+    
+    res.json({ token });
+  });
+});
+
 // User logout
 router.post('/logout', authenticateToken, (req, res) => {
-  // In a real implementation, you might want to invalidate the token
-  // by adding it to a blacklist or using Redis to track invalidated tokens
+  const { refreshToken } = req.body;
+  
+  if (refreshToken) {
+    // Remove refresh token from store
+    refreshTokens.delete(refreshToken);
+  }
+  
   res.json({ message: 'Logged out successfully' });
 });
 
