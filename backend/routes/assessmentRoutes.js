@@ -1,21 +1,14 @@
 import express from "express";
-import {
-  startAssessment,
-  submitAnswer,
-  getResults,
-} from "../controllers/assessmentController.js";
+import assessmentRoutes from "./assessment/index.js";
 
 const router = express.Router();
 
-// Add logging middleware
-router.use((req, res, next) => {
-  console.log(`Assessment route: ${req.method} ${req.path}`);
-  next();
-});
+// Remove logging middleware
+// router.use((req, res, next) => {
+//   console.log(`Assessment route: ${req.method} ${req.path}`);
+//   next();
+// });
 
-// Routes for assessment
-router.post("/start", startAssessment);
-router.post("/answer", submitAnswer);
-router.get("/results/:assessmentId", getResults);
+router.use(assessmentRoutes);
 
 export default router;
