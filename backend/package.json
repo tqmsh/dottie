@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -16,7 +16,8 @@
     "test:coverage": "vitest run --coverage",
     "db:init": "node scripts/initDb.js",
     "db:azure:create": "node scripts/createAzureDb.js",
-    "db:azure:init": "cross-env NODE_ENV=production node scripts/initDb.js"
+    "db:azure:init": "cross-env NODE_ENV=production node scripts/initDb.js",
+    "vercel-build": "node vercel-build.js"
   },
   "keywords": [],
   "author": "",
@@ -38,7 +39,7 @@
     "@playwright/test": "^1.51.0",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.9",
-    "supertest": "^7.0.0",
+    "supertest": "^7.1.0",
     "vitest": "^3.0.8"
   }
 }

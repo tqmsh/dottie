@@ -1,0 +1,98 @@
+# Dottie API Endpoints
+
+## Testing Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/hello` | GET | Test endpoint to verify API is working |
+| `/api/db-status` | GET | Check database connection status |
+
+## Authentication Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/signup` | POST | Register a new user account |
+| `/api/auth/login` | POST | Authenticate user and get access token |
+| `/api/auth/logout` | POST | Logout user and invalidate token |
+| `/api/auth/users` | GET | Get list of all users |
+| `/api/auth/users/:id` | GET | Get user by ID |
+| `/api/auth/users/:id` | PUT | Update a user |
+| `/api/auth/users/:id` | DELETE | Delete a user |
+
+## Assessment Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/assessment/start` | POST | Start a new assessment |
+| `/api/assessment/answer` | POST | Submit an answer to the assessment |
+| `/api/assessment/results/:assessmentId` | GET | Get assessment results by ID |
+| `/api/assessment/send` | POST | Send assessment results from frontend context |
+| `/api/assessment/list` | GET | Get list of all assessments for current user |
+| `/api/assessment/:id` | GET | Get detailed view of a specific assessment |
+
+## Request Examples
+
+### Authentication
+
+```javascript
+// Signup
+fetch("/api/auth/signup", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    username: "user123",
+    email: "user@example.com",
+    password: "securePassword123"
+  })
+});
+
+// Login
+fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email: "user@example.com",
+    password: "securePassword123"
+  })
+});
+```
+
+### Assessment
+
+```javascript
+// Send assessment
+fetch("/api/assessment/send", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer your-access-token"
+  },
+  body: JSON.stringify({
+    assessmentData: {
+      age: "18_24",
+      cycleLength: "26_30",
+      periodDuration: "4_5",
+      flowHeaviness: "moderate",
+      painLevel: "moderate",
+      symptoms: {
+        physical: ["Bloating", "Headaches"],
+        emotional: ["Mood swings", "Irritability"]
+      }
+    }
+  })
+});
+
+// Get assessment list
+fetch("/api/assessment/list", {
+  headers: {
+    "Authorization": "Bearer your-access-token"
+  }
+});
+
+// Get specific assessment
+fetch("/api/assessment/assessment-123", {
+  headers: {
+    "Authorization": "Bearer your-access-token"
+  }
+});
+``` 

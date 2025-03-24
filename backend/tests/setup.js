@@ -3,7 +3,7 @@
 process.env.TEST_MODE = 'true';
 
 import db from '../db/index.js';
-import { createTables } from '../db/migrations/initialSchema.js';
+import { createTables, dropTables } from '../db/migrations/initialSchema.js';
 
 /**
  * Initialize the test database
@@ -12,7 +12,39 @@ import { createTables } from '../db/migrations/initialSchema.js';
 export async function initTestDatabase() {
   try {
     console.log('Setting up test database...');
-    await createTables(db);
+    
+    // First ensure we have a clean start for test database
+    // Check if tables exist and recreate them if needed
+    const hasUsersTable = await db.schema.hasTable('users');
+    
+    if (!hasUsersTable) {
+      console.log('Users table not found, creating all tables...');
+      await createTables(db);
+    } else {
+      console.log('Tables already exist, continuing...');
+    }
+    
+    // Verify tables were created successfully
+    const tablesExist = await Promise.all([
+      db.schema.hasTable('users'),
+      db.schema.hasTable('period_logs'),
+      db.schema.hasTable('symptoms'),
+      db.schema.hasTable('assessments')
+    ]);
+    
+    if (!tablesExist.every(exists => exists)) {
+      console.error('Failed to create all required tables!');
+      // Force recreation of all tables
+      await dropTables(db);
+      await createTables(db);
+      
+      // Check again
+      const tablesCreated = await db.schema.hasTable('users');
+      if (!tablesCreated) {
+        throw new Error('Failed to create database tables after retry!');
+      }
+    }
+    
     console.log('Test database setup complete');
     return true;
   } catch (error) {
@@ -26,12 +58,12 @@ export async function initTestDatabase() {
  */
 export async function clearDatabase() {
   try {
-    console.log('Clearing test database...');
+    // console.log('Clearing test database...');
     await db('assessments').delete();
     await db('symptoms').delete();
     await db('period_logs').delete();
     await db('users').delete();
-    console.log('Test database cleared');
+    // console.log('Test database cleared');
     return true;
   } catch (error) {
     console.error('Error clearing test database:', error);
