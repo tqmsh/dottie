@@ -1,14 +1,15 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { DotIcon, ChevronRight } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 
 export default function WelcomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+          <Image src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link href="#" className="text-gray-500">
@@ -17,7 +18,7 @@ export default function WelcomePage() {
       </header>
 
       <main className="flex-1 flex flex-col items-center p-6 max-w-md mx-auto w-full">
-        <DotIcon className="h-16 w-16 text-pink-500 fill-pink-500 mb-6" />
+        <Image src="/chatb.png" alt="Dottie Logo" width={50} height={50} />
 
         <h1 className="text-2xl font-bold text-center mb-2">Welcome to Dottie</h1>
         <p className="text-center text-gray-600 mb-8">Your AI-powered menstrual health companion</p>
