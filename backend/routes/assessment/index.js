@@ -1,23 +1,34 @@
 import express from "express";
-import startRoutes from "./start.js";
-import answerRoutes from "./answer.js";
-import resultsRoutes from "./results.js";
-import sendRoutes from "./send.js";
-import listRoutes from "./list.js";
-import getByIdRoutes from "./getById.js";
-import updateRoutes from "./update.js";
-import deleteRoutes from "./delete.js";
+import { verifyToken } from '../auth/middleware.js';
+import { 
+  startAssessment, 
+  submitAnswer, 
+  getResults 
+} from '../../controllers/assessmentController.js';
+
+// Import individual route files
+import sendRouter from './send.js';
+import listRouter from './list.js';
+import getByIdRouter from './getById.js';
+import updateRouter from './update.js';
+import deleteRouter from './delete.js';
 
 const router = express.Router();
 
-// Mount all assessment-related routes
-router.use(startRoutes);
-router.use(answerRoutes);
-router.use(resultsRoutes);
-router.use(sendRoutes);
-router.use(listRoutes);
-router.use(getByIdRoutes);
-router.use(updateRoutes);
-router.use(deleteRoutes);
+// Start a new assessment
+router.post('/start', verifyToken, startAssessment);
+
+// Submit an answer for the current question
+router.post('/submit', verifyToken, submitAnswer);
+
+// Get assessment results
+router.get('/results/:assessmentId', verifyToken, getResults);
+
+// Mount individual route handlers
+router.use(sendRouter);
+router.use(listRouter);
+router.use(getByIdRouter);
+router.use(updateRouter);
+router.use(deleteRouter);
 
 export default router; 

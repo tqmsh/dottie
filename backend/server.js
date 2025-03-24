@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import db from "./db/index.js";
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 // Import route modules
 import assessmentRoutes from "./routes/assessmentRoutes.js";
@@ -25,8 +27,27 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://dottie-app.com' 
+    : ['http://localhost:3000', 'http://localhost:5173'],
+  credentials: true
+}));
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+// Request logging in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });
+});
 
 // Mount refactored endpoint routers
 app.use(helloEndpoint);

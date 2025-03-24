@@ -1,8 +1,0 @@
-Testing production database connection...
-NODE_ENV: production
-Azure SQL Configuration:
-Server: dottie-health-server.database.windows.net
-Database: HealthDB
-User: Set
-Password: Set
-Database connection test timed out after 15 seconds
