@@ -18,6 +18,8 @@ describe("Basic Endpoints - Production", () => {
     console.log('Testing database status endpoint - this may time out...');
     const response = await fetch(`${API_URL}/api/db-status`);
     
+
+    
     // In production, this endpoint may require auth
     if (response.status === 200) {
       const data = await response.json();
@@ -25,13 +27,16 @@ describe("Basic Endpoints - Production", () => {
       console.log(`Database status: ${data.status}`);
     } else if (response.status === 401) {
       console.log('Database status endpoint requires authentication');
-    } else if (response.status === 504) {
-      console.log('Database status endpoint timed out - accepted in production');
     } else {
       console.log(`Unexpected status from database endpoint: ${response.status}`);
     }
     
-    // Now accept 504 timeout as valid response in production
-    expect([200, 401, 504]).toContain(response.status);
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 401]).toContain(response.status);
+
+        // Check for timeout and skip the test if it occurs
+    if (response.status === 504) {
+      throw new Error("Database status endpoint timed out - failing test");
+    }
   });
 }); 
