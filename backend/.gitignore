@@ -18,3 +18,9 @@ yarn-error.log*
 
 test-results/
 playwright-report/
+
+# azure sql json
+.azure_sql_json
+
+.venv/
+.vercel
