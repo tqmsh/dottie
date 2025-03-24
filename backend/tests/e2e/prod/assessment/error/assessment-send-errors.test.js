@@ -31,10 +31,8 @@ describe("Assessment Send Endpoint (Errors) - Production", () => {
     
     console.log(`Assessment submission with invalid token status: ${response.status}`);
     
-    // Should reject invalid token or accept it
-    // Note: In production, this is returning 201 which suggests the endpoint
-    // might not be properly validating tokens
-    expect([201, 401, 403]).toContain(response.status);
+    // Should reject invalid token with 401 Unauthorized
+    expect(response.status).toBe(401);
   });
   
   test("POST /api/assessment/send - should validate input data", async () => {
@@ -57,9 +55,7 @@ describe("Assessment Send Endpoint (Errors) - Production", () => {
     
     console.log(`Assessment submission with invalid data status: ${response.status}`);
     
-    // Should validate data or return auth error
-    // Note: In production, this is returning 201 which suggests the endpoint
-    // might not be properly validating input data
-    expect([201, 400, 401, 403]).toContain(response.status);
+    // Should validate data and return 400 Bad Request
+    expect(response.status).toBe(400);
   });
 }); 

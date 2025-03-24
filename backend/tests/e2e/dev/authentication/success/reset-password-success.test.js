@@ -75,9 +75,6 @@ describe("Password Reset - Success Scenarios", () => {
     // 2. Generate a reset token
     // 3. Submit the reset token with a new password
     
-    // However, since reset tokens come via email and we can't test that directly,
-    // this test may need to be mocked or skipped depending on implementation
-    
     // Creating a user
     const testUser = {
       username: `resetcomplete_${Date.now()}`,
@@ -92,14 +89,8 @@ describe("Password Reset - Success Scenarios", () => {
     
     const userId = createResponse.body.id;
     
-    // This part depends on implementation:
-    // In a real test, you might:
-    // 1. Mock the email service
-    // 2. Extract the reset token from the mock
-    // 3. Submit it here
-    
-    // For now, we'll just make a direct API call that may or may not exist
-    // This test might fail depending on implementation
+    // Here we're assuming reset-password endpoint works (tested separately)
+    // This is testing the reset-password-complete endpoint specifically
     
     const mockToken = "mock-reset-token"; // This would come from email
     const newPassword = "NewPassword123!";
@@ -110,33 +101,24 @@ describe("Password Reset - Success Scenarios", () => {
       password: newPassword
     };
     
-    try {
-      const response = await request
-        .post("/api/auth/reset-password-complete")
-        .send(resetCompleteData);
-      
-      if (response.status === 200) {
-        expect(response.body).toHaveProperty("message");
-        
-        // Try logging in with the new password
-        const loginData = {
-          email: testUser.email,
-          password: newPassword
-        };
-        
-        const loginResponse = await request
-          .post("/api/auth/login")
-          .send(loginData);
-        
-        expect(loginResponse.status).toBe(200);
-        expect(loginResponse.body).toHaveProperty("token");
-      } else {
-        console.log("Reset password complete endpoint not implemented or returned non-200");
-        // Skip test or handle non-implemented case
-      }
-    } catch (error) {
-      console.log("Reset password complete endpoint may not exist");
-      // Skip test or handle non-implemented case
-    }
+    const response = await request
+      .post("/api/auth/reset-password-complete")
+      .send(resetCompleteData);
+    
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    
+    // Try logging in with the new password
+    const loginData = {
+      email: testUser.email,
+      password: newPassword
+    };
+    
+    const loginResponse = await request
+      .post("/api/auth/login")
+      .send(loginData);
+    
+    expect(loginResponse.status).toBe(200);
+    expect(loginResponse.body).toHaveProperty("token");
   });
 }); 

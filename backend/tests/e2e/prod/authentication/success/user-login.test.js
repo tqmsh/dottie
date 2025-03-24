@@ -17,7 +17,7 @@ describe("User Login - Success Cases (Production)", () => {
       registrationSucceeded = true;
       console.log(`User registered with ID: ${result.body.id}`);
     } else if (result.status === 504) {
-      console.log('Signup endpoint timed out - continuing with login test');
+      throw new Error("Signup endpoint timed out - failing login setup test");
     } else {
       console.log(`Registration returned status: ${result.status} - continuing with login test`);
     }
@@ -29,8 +29,13 @@ describe("User Login - Success Cases (Production)", () => {
     // Attempt login
     const result = await loginTestUser(testUser.email, testUser.password);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.login).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Login endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 400, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Login endpoint status: ${result.status}`);
     
     // If login successful, verify token structure
@@ -55,8 +60,6 @@ describe("User Login - Success Cases (Production)", () => {
       expect(result.body.user).toHaveProperty('email', testUser.email);
       
       console.log('Authentication tokens received and validated');
-    } else if (result.status === 504) {
-      console.log('Login endpoint timed out - accepted in production');
     }
   });
 }); 
