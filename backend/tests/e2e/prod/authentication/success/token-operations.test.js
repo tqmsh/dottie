@@ -26,7 +26,7 @@ describe("Token Operations - Success Cases (Production)", () => {
     if (registerResult.status === 201) {
       console.log(`User registered with ID: ${registerResult.body.id}`);
     } else if (registerResult.status === 504) {
-      console.log('Signup endpoint timed out - continuing with login');
+      throw new Error("Signup endpoint timed out during user registration - failing test");
     } else {
       console.log(`Registration returned status: ${registerResult.status} - continuing with login`);
     }
@@ -39,7 +39,7 @@ describe("Token Operations - Success Cases (Production)", () => {
       refreshTokenStr = loginResult.body.refreshToken;
       console.log('Login successful, tokens received');
     } else if (loginResult.status === 504) {
-      console.log('Login endpoint timed out - continuing with token tests');
+      throw new Error("Login endpoint timed out during login - failing test");
     } else {
       console.log(`Login returned status: ${loginResult.status} - continuing with token tests`);
     }
@@ -56,8 +56,13 @@ describe("Token Operations - Success Cases (Production)", () => {
     
     const result = await verifyToken(authToken);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.verify).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Verification endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Verification endpoint status: ${result.status}`);
     
     if (result.status === 200) {
@@ -67,8 +72,6 @@ describe("Token Operations - Success Cases (Production)", () => {
       expect(result.body.user).toHaveProperty('email');
       
       console.log('Authentication verified successfully');
-    } else if (result.status === 504) {
-      console.log('Verification endpoint timed out - accepted in production');
     }
   });
   
@@ -83,8 +86,13 @@ describe("Token Operations - Success Cases (Production)", () => {
     
     const result = await refreshTokenFunc(refreshTokenStr);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.refresh).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Token refresh endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 400, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Token refresh endpoint status: ${result.status}`);
     
     if (result.status === 200) {
@@ -104,8 +112,6 @@ describe("Token Operations - Success Cases (Production)", () => {
       expect(authToken).not.toBe(previousToken);
       
       console.log('Token refreshed successfully');
-    } else if (result.status === 504) {
-      console.log('Token refresh endpoint timed out - accepted in production');
     }
   });
   
@@ -120,15 +126,18 @@ describe("Token Operations - Success Cases (Production)", () => {
     
     const result = await verifyToken(authToken);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.verify).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Verification endpoint timed out on refreshed token - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 401, 403, 404, 500]).toContain(result.status);
     
     if (result.status === 200) {
       // Verify content of the response
       expect(result.body).toHaveProperty('authenticated', true);
       console.log('Refreshed token verified successfully');
-    } else if (result.status === 504) {
-      console.log('Verification endpoint timed out - accepted in production');
     }
   });
   
@@ -143,15 +152,18 @@ describe("Token Operations - Success Cases (Production)", () => {
     
     const result = await logoutUser(authToken, refreshTokenStr);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.logout).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Logout endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Logout endpoint status: ${result.status}`);
     
     if (result.status === 200) {
       expect(result.body).toHaveProperty('message');
       console.log('Logout successful');
-    } else if (result.status === 504) {
-      console.log('Logout endpoint timed out - accepted in production');
     }
   });
 }); 

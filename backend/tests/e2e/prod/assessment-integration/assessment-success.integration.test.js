@@ -161,61 +161,39 @@ describe("Assessment Success Integration Tests - Production", () => {
       }
     };
 
-    try {
-      const response = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${testToken}`
-        },
-        body: JSON.stringify(updateData)
-      });
+    const response = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${testToken}`
+      },
+      body: JSON.stringify(updateData)
+    });
 
-      if (response.status === 404) {
-        console.log('Update assessment endpoint not implemented yet in production');
-        expect(true).toBe(true);
-      } else {
-        expect(response.status).toBe(200);
-        const data = await response.json();
-        expect(data).toHaveProperty("id", testAssessmentId);
-        expect(data.assessmentData).toHaveProperty("painLevel", "severe");
-        expect(data.assessmentData.symptoms.physical).toContain("Insomnia");
-      }
-    } catch (error) {
-      // If endpoint doesn't exist, don't fail the test
-      console.log('Update assessment endpoint error or not implemented in production');
-      expect(true).toBe(true);
-    }
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty("id", testAssessmentId);
+    expect(data.assessmentData).toHaveProperty("painLevel", "severe");
+    expect(data.assessmentData.symptoms.physical).toContain("Insomnia");
   });
 
   // Step 7: Delete assessment (if endpoint exists)
   test("7. Delete Assessment - DELETE /api/assessment/:id", async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${testToken}` }
-      });
+    const response = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${testToken}` }
+    });
 
-      if (response.status === 404) {
-        console.log('Delete assessment endpoint not implemented yet in production');
-        expect(true).toBe(true);
-      } else {
-        expect(response.status).toBe(200);
-        const data = await response.json();
-        expect(data).toHaveProperty("message");
-        
-        // Verify assessment is gone
-        const checkResponse = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${testToken}` }
-        });
-        
-        expect(checkResponse.status).toBe(404);
-      }
-    } catch (error) {
-      // If endpoint doesn't exist, don't fail the test
-      console.log('Delete assessment endpoint error or not implemented in production');
-      expect(true).toBe(true);
-    }
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty("message");
+    
+    // Verify assessment is gone
+    const checkResponse = await fetch(`${API_URL}/api/assessment/${testAssessmentId}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${testToken}` }
+    });
+    
+    expect(checkResponse.status).toBe(404);
   });
 }); 

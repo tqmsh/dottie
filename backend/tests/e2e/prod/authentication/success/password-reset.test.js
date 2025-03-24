@@ -18,7 +18,7 @@ describe("Password Reset - Success Cases (Production)", () => {
     if (result.status === 201) {
       console.log(`User registered with ID: ${result.body.id}`);
     } else if (result.status === 504) {
-      console.log('Signup endpoint timed out - continuing with password reset test');
+      throw new Error("Signup endpoint timed out - failing test");
     } else {
       console.log(`Registration returned status: ${result.status} - continuing with password reset test`);
     }
@@ -29,8 +29,12 @@ describe("Password Reset - Success Cases (Production)", () => {
     
     const result = await requestPasswordReset(testUser.email);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.passwordReset).toContain(result.status);
+    if (result.status === 504) {
+      throw new Error("Password reset endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([200, 400, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Password reset endpoint status: ${result.status}`);
     
     // If 200 response received, verify message
@@ -40,8 +44,6 @@ describe("Password Reset - Success Cases (Production)", () => {
     } else if (result.status === 404) {
       // Expected in current implementation
       console.log('Password reset endpoint returned 404 - expected in current implementation');
-    } else if (result.status === 504) {
-      console.log('Password reset endpoint timed out - accepted in production');
     }
   });
 }); 

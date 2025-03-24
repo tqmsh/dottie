@@ -12,8 +12,13 @@ describe("User Registration - Success Cases (Production)", () => {
     // Register the user
     const result = await registerTestUser(testUser);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.signup).toContain(result.status);
+    // Check for timeout and skip the test if it occurs
+    if (result.status === 504) {
+      throw new Error("Signup endpoint timed out - failing test");
+    }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([201, 400, 401, 403, 404, 500]).toContain(result.status);
     console.log(`Registration endpoint status: ${result.status}`);
     
     // If 201 response received, verify user data
@@ -24,8 +29,6 @@ describe("User Registration - Success Cases (Production)", () => {
       // Validate returned user data
       expect(typeof result.body.id).toBe('string');
       expect(result.body.id.length).toBeGreaterThan(0);
-    } else if (result.status === 504) {
-      console.log('Signup endpoint timed out - accepted in production');
     }
   });
   
@@ -39,12 +42,13 @@ describe("User Registration - Success Cases (Production)", () => {
     // Register the user
     const result = await registerTestUser(testUser);
     
-    // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.signup).toContain(result.status);
-    console.log(`Registration with longer username status: ${result.status}`);
-    
+    // Check for timeout and skip the test if it occurs
     if (result.status === 504) {
-      console.log('Signup endpoint timed out - accepted in production');
+      throw new Error("Signup endpoint timed out (longer username) - failing test");
     }
+    
+    // Verify the response status is among accepted codes (excluding 504)
+    expect([201, 400, 401, 403, 404, 500]).toContain(result.status);
+    console.log(`Registration with longer username status: ${result.status}`);
   });
 }); 
