@@ -64,7 +64,7 @@ describe("User Login - Error Scenarios", () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test("Should handle login with incorrect password gracefully", async () => {
+  test("Should reject login with incorrect password", async () => {
     // Create a unique user specifically for this test
     const uniqueEmail = `incorrect_pw_test_${Date.now()}@example.com`;
     
@@ -91,21 +91,9 @@ describe("User Login - Error Scenarios", () => {
       .post("/api/auth/login")
       .send(loginData);
 
-    // Current API behavior returns 200 even with wrong password
-    expect(response.status).toBe(200);
-    
-    // With current implementation, we can only verify that some response is returned
-    // We can't strictly verify authentication failure since the API returns a token
-    // This test documents the current behavior rather than enforcing ideal behavior
-    
-    // Logging the unusual behavior for awareness
-    console.log("Note: Login API returns 200 status with incorrect password");
-    
-    // Check that some basic properties exist in the response
-    expect(response.body).toBeDefined();
-    
-    // No strict validation on response contents since API appears to
-    // authenticate even with wrong password
+    // Should return 401 Unauthorized for incorrect password
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("error");
   });
 
   test("Should reject login with missing credentials", async () => {
