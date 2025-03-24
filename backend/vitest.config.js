@@ -8,5 +8,6 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
     testTimeout: 60000,
+    globalSetup: './tests/setupDatabase.js',
   },
 }); 
