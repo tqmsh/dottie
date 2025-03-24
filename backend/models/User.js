@@ -76,6 +76,16 @@ class User {
   static async getAll() {
     return DbService.getAll(this.tableName);
   }
+
+  /**
+   * Update a user's password
+   * @param {string} id - User ID
+   * @param {string} password_hash - New password hash
+   * @returns {Promise<object>} - Success indicator
+   */
+  static async updatePassword(id, password_hash) {
+    return DbService.update(this.tableName, id, { password_hash });
+  }
 }
 
 export default User; 
