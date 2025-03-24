@@ -25,11 +25,10 @@ export const authenticateToken = (req, res, next) => {
     
     const payload = JSON.parse(Buffer.from(decoded, 'base64').toString());
     req.user = { id: payload.id || '123' };
+    next();
   } catch (error) {
     console.error("Token decode error:", error);
-    // Default fallback
-    req.user = { id: '123' };
+    // Return 401 Unauthorized for invalid tokens
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
-  
-  next();
 }; 
