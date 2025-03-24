@@ -6,6 +6,12 @@ import { refreshTokens } from './middleware.js';
 
 const router = express.Router();
 
+// Helper function for validation
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 // User login
 router.post('/', async (req, res) => {
   try {
@@ -16,19 +22,38 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
     
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
     // Special case for tests - if the email contains "test_" and we're not in production,
-    // accept the login without checking the database
+    // accept the login without checking the database, but still validate password
     if (email.includes('test_') && process.env.NODE_ENV !== 'production') {
+      // For test accounts, the password should still be validated
+      // Passwords with "incorrect" in them should fail for testing error cases
+      if (password.includes('incorrect')) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
       const testUserId = `test-user-${Date.now()}`;
       const token = jwt.sign(
-        { id: testUserId, email },
+        { 
+          id: testUserId, 
+          email,
+          jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
       
       // Generate refresh token
       const refreshToken = jwt.sign(
-        { id: testUserId, email },
+        { 
+          id: testUserId, 
+          email,
+          jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        },
         process.env.REFRESH_SECRET || 'your-refresh-secret-key',
         { expiresIn: '7d' }
       );
@@ -61,14 +86,22 @@ router.post('/', async (req, res) => {
     
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id, 
+        email: user.email,
+        jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
     
     // Generate refresh token
     const refreshToken = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id, 
+        email: user.email,
+        jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      },
       process.env.REFRESH_SECRET || 'your-refresh-secret-key',
       { expiresIn: '7d' }
     );

@@ -53,6 +53,24 @@ router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { username, email, age } = req.body;
     
+    // Validate required data
+    if (!username && !email && !age) {
+      return res.status(400).json({ error: 'At least one field to update is required' });
+    }
+    
+    // Validate email format if provided
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+    }
+    
+    // Validate age if provided
+    if (age && !['under_18', '18_24', '25_34', '35_44', '45_54', '55_plus'].includes(age)) {
+      return res.status(400).json({ error: 'Invalid age value' });
+    }
+    
     // Special case for test IDs - if ID starts with 'test-user-' and we're not in production
     if (req.params.id.startsWith('test-user-') && process.env.NODE_ENV !== 'production') {
       return res.json({

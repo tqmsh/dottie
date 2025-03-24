@@ -5,6 +5,7 @@ import verifyRoutes from './verify.js';
 import refreshRoutes from './refresh.js';
 import logoutRoutes from './logout.js';
 import usersRoutes from './users.js';
+import resetPasswordRoutes from './resetPassword.js';
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use('/verify', verifyRoutes);
 router.use('/refresh', refreshRoutes);
 router.use('/logout', logoutRoutes);
 router.use('/users', usersRoutes);
+router.use('/', resetPasswordRoutes);
 
 export default router; 

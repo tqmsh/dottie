@@ -14,14 +14,14 @@ router.post('/', async (req, res) => {
   
   // Check if refresh token exists in our store
   if (!refreshTokens.has(refreshToken)) {
-    return res.status(403).json({ error: 'Invalid refresh token' });
+    return res.status(401).json({ error: 'Invalid or expired refresh token' });
   }
   
   jwt.verify(refreshToken, process.env.REFRESH_SECRET || 'your-refresh-secret-key', (err, user) => {
     if (err) {
       // Remove invalid token
       refreshTokens.delete(refreshToken);
-      return res.status(403).json({ error: 'Invalid refresh token' });
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
     }
     
     // Generate new access token with a unique jti (JWT ID) to ensure it's different
