@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeAll } from 'vitest';
 import fetch from 'node-fetch';
 import { API_URL } from '../../setup.js';
 import { 
@@ -15,8 +15,9 @@ describe("Token Operations - Error Cases (Production)", () => {
   // Store valid token for comparison
   let validToken = null;
   let validRefreshToken = null;
+  let initialSetupComplete = false;
   
-  test("1. Setup: Register and login a user", async () => {
+  beforeAll(async () => {
     console.log(`Setting up test user with email: ${testUser.email}`);
     
     // Register the user
@@ -29,14 +30,15 @@ describe("Token Operations - Error Cases (Production)", () => {
       if (loginResult.status === 200) {
         validToken = loginResult.body.token;
         validRefreshToken = loginResult.body.refreshToken;
+        initialSetupComplete = true;
         console.log('Login successful, tokens received for error testing');
       } else {
-        console.log(`Login returned status: ${loginResult.status} - continuing with token error tests`);
+        console.log(`Login returned status: ${loginResult.status} - error tests will still run with fallback values`);
       }
     }
-  });
+  }, 30000); // Increased timeout for initial setup
   
-  test("2. Should reject verification with invalid token format", async () => {
+  test("1. Should reject verification with invalid token format", async () => {
     console.log('Testing verification with invalid token format...');
     
     const invalidToken = "invalid-token-format";
@@ -62,7 +64,7 @@ describe("Token Operations - Error Cases (Production)", () => {
     }
   });
   
-  test("3. Should reject verification with missing token", async () => {
+  test("2. Should reject verification with missing token", async () => {
     console.log('Testing verification with missing token...');
     
     const response = await fetch(`${API_URL}/api/auth/verify`, {
@@ -86,7 +88,7 @@ describe("Token Operations - Error Cases (Production)", () => {
     }
   });
   
-  test("4. Should reject refresh with invalid refresh token", async () => {
+  test("3. Should reject refresh with invalid refresh token", async () => {
     console.log('Testing refresh with invalid refresh token...');
     
     const invalidRefreshToken = "invalid-refresh-token";
@@ -110,13 +112,14 @@ describe("Token Operations - Error Cases (Production)", () => {
     }
   });
   
-  test("5. Should reject logout with invalid token", async () => {
+  test("4. Should reject logout with invalid token", async () => {
     console.log('Testing logout with invalid token...');
     
     const invalidToken = "invalid-token";
     
-    // Use the valid refresh token (if we have one) to test the authorization portion
-    const refreshTokenToUse = validRefreshToken || "sample-refresh-token";
+    // If we don't have a valid refresh token from setup, use a fallback sample
+    const refreshTokenToUse = (initialSetupComplete && validRefreshToken) ? 
+      validRefreshToken : "sample-refresh-token";
     
     const response = await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
