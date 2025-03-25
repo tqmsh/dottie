@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import db from "./db/index.js";
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 // Import route modules
 import assessmentRoutes from "./routes/assessmentRoutes.js";
@@ -12,11 +14,11 @@ import authRoutes from "./routes/auth/index.js";
 import serverlessTestRoutes from "./routes/serverlessTestRoutes.js";
 
 // Import refactored endpoints
-import helloEndpoint from "./setup/hello.js";
-import serverlessTestEndpoint from "./setup/serverlessTest.js";
-import sqlHelloEndpoint from "./setup/database/sqlHello.js";
-import dbStatusEndpoint from "./setup/database/dbStatus.js";
-import errorHandlers from "./setup/errorHandlers.js";
+import helloEndpoint from "./routes/setup/hello.js";
+import serverlessTestEndpoint from "./routes/setup/serverlessTest.js";
+import sqlHelloEndpoint from "./routes/setup/database/sqlHello.js";
+import dbStatusEndpoint from "./routes/setup/database/dbStatus.js";
+import errorHandlers from "./routes/setup/errorHandlers.js";
 
 // Load environment variables
 dotenv.config();
@@ -25,8 +27,27 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://dottie-app.com' 
+    : ['http://localhost:3000', 'http://localhost:5173'],
+  credentials: true
+}));
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+// Request logging in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });
+});
 
 // Mount refactored endpoint routers
 app.use(helloEndpoint);
