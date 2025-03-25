@@ -1,5 +1,17 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
 jobs:
   build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
@@ -15,29 +27,35 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '20'  # Ensure you're using a compatible Node.js version
+
+      ######################################################################
+      # Install Backend Dependencies
+      ######################################################################
+      # - name: Install Backend Dependencies
+      #   run: |
+      #     cd backend
+      #     rm -rf node_modules package-lock.json # Clear old dependencies
+      #     npm install --legacy-peer-deps  # Reinstall backend dependencies
 
       ######################################################################
       # Install Frontend Dependencies
-      ######################################################################
-      - name: Install Frontend Dependencies
-        run: |
-          cd dottie-app
-          npm install vitest@1.6.1 @vitest/ui@1.6.1
-          npm install
+      ###################################################################### 
 
       ######################################################################
       # Build And Deploy
       ######################################################################
-      - name: Build the frontend
+      - name: Build And Deploy
+        id: builddeploy
         run: |
           cd dottie-app
-          npm run build
-
-      - name: List build output
-        run: |
-          cd dottie-app
-          ls -R dist  # Adjust if build output is in a different folder
+          npm install vitest@1.6.1 @vitest/ui@1.6.1
+          npm install
+          npm run build  # Runs the build process
+          npm run dev  # Ensure dev server runs properly
+        env:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_OCEAN_0B44E5A10 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (e.g. PR comments)
 
       - name: Deploy to Azure
         id: deploy
@@ -46,10 +64,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_OCEAN_0B44E5A10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "dottie-app"
-          api_location: "backend"
-          output_location: "dottie-app/dist"  # Ensure this is the correct output folder
-          app_build_command: "npm run build"
+          app_location: "dottie-app"    # App source code path
+          api_location: "backend"       # Backend API source code path
+          output_location: "dottie-app/dist"   # Built app content directory
+          app_build_command: "npm run build"   # Build command for the app
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
