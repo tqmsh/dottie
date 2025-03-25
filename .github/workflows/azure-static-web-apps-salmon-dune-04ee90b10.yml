@@ -1,37 +1,55 @@
-name: Azure Static Web Apps CI/CD
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
-
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      ######################################################################
+      # Checkout full codebase
+      ######################################################################
+      - name: Checkout repo ✅
+        uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      ######################################################################
+      # Install Frontend Dependencies
+      ######################################################################
+      - name: Install Frontend Dependencies
+        run: |
+          cd dottie-app
+          npm install vitest@1.6.1 @vitest/ui@1.6.1
+          npm install
+
+      ######################################################################
+      # Build And Deploy
+      ######################################################################
+      - name: Build the frontend
+        run: |
+          cd dottie-app
+          npm run build
+
+      - name: List build output
+        run: |
+          cd dottie-app
+          ls -R dist  # Adjust if build output is in a different folder
+
+      - name: Deploy to Azure
+        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_DUNE_04EE90B10 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_OCEAN_0B44E5A10 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "api" # Api source code path - optional
-          output_location: "dist" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          app_location: "dottie-app"
+          api_location: "backend"
+          output_location: "dottie-app/dist"  # Ensure this is the correct output folder
+          app_build_command: "npm run build"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -42,5 +60,5 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_DUNE_04EE90B10 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_OCEAN_0B44E5A10 }}
           action: "close"
