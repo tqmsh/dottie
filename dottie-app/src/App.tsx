@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
+import SignIn from './pages/auth/SignIn'
+import SignUp from './pages/auth/SignUp'
 
 // Import assessment components
 import AgeVerification from './components/assessment/age-verification/page'
@@ -14,7 +16,7 @@ import TestPage from './components/test_page/page'
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <main className="flex min-h-screen flex-col">
         <Routes>
           <Route path="/" element={<Navigate to="/assessment/age-verification" replace />} />
@@ -26,9 +28,11 @@ function App() {
           <Route path="/assessment/symptoms" element={<Symptoms />} />
           <Route path="/assessment/results" element={<Results />} />
           <Route path="/test" element={<TestPage />} />
+          <Route path="/auth/signin" element={<SignIn />} />
+          <Route path="/auth/signup" element={<SignUp />} />
         </Routes>
       </main>
-    </Router>
+    </BrowserRouter>
   )
 }
 
