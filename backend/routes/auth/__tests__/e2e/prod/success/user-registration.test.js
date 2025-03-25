@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { generateTestUser, registerTestUser, acceptedStatusCodes } from '../setup.js';
 
+// @prod
 describe("User Registration - Success Cases (Production)", () => {
   test("Should register a new user with valid credentials", async () => {
     console.log('Testing successful user registration...');

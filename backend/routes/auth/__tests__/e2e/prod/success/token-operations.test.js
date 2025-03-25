@@ -9,6 +9,7 @@ import {
   acceptedStatusCodes 
 } from '../setup.js';
 
+// @prod
 describe("Token Operations - Success Cases (Production)", () => {
   // Test user that will be used throughout the tests
   const testUser = generateTestUser();

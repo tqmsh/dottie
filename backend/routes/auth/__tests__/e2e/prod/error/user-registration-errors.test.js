@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { API_URL } from '../../setup.js';
 import { generateTestUser, registerTestUser, acceptedStatusCodes } from '../setup.js';
 
+// @prod
 describe("User Registration - Error Cases (Production)", () => {
   test("Should reject registration with missing required fields", async () => {
     console.log('Testing registration with missing fields...');

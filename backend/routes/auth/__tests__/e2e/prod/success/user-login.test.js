@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { generateTestUser, registerTestUser, loginTestUser, acceptedStatusCodes } from '../setup.js';
 
+// @prod
 describe("User Login - Success Cases (Production)", () => {
   // Test user that will be registered first
   const testUser = generateTestUser();

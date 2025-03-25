@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { submitAssessment, sampleAssessmentData } from '../setup.js';
 
+// @prod
 describe("Assessment Send Endpoint (Success) - Production", () => {
   test("POST /api/assessment/send - should submit assessment data when authenticated", async () => {
     const response = await submitAssessment();

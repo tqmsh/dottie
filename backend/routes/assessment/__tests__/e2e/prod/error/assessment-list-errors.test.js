@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest';
 import fetch from 'node-fetch';
 import { API_URL } from '../setup.js';
 
+// @prod
 describe("Assessment List Endpoint (Errors) - Production", () => {
   test("GET /api/assessment/list - should require authentication", async () => {
     // Test without authentication token

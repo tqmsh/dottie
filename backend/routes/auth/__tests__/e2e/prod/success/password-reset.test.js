@@ -6,6 +6,7 @@ import {
   acceptedStatusCodes 
 } from '../setup.js';
 
+// @prod
 describe("Password Reset - Success Cases (Production)", () => {
   // Test user that will be registered first
   const testUser = generateTestUser();

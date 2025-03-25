@@ -2,7 +2,9 @@ import { describe, test, expect } from 'vitest';
 import fetch from 'node-fetch';
 import { API_URL } from '../../setup.js';
 import { acceptedStatusCodes } from '../setup.js';
+import { requestPasswordReset } from '../setup.js';
 
+// @prod
 describe("Password Reset - Error Cases (Production)", () => {
   test("Should handle password reset with non-existent email", async () => {
     console.log('Testing password reset with non-existent email...');

@@ -1,10 +1,9 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import fetch from 'node-fetch';
-import { PROD_API_URL } from '../../../../../config/api.js';
 
 // Constants
-const API_URL = process.env.PROD_API_URL || PROD_API_URL;
+const API_URL = process.env.PROD_API_URL || 'https://dottie-api-zeta.vercel.app';
 let testUserId;
 let testToken;
 let otherUserId;
