@@ -1,54 +1,30 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
-import { createServer } from 'http';
-import jwt from 'jsonwebtoken';
+import { setupTestServer, closeTestServer, createMockToken } from '../../../../../../test-utilities/testSetup.js';
 
-// Create a supertest instance
-const request = supertest(app);
-
-// Store server instance and test user data
+// Variables to store server instance and request
 let server;
+let request;
 let testUserId;
 let testToken;
-
-// Use a different port for tests to avoid conflicts with the running server
 const TEST_PORT = 5010;
 
-// Create a mock token for testing
-const createMockToken = (userId) => {
-  return jwt.sign(
-    { id: userId, email: `test_${Date.now()}@example.com` },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '1h' }
-  );
-};
-
-// Start server before all tests
+// Setup server before tests
 beforeAll(async () => {
-  server = createServer(app);
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.listen(TEST_PORT, () => {
-      console.log(`Assessment send error test server started on port ${TEST_PORT}`);
-      resolve(true);
-    });
-  });
+  const setup = await setupTestServer(TEST_PORT);
+  server = setup.server;
+  request = supertest(setup.app);
 
   // Create a test user ID and token
   testUserId = `test-user-${Date.now()}`;
   testToken = createMockToken(testUserId);
-}, 15000); // Increased timeout to 15 seconds
+}, 15000);
 
-// Close server after all tests
+// Close server after tests
 afterAll(async () => {
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.close(() => {
-      console.log('Assessment send error test server closed');
-      resolve(true);
-    });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  await closeTestServer(server);
+}, 15000);
 
 describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev'] }, () => {
   // Test submitting assessment without authentication

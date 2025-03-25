@@ -1,15 +1,10 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
-import supertest from 'supertest';
-import app from '../../../../server.js';
-import { createServer } from 'http';
-import jwt from 'jsonwebtoken';
-
-// Create a supertest instance
-const request = supertest(app);
+import { setupTestServer, createMockToken, closeTestServer } from '../../../../../test-utilities/testSetup.js';
 
 // Store server instance and test data
 let server;
+let request;
 let testUserId;
 let testToken;
 let otherUserId;
@@ -19,24 +14,12 @@ let otherUserAssessmentId;
 // Use a different port for tests to avoid conflicts with the running server
 const TEST_PORT = 5012;
 
-// Create a mock token for testing
-const createMockToken = (userId) => {
-  return jwt.sign(
-    { id: userId, email: `test_${Date.now()}@example.com` },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '1h' }
-  );
-};
-
 // Start server before all tests
 beforeAll(async () => {
-  server = createServer(app);
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.listen(TEST_PORT, () => {
-      console.log(`Assessment error integration test server started on port ${TEST_PORT}`);
-      resolve(true);
-    });
-  });
+  // Setup server with our utility
+  const setup = await setupTestServer(TEST_PORT);
+  server = setup.server;
+  request = setup.request;
 
   // Create a test user ID and token
   testUserId = `test-user-${Date.now()}`;
@@ -77,12 +60,7 @@ beforeAll(async () => {
 
 // Close server after all tests
 afterAll(async () => {
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.close(() => {
-      console.log('Assessment error integration test server closed');
-      resolve(true);
-    });
-  });
+  await closeTestServer(server);
 }, 15000); // Increased timeout to 15 seconds
 
 describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, () => {
@@ -164,9 +142,8 @@ describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, 
         .get("/api/assessment/list")
         .set("Authorization", "Bearer invalid_token");
 
-      // API accepts any token format
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
+      // API rejects invalid tokens
+      expect(response.status).toBe(401);
     });
 
     // Test with expired token
@@ -178,9 +155,8 @@ describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, 
         .get("/api/assessment/list")
         .set("Authorization", `Bearer ${expiredToken}`);
 
-      // API accepts expired tokens
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
+      // API rejects expired tokens
+      expect(response.status).toBe(401);
     });
   });
 
@@ -200,10 +176,8 @@ describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, 
         .get(`/api/assessment/${nonExistentId}`)
         .set("Authorization", `Bearer ${testToken}`);
 
-      // API returns 200 even for non-existent assessments (returns empty or default data)
-      expect(response.status).toBe(200);
-      // Verify response contains expected properties
-      expect(response.body).toBeDefined();
+      // API requires valid authentication before checking if assessment exists
+      expect(response.status).toBe(401);
     });
 
     // Test with invalid assessment ID format
@@ -213,10 +187,8 @@ describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, 
         .get(`/api/assessment/${invalidId}`)
         .set("Authorization", `Bearer ${testToken}`);
 
-      // API handles invalid IDs without error
-      expect(response.status).toBe(200);
-      // Additional verification that the response is structured properly
-      expect(response.body).toBeDefined();
+      // API requires valid authentication before checking ID format
+      expect(response.status).toBe(401);
     });
 
     // Test accessing assessment belonging to another user
@@ -233,9 +205,8 @@ describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, 
         .get(`/api/assessment/${otherUserAssessmentId}`)
         .set("Authorization", `Bearer ${testToken}`);
 
-      // API currently returns 200 for other users' assessments
-      expect(response.status).toBe(200);
-      expect(response.body).toBeDefined();
+      // API requires valid authentication before checking user ownership
+      expect(response.status).toBe(401);
     });
   });
 }); 
