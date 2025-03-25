@@ -10,7 +10,7 @@ import {
 } from '../setup.js';
 
 // @prod
-describe("Token Operations - Success Cases (Production)", () => {
+describe("Token Operations - Success Cases (Production)", { tags: ['authentication', 'prod', 'success'] }, () => {
   // Test user that will be used throughout the tests
   const testUser = generateTestUser();
   

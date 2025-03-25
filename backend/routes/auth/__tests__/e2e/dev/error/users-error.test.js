@@ -63,7 +63,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("User Management - Error Scenarios", () => {
+describe("User Management - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   test("GET /api/auth/users - should reject request without token", async () => {
     const response = await request
       .get("/api/auth/users");

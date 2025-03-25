@@ -106,6 +106,16 @@ const testDb = {
     }
   },
   
+  // Add a raw method for testing
+  raw: async (query) => {
+    console.log(`Mock executing raw query: ${query}`);
+    if (query.includes('1')) {
+      return [{ testValue: 1 }];
+    } else {
+      return [{ message: 'Hello World from Mock DB!' }];
+    }
+  },
+  
   // Mock database destruction
   destroy: async () => {
     console.log('Mock database connection closed');

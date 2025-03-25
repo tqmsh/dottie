@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { API_URL, testToken, fetchAssessmentList } from '../setup.js';
 
 // @prod
-describe("Assessment List Endpoint (Success) - Production", () => {
+describe("Assessment List Endpoint (Success) - Production", { tags: ['assessment', 'prod'] }, () => {
   test("GET /api/assessment/list - should return assessments list when authenticated", async () => {
     const response = await fetchAssessmentList();
     

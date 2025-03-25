@@ -69,9 +69,9 @@ afterAll(async () => {
   console.log('Assessment error integration test completed - Production environment');
 }, 5000);
 
-describe("Assessment Error Integration Tests - Production", () => {
+describe("Assessment Error Integration Tests - Production", { tags: ['assessment', 'prod'] }, () => {
   // Test cases for Assessment Send Endpoint
-  describe("Assessment Send Endpoint - Error Cases", () => {
+  describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'prod'] }, () => {
     // Test submitting assessment without authentication
     test("POST /api/assessment/send - should reject request without token", async () => {
       const assessmentData = {
@@ -147,7 +147,7 @@ describe("Assessment Error Integration Tests - Production", () => {
   });
 
   // Test cases for Assessment List Endpoint
-  describe("Assessment List Endpoint - Error Cases", () => {
+  describe("Assessment List Endpoint - Error Cases", { tags: ['assessment', 'prod'] }, () => {
     // Test getting assessments without authentication
     test("GET /api/assessment/list - should reject request without token", async () => {
       const response = await fetch(`${API_URL}/api/assessment/list`, {
@@ -187,7 +187,7 @@ describe("Assessment Error Integration Tests - Production", () => {
   });
 
   // Test cases for Assessment Detail Endpoint
-  describe("Assessment Detail Endpoint - Error Cases", () => {
+  describe("Assessment Detail Endpoint - Error Cases", { tags: ['assessment', 'prod'] }, () => {
     // Test getting assessment without authentication
     test("GET /api/assessment/:id - should reject request without token", async () => {
       const nonExistentId = "non-existent-id-12345";

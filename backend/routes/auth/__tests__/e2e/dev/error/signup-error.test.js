@@ -34,7 +34,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("User Signup - Error Scenarios", () => {
+describe("User Signup - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   test("Should reject signup with missing required fields", async () => {
     const incompleteUserData = {
       username: `testuser_${Date.now()}`,

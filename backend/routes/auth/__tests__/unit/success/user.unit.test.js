@@ -4,7 +4,7 @@ import app from '../../server.js';
 import { v4 as uuidv4 } from 'uuid';
 import { initTestDatabase, clearDatabase, createTestUser } from '../setup.js';
 
-describe('User API Endpoints', () => {
+describe('User API Endpoints', { tags: ['authentication', 'unit', 'success'] }, () => {
   // Initialize database before all tests
   beforeAll(async () => {
     await initTestDatabase();

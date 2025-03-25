@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { API_URL, testToken, sampleAssessmentData } from '../setup.js';
 
 // @prod
-describe("Assessment Send Endpoint (Errors) - Production", () => {
+describe("Assessment Send Endpoint (Errors) - Production", { tags: ['assessment', 'prod'] }, () => {
   test("POST /api/assessment/send - should require authentication", async () => {
     // Test without authentication token
     const response = await fetch(`${API_URL}/api/assessment/send`, {

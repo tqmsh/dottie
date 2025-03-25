@@ -35,7 +35,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("Token Refresh - Error Scenarios", () => {
+describe("Token Refresh - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   test("Should reject request with missing refresh token", async () => {
     const response = await request
       .post("/api/auth/refresh")

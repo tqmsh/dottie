@@ -54,7 +54,7 @@ afterAll(async () => {
   }
 }, 15000);
 
-describe("User Login - Success Scenarios", () => {
+describe("User Login - Success Scenarios", { tags: ['authentication', 'dev', 'success'] }, () => {
   // Create a test user first
   const testUser = {
     username: `logintest_${Date.now()}`,

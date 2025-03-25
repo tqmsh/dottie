@@ -85,7 +85,7 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-describe("Assessment Error Integration Tests", () => {
+describe("Assessment Error Integration Tests", { tags: ['assessment', 'dev'] }, () => {
   // Test cases for Assessment Send Endpoint
   describe("Assessment Send Endpoint - Error Cases", () => {
     // Test submitting assessment without authentication

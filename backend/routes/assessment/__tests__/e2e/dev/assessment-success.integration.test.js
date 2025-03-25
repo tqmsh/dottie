@@ -36,7 +36,7 @@ const createMockToken = (userId) => {
   return jwt.sign({ id: userId }, 'test-secret-key');
 };
 
-describe("Assessment Success Integration Tests", () => {
+describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }, () => {
   // Setup before tests
   beforeAll(() => {
     return new Promise((resolve) => {

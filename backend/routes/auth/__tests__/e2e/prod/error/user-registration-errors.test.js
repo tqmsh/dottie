@@ -4,7 +4,7 @@ import { API_URL } from '../../setup.js';
 import { generateTestUser, registerTestUser, acceptedStatusCodes } from '../setup.js';
 
 // @prod
-describe("User Registration - Error Cases (Production)", () => {
+describe("User Registration - Error Cases (Production)", { tags: ['authentication', 'prod', 'error'] }, () => {
   test("Should reject registration with missing required fields", async () => {
     console.log('Testing registration with missing fields...');
     

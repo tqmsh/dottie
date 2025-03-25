@@ -34,7 +34,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("Password Reset - Error Scenarios", () => {
+describe("Password Reset - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   test("Should reject reset password request with missing email", async () => {
     const resetData = {
       // No email

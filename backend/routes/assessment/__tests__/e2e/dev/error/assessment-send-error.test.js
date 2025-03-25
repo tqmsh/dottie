@@ -50,7 +50,7 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-describe("Assessment Send Endpoint - Error Cases", () => {
+describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev'] }, () => {
   // Test submitting assessment without authentication
   test("POST /api/assessment/send - should reject request without token", async () => {
     const assessmentData = {

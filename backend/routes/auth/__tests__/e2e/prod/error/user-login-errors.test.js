@@ -4,7 +4,7 @@ import { API_URL } from '../../setup.js';
 import { generateTestUser, registerTestUser, acceptedStatusCodes } from '../setup.js';
 
 // @prod
-describe("User Login - Error Cases (Production)", () => {
+describe("User Login - Error Cases (Production)", { tags: ['authentication', 'prod', 'error'] }, () => {
   // Test user that will be registered first to ensure user exists
   const testUser = generateTestUser();
   

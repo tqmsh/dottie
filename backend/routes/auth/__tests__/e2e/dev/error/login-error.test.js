@@ -34,7 +34,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("User Login - Error Scenarios", () => {
+describe("User Login - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   // Create a test user first
   const testUser = {
     username: `loginerrortest_${Date.now()}`,

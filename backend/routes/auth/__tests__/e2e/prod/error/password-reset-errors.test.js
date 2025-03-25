@@ -5,7 +5,7 @@ import { acceptedStatusCodes } from '../setup.js';
 import { requestPasswordReset } from '../setup.js';
 
 // @prod
-describe("Password Reset - Error Cases (Production)", () => {
+describe("Password Reset - Error Cases (Production)", { tags: ['authentication', 'prod', 'error'] }, () => {
   test("Should handle password reset with non-existent email", async () => {
     console.log('Testing password reset with non-existent email...');
     

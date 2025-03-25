@@ -36,7 +36,7 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-describe("Authentication Success Integration Tests", () => {
+describe("Authentication Success Integration Tests", { tags: ['authentication', 'dev', 'success'] }, () => {
   // Generate unique test user for this test run
   const testUser = {
     username: `integration_user_${Date.now()}`,

@@ -7,7 +7,7 @@ import {
 } from '../setup.js';
 
 // @prod
-describe("Password Reset - Success Cases (Production)", () => {
+describe("Password Reset - Success Cases (Production)", { tags: ['authentication', 'prod', 'success'] }, () => {
   // Test user that will be registered first
   const testUser = generateTestUser();
   

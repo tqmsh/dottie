@@ -3,7 +3,7 @@ import User from '../../models/User.js';
 import db from '../../db/index.js';
 import { createTables, dropTables } from '../../db/migrations/initialSchema.js';
 
-describe('User Model', () => {
+describe('User Model', { tags: ['authentication', 'unit', 'success'] }, () => {
   const testUser = {
     username: 'testuser',
     email: 'test@example.com',

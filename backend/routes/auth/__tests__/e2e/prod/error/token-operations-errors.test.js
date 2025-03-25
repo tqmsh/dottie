@@ -11,7 +11,7 @@ import {
 } from '../setup.js';
 
 // @prod
-describe("Token Operations - Error Cases (Production)", () => {
+describe("Token Operations - Error Cases (Production)", { tags: ['authentication', 'prod', 'error'] }, () => {
   // Test user that will be used for the initial valid token
   const testUser = generateTestUser();
   

@@ -34,7 +34,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("User Logout - Error Scenarios", () => {
+describe("User Logout - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   // Variables to store auth data
   let token;
   let refreshToken;

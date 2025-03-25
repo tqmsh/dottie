@@ -56,7 +56,7 @@ afterAll(async () => {
   console.log('Assessment success integration test completed - Production environment');
 }, 5000);
 
-describe("Assessment Success Integration Tests - Production", () => {
+describe("Assessment Success Integration Tests - Production", { tags: ['assessment', 'prod'] }, () => {
   // Step 1: Create a user account (if needed for integration)
   test("1. Create User Account - POST /api/auth/signup", async () => {
     const userData = {

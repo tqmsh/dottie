@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { API_URL } from '../setup.js';
 
 // @prod
-describe("Assessment List Endpoint (Errors) - Production", () => {
+describe("Assessment List Endpoint (Errors) - Production", { tags: ['assessment', 'prod'] }, () => {
   test("GET /api/assessment/list - should require authentication", async () => {
     // Test without authentication token
     const response = await fetch(`${API_URL}/api/assessment/list`);

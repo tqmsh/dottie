@@ -34,7 +34,7 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-describe("Assessment List Endpoint - Error Cases", () => {
+describe("Assessment List Endpoint - Error Cases", { tags: ['assessment', 'dev'] }, () => {
   // Test getting assessments without authentication
   test("GET /api/assessment/list - should reject request without token", async () => {
     const response = await request.get("/api/assessment/list");

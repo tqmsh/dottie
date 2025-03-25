@@ -50,7 +50,7 @@ afterAll(async () => {
   });
 }, 15000); // Increased timeout to 15 seconds
 
-describe("Assessment Detail Endpoint - Error Cases", () => {
+describe("Assessment Detail Endpoint - Error Cases", { tags: ['assessment', 'dev'] }, () => {
   // Test getting assessment without authentication
   test("GET /api/assessment/:id - should reject request without token", async () => {
     const nonExistentId = "non-existent-id-12345";

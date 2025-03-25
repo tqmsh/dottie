@@ -35,7 +35,7 @@ afterAll(async () => {
   });
 }, 15000);
 
-describe("Token Verification - Error Scenarios", () => {
+describe("Token Verification - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
   test("Should reject request with missing token", async () => {
     const response = await request
       .get("/api/auth/verify");
