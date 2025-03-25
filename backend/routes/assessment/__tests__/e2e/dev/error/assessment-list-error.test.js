@@ -1,38 +1,24 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
-import { createServer } from 'http';
+import { setupTestServer, closeTestServer } from '../../../../../../test-utilities/testSetup.js';
 
-// Create a supertest instance
-const request = supertest(app);
-
-// Store server instance
+// Variables to store server instance and request
 let server;
-
-// Use a different port for tests to avoid conflicts with the running server
+let request;
 const TEST_PORT = 5007;
 
-// Start server before all tests
+// Setup server before tests
 beforeAll(async () => {
-  server = createServer(app);
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.listen(TEST_PORT, () => {
-      console.log(`Assessment list error test server started on port ${TEST_PORT}`);
-      resolve(true);
-    });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  const setup = await setupTestServer(TEST_PORT);
+  server = setup.server;
+  request = supertest(setup.app);
+}, 15000);
 
-// Close server after all tests
+// Close server after tests
 afterAll(async () => {
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.close(() => {
-      console.log('Assessment list error test server closed');
-      resolve(true);
-    });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  await closeTestServer(server);
+}, 15000);
 
 describe("Assessment List Endpoint - Error Cases", { tags: ['assessment', 'dev'] }, () => {
   // Test getting assessments without authentication
@@ -42,18 +28,17 @@ describe("Assessment List Endpoint - Error Cases", { tags: ['assessment', 'dev']
   });
 
   // Test with invalid token
-  test("GET /api/assessment/list - should handle request with invalid token", async () => {
+  test("GET /api/assessment/list - should reject request with invalid token", async () => {
     const response = await request
       .get("/api/assessment/list")
       .set("Authorization", "Bearer invalid_token");
 
-    // API accepts any token format
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+    // API rejects invalid tokens with 401
+    expect(response.status).toBe(401);
   });
 
   // Test with expired token
-  test("GET /api/assessment/list - should handle request with expired token", async () => {
+  test("GET /api/assessment/list - should reject request with expired token", async () => {
     // This is a known expired token format
     const expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InRlc3QtdXNlci1pZCIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxNTE2MjM5MDIyfQ.7fgfDJJWJLDdJ-LXi9mEI6QCqFQfJOaXUzaLhiEXYmM";
     
@@ -61,8 +46,7 @@ describe("Assessment List Endpoint - Error Cases", { tags: ['assessment', 'dev']
       .get("/api/assessment/list")
       .set("Authorization", `Bearer ${expiredToken}`);
 
-    // API accepts expired tokens
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+    // API rejects expired tokens with 401
+    expect(response.status).toBe(401);
   });
 }); 
