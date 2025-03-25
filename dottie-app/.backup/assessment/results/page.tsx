@@ -1,10 +1,26 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { DotIcon, MessageCircle, Heart, ChevronRight } from "lucide-react"
+import { MessageCircle, Heart, ChevronRight } from "lucide-react"
+import { ChatModal } from "@/components/chat-modal"
 
 export default function ResultsPage() {
+  const [isChatOpen, setIsChatOpen] = useState(false)
+
+  // Sample user data based on assessment results
+  const userData = {
+    age: "14 years (Early to Late Adolescence)",
+    cycleLength: "21-32 days",
+    periodDuration: "2-6 days",
+    flowHeaviness: "Moderate",
+    painLevel: "Moderate",
+    symptoms: ["Bloating", "Headaches", "Fatigue", "Acne", "Mood swings", "Irritability"],
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
@@ -29,7 +45,7 @@ export default function ResultsPage() {
             </div>
 
             <div className="flex gap-3 mb-4">
-              <Button className="flex-1 bg-pink-500 hover:bg-pink-600">
+              <Button className="flex-1 bg-pink-500 hover:bg-pink-600" onClick={() => setIsChatOpen(true)}>
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Ask Dottie
               </Button>
@@ -52,7 +68,7 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Age</span>
-                <span className="text-sm text-gray-500">14 years (Early to Late Adolescence)</span>
+                <span className="text-sm text-gray-500">{userData.age}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div className="bg-pink-500 h-2 rounded-full w-[30%]"></div>
@@ -62,7 +78,7 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Cycle Length</span>
-                <span className="text-sm text-gray-500">21-32 days</span>
+                <span className="text-sm text-gray-500">{userData.cycleLength}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div className="bg-pink-500 h-2 rounded-full w-[60%]"></div>
@@ -72,7 +88,7 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Period Duration</span>
-                <span className="text-sm text-gray-500">2-6 days</span>
+                <span className="text-sm text-gray-500">{userData.periodDuration}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
@@ -82,7 +98,7 @@ export default function ResultsPage() {
             <div>
               <h3 className="text-sm font-medium mb-2">Symptoms</h3>
               <div className="grid grid-cols-2 gap-2">
-                {["Bloating", "Headaches", "Fatigue", "Acne", "Mood swings", "Irritability"].map((symptom, index) => (
+                {userData.symptoms.map((symptom, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-sm bg-pink-100 flex items-center justify-center">
                       <span className="text-pink-500 text-xs">✓</span>
@@ -96,7 +112,7 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Pain Level</span>
-                <span className="text-sm text-gray-500">Moderate</span>
+                <span className="text-sm text-gray-500">{userData.painLevel}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
@@ -106,7 +122,7 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Flow Heaviness</span>
-                <span className="text-sm text-gray-500">Moderate</span>
+                <span className="text-sm text-gray-500">{userData.flowHeaviness}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
@@ -189,6 +205,8 @@ export default function ResultsPage() {
           </Button>
         </Link>
       </main>
+
+      <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} userData={userData} />
     </div>
   )
 }
