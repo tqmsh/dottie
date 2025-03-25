@@ -2,8 +2,8 @@ import express from "express";
 import { verifyToken } from '../auth/middleware.js';
 import { 
   startAssessment, 
-  submitAnswer, 
-  getResults 
+  submitAssessment, 
+  getAssessment 
 } from '../../controllers/assessmentController.js';
 
 // Import individual route files
@@ -18,11 +18,11 @@ const router = express.Router();
 // Start a new assessment
 router.post('/start', verifyToken, startAssessment);
 
-// Submit an answer for the current question
-router.post('/submit', verifyToken, submitAnswer);
+// Submit an assessment
+router.post('/:assessmentId/submit', verifyToken, submitAssessment);
 
-// Get assessment results
-router.get('/results/:assessmentId', verifyToken, getResults);
+// Get assessment by ID
+router.get('/:assessmentId', verifyToken, getAssessment);
 
 // Mount individual route handlers
 router.use(sendRouter);
