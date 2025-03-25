@@ -51,7 +51,8 @@ jobs:
           cd dottie-app
           npm install vitest@1.6.1 @vitest/ui@1.6.1
           npm install
-          npm run build  # Runs the build process 
+          npm run build  # Runs the build process
+          npm run dev  # Ensure dev server runs properly
         env:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_OCEAN_0B44E5A10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (e.g. PR comments)
