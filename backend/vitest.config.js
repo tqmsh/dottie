@@ -8,6 +8,11 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
     testTimeout: 60000,
-    globalSetup: './tests/setupDatabase.js',
+    globalSetup: './test-utilities/setupDatabase.js',
+    // Match anything with 'dev' in the file path or test name
+    includeMatch: [
+      // Include tests with 'dev' in the file path
+      { name: 'dev', pattern: '**/dev/**' }
+    ]
   },
 }); 
