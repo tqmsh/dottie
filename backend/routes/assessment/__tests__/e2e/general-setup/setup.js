@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_API_URL } from '../../../../../config/api.js';
 
 // API URL based on environment
-export const API_URL = process.env.API_URL || DEFAULT_API_URL;
+export const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 // Test user credentials
 export const testUser = {
