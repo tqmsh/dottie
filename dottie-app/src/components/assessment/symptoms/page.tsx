@@ -21,6 +21,46 @@ export default function SymptomsPage() {
     setEmotionalSymptoms((prev) => (prev.includes(symptom) ? prev.filter((s) => s !== symptom) : [...prev, symptom]))
   }
 
+  const handleContinue = () => {
+    // Combine all symptoms
+    const allSymptoms = [
+      ...physicalSymptoms.map(id => {
+        const symptom = [
+          { id: "bloating", label: "Bloating" },
+          { id: "breast-tenderness", label: "Breast tenderness" },
+          { id: "headaches", label: "Headaches" },
+          { id: "back-pain", label: "Back pain" },
+          { id: "nausea", label: "Nausea" },
+          { id: "fatigue", label: "Fatigue" },
+          { id: "dizziness", label: "Dizziness" },
+          { id: "acne", label: "Acne" },
+          { id: "digestive-issues", label: "Digestive issues" },
+          { id: "sleep-disturbances", label: "Sleep disturbances" },
+          { id: "hot-flashes", label: "Hot flashes" },
+          { id: "joint-pain", label: "Joint pain" },
+        ].find(s => s.id === id)
+        return symptom?.label || id
+      }),
+      ...emotionalSymptoms.map(id => {
+        const symptom = [
+          { id: "irritability", label: "Irritability" },
+          { id: "mood-swings", label: "Mood swings" },
+          { id: "anxiety", label: "Anxiety" },
+          { id: "depression", label: "Depression" },
+          { id: "difficulty-concentrating", label: "Difficulty concentrating" },
+          { id: "food-cravings", label: "Food cravings" },
+          { id: "emotional-sensitivity", label: "Emotional sensitivity" },
+          { id: "low-energy", label: "Low energy/motivation" },
+        ].find(s => s.id === id)
+        return symptom?.label || id
+      }),
+      ...(otherSymptoms ? [otherSymptoms] : [])
+    ]
+
+    // Save to sessionStorage
+    sessionStorage.setItem("symptoms", JSON.stringify(allSymptoms))
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
@@ -161,7 +201,7 @@ export default function SymptomsPage() {
             </Button>
           </Link>
 
-          <Link to="/assessment/results">
+          <Link to="/assessment/results" onClick={handleContinue}>
             <Button className="bg-pink-500 hover:bg-pink-600 text-white">
               Complete Assessment
               <ChevronRight className="h-4 w-4 ml-2" />
