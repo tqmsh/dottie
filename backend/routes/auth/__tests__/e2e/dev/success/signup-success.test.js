@@ -1,9 +1,9 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
-import { initTestDatabase } from '../../../../setup.js';
+import db from '../../../../../../db/index.js';
 
 // Create a supertest instance
 const request = supertest(app);
@@ -14,11 +14,25 @@ let server;
 // Use a different port for tests
 const TEST_PORT = 5010;
 
+// Initialize test database
+async function initializeDatabase() {
+  try {
+    console.log('Initializing test database...');
+    // Just check if we can connect to the database
+    await db.raw('SELECT 1');
+    console.log('Database connection successful');
+    return true;
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return false;
+  }
+}
+
 // Start server before all tests
 beforeAll(async () => {
   // Initialize test database first
   console.log('Initializing database for signup tests...');
-  const success = await initTestDatabase();
+  const success = await initializeDatabase();
   if (!success) {
     throw new Error('Failed to initialize test database!');
   }

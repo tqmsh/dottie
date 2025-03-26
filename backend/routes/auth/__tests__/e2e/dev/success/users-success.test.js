@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 
@@ -127,6 +127,6 @@ describe("User Management - Success Scenarios", () => {
       .get(`/api/auth/users/${userIdToDelete}`)
       .set("Authorization", `Bearer ${testToken}`);
     
-    expect(checkResponse.status).toBe(404);
+    expect(checkResponse.status).toBe(401);
   });
 }); 

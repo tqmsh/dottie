@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 
 // Create a supertest instance

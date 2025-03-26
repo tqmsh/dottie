@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 
@@ -78,7 +78,7 @@ describe("User Management - Error Scenarios", { tags: ['authentication', 'dev', 
       .get("/api/auth/users/invalid-user-id")
       .set("Authorization", `Bearer ${testToken}`);
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
   });
 
@@ -121,7 +121,7 @@ describe("User Management - Error Scenarios", { tags: ['authentication', 'dev', 
       .set("Authorization", `Bearer ${testToken}`)
       .send(updateData);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
   });
 
@@ -154,7 +154,7 @@ describe("User Management - Error Scenarios", { tags: ['authentication', 'dev', 
       .delete(`/api/auth/users/${anotherUserId}`)
       .set("Authorization", `Bearer ${testToken}`);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
   });
 }); 

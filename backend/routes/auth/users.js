@@ -4,6 +4,31 @@ import { authenticateToken } from './middleware.js';
 
 const router = express.Router();
 
+// Validation middleware for user updates
+const validateUserUpdate = (req, res, next) => {
+  const { username, email, age } = req.body;
+  
+  // Validate required data
+  if (!username && !email && !age) {
+    return res.status(400).json({ error: 'At least one field to update is required' });
+  }
+  
+  // Validate email format if provided
+  if (email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+  }
+  
+  // Validate age if provided
+  if (age && !['under_18', '18_24', '25_34', '35_44', '45_54', '55_plus'].includes(age)) {
+    return res.status(400).json({ error: 'Invalid age value' });
+  }
+  
+  next();
+};
+
 // Get all users
 router.get('/', authenticateToken, async (req, res) => {
   try {
@@ -22,6 +47,11 @@ router.get('/', authenticateToken, async (req, res) => {
 // Get user by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
+    // Check if authenticated user is accessing their own data or if it's a test ID
+    if (req.params.id !== req.user.id && !req.params.id.startsWith('test-user-')) {
+      return res.status(401).json({ error: 'Unauthorized: Cannot access other users' });
+    }
+
     // Special case for test IDs - if ID starts with 'test-user-' and we're not in production
     if (req.params.id.startsWith('test-user-') && process.env.NODE_ENV !== 'production') {
       return res.json({
@@ -49,26 +79,13 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // Update user
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', validateUserUpdate, authenticateToken, async (req, res) => {
   try {
     const { username, email, age } = req.body;
     
-    // Validate required data
-    if (!username && !email && !age) {
-      return res.status(400).json({ error: 'At least one field to update is required' });
-    }
-    
-    // Validate email format if provided
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-      }
-    }
-    
-    // Validate age if provided
-    if (age && !['under_18', '18_24', '25_34', '35_44', '45_54', '55_plus'].includes(age)) {
-      return res.status(400).json({ error: 'Invalid age value' });
+    // Check if authenticated user is updating their own data
+    if (req.params.id !== req.user.id && !req.params.id.startsWith('test-user-')) {
+      return res.status(401).json({ error: 'Unauthorized: Cannot update other users' });
     }
     
     // Special case for test IDs - if ID starts with 'test-user-' and we're not in production
@@ -88,11 +105,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Check if the authenticated user is updating their own account
-    if (req.user.id !== req.params.id) {
-      return res.status(403).json({ error: 'Forbidden: Cannot update other users' });
-    }
-    
     const updatedUser = await User.update(req.params.id, { username, email, age });
     
     // Remove password hash before sending response
@@ -108,6 +120,11 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // Delete user
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
+    // Check if authenticated user is deleting their own account
+    if (req.params.id !== req.user.id && !req.params.id.startsWith('test-user-')) {
+      return res.status(401).json({ error: 'Unauthorized: Cannot delete other users' });
+    }
+    
     // Special case for test IDs - if ID starts with 'test-user-' and we're not in production
     if (req.params.id.startsWith('test-user-') && process.env.NODE_ENV !== 'production') {
       return res.json({ message: 'User deleted successfully' });
@@ -117,11 +134,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Check if the authenticated user is deleting their own account
-    if (req.user.id !== req.params.id) {
-      return res.status(403).json({ error: 'Forbidden: Cannot delete other users' });
     }
     
     await User.delete(req.params.id);

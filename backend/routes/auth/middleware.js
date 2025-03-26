@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 
 // In-memory storage for refresh tokens
 // In production, this would be stored in a database
-export const refreshTokens = new Map();
+export const refreshTokens = new Set();
 
 /**
  * Middleware to verify JWT token
@@ -30,22 +30,38 @@ export const verifyToken = (req, res, next) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
+    // Verify token format
+    if (!/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/.test(token)) {
+      return res.status(401).json({ error: 'Invalid token format', code: 'INVALID_TOKEN' });
+    }
+
     try {
       // Verify token
       const decoded = jwt.verify(token, JWT_SECRET);
+      
+      // Ensure decoded token has the required fields
+      if (!decoded.id || !decoded.email) {
+        return res.status(401).json({ error: 'Invalid token payload', code: 'INVALID_TOKEN' });
+      }
+      
       req.user = decoded;
       next();
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+      } else if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
       }
-      return res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ error: 'Authentication failed', code: 'AUTH_FAILED' });
     }
   } catch (error) {
     console.error('Token verification error:', error);
     res.status(500).json({ error: 'Authentication error' });
   }
 };
+
+// Alias for verifyToken to maintain compatibility with both naming styles
+export const authenticateToken = verifyToken;
 
 /**
  * Optional token verification
