@@ -1,17 +1,19 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { refreshTokens } from './middleware.js';
+import crypto from 'crypto';
 
 const router = express.Router();
 
 // Refresh token endpoint
 router.post('/', async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-    
-    if (!refreshToken) {
+    // Check if refresh token exists in the request
+    if (!req.body.refreshToken) {
       return res.status(400).json({ error: 'Refresh token is required' });
     }
+    
+    const { refreshToken } = req.body;
     
     // Check if refresh token exists in our store
     if (!refreshTokens.has(refreshToken)) {
@@ -25,15 +27,20 @@ router.post('/', async (req, res) => {
         return res.status(401).json({ error: 'Invalid or expired refresh token' });
       }
       
-      // Generate new access token with a unique jti (JWT ID) to ensure it's different
+      // Generate a truly unique set of identifiers
+      const uniqueId = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+      const randomNonce = crypto.randomBytes(16).toString('hex');
+      
       const token = jwt.sign(
         { 
           id: user.id, 
           email: user.email,
-          jti: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}` // Add unique JWT ID
+          jti: uniqueId,
+          nonce: randomNonce,
+          iat: Math.floor(Date.now() / 1000)
         },
         process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '15m' } // Shorter expiry to ensure it's different
+        { expiresIn: '15m' }
       );
       
       res.json({ token });
