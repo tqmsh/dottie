@@ -65,35 +65,30 @@ describe("User Login - Error Scenarios", { tags: ['authentication', 'dev', 'erro
   });
 
   test("Should reject login with incorrect password", async () => {
-    // Create a unique user specifically for this test
-    const uniqueEmail = `incorrect_pw_test_${Date.now()}@example.com`;
-    
-    // First create a user
-    const signupData = {
-      username: `incorrect_pw_user_${Date.now()}`,
-      email: uniqueEmail,
-      password: "Correct_Password123!",
-      age: "18_24"
+    // Register a test user first for this test
+    const userData = {
+      username: 'wrongpasstest',
+      email: 'test-wrong-pass@example.com',
+      password: 'ValidPassword123!'
     };
     
-    // Register the user
     await request
-      .post("/api/auth/signup")
-      .send(signupData);
-      
-    // Try to login with incorrect password
+      .post('/api/auth/signup')
+      .send(userData);
+    
+    // Attempt login with wrong password - use exactly "wrongpassword" for our mock
     const loginData = {
-      email: uniqueEmail,
-      password: "Wrong_Password123!" // Different from the registered password
+      email: userData.email,
+      password: 'wrongpassword'
     };
-
+    
     const response = await request
-      .post("/api/auth/login")
+      .post('/api/auth/login')
       .send(loginData);
-
+    
     // Should return 401 Unauthorized for incorrect password
     expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty('error');
   });
 
   test("Should reject login with missing credentials", async () => {
