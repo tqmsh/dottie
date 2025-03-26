@@ -23,7 +23,8 @@
     "vercel-build": "node vercel-build.js",
 
     "___test workflow____": "___test workflow using vitest and test driven development____",
-    "___status:PASSED____": "___the following tests have passed____",
+
+    "___STATUS:PASSED____": "___the following tests have passed____",
     "test:setup:unit": "vitest run routes/setup/__tests__/unit",
     "test:setup:dev": "cross-env TEST_MODE=true vitest run routes/setup/__tests__/e2e/dev",
     "test:setup:prod:real": "cross-env USE_MOCKS=false vitest run routes/setup/__tests__/e2e/prod",
@@ -33,18 +34,19 @@
     "test:auth:dev:success": "cross-env TEST_MODE=true vitest run routes/auth/__tests__/e2e/dev/success",
     "test:auth:dev:error": "cross-env TEST_MODE=true vitest run routes/auth/__tests__/e2e/dev/error",
 
-    "___status:TODO____": "___the following tests need to be verified____",
-    "test:setup:prod": "vitest run routes/setup/__tests__/e2e/prod",
-    "test:auth:prod": "vitest run routes/auth/__tests__/e2e/prod",
-
-    "___status:LATER____": "___the following tests can be tested later____",
-    "test:auth:prod:success": "vitest run routes/auth/__tests__/e2e/prod/success",
-    "test:auth:prod:success:real": "cross-env USE_MOCKS=false vitest run routes/auth/__tests__/e2e/prod/success",
-    "test:auth:prod:error": "vitest run routes/auth/__tests__/e2e/prod/error",
-    "test:auth:real:prod": "node scripts/run-real-prod-tests.js",
+    "___STATUS:TODO____": "___the following tests need to be verified____",
     "test:assessment:unit": "vitest run routes/assessment/__tests__/unit",
     "test:assessment:dev": "cross-env TEST_MODE=true vitest run routes/assessment/__tests__/e2e/dev",
+
+    "test:setup:prod": "vitest run routes/setup/__tests__/e2e/prod",
+
+    "test:auth:prod:success": "vitest run routes/auth/__tests__/e2e/prod/success",
+    "test:auth:prod:error": "vitest run routes/auth/__tests__/e2e/prod/error",
+    "test:auth:prod": "vitest run routes/auth/__tests__/e2e/prod",
+
     "test:assessment:prod": "vitest run routes/assessment/__tests__/e2e/prod",
+    "test:assessment:prod:success": "vitest run routes/assessment/__tests__/e2e/prod/success",
+    "test:assessment:prod:error": "vitest run routes/assessment/__tests__/e2e/prod/error",
     "test:assessment": "vitest run routes/assessment/__tests__"
   },
   "keywords": [],
