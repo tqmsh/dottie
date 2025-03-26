@@ -68,19 +68,32 @@ if (useAzure) {
 
 // Create a mock database object for testing
 const testDb = function(tableName) {
+  const mockData = {
+    users: [
+      {
+        id: 'test-user-1',
+        username: 'Test User 1',
+        email: 'test1@example.com',
+        age: '18_24'
+      }
+    ]
+  };
+
   return {
     where: (field, value) => ({
-      first: () => Promise.resolve(null),
-      delete: () => Promise.resolve(0),
-      update: () => Promise.resolve(0),
+      first: () => Promise.resolve(mockData[tableName]?.find(item => item[field] === value) || null),
+      delete: () => Promise.resolve(1),
+      update: () => Promise.resolve(1),
       orderBy: () => ({
-        first: () => Promise.resolve(null)
+        first: () => Promise.resolve(mockData[tableName]?.[0] || null)
       })
     }),
     insert: () => Promise.resolve([1]),
     orderBy: () => ({
-      first: () => Promise.resolve(null)
-    })
+      first: () => Promise.resolve(mockData[tableName]?.[0] || null)
+    }),
+    // Return the mock data array for the table
+    then: (resolve) => resolve(mockData[tableName] || [])
   };
 };
 

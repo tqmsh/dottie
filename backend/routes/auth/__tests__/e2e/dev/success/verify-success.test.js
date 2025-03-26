@@ -22,7 +22,7 @@ const TEST_PORT = 5014;
 const createToken = (userId) => {
   return jwt.sign(
     { id: userId, email: `verify_${Date.now()}@example.com` },
-    process.env.JWT_SECRET || 'your-secret-key',
+    process.env.JWT_SECRET || 'dev-jwt-secret',
     { expiresIn: '1h' }
   );
 };

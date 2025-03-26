@@ -134,7 +134,7 @@ describe("User Logout - Success Scenarios", () => {
   test("Should allow re-login after logout", async () => {
     // Create a user with known credentials for this specific test
     const username = `relogin_${Date.now()}`;
-    const email = `relogin_${Date.now()}@example.com`;
+    const email = `test_${Date.now()}@example.com`; // Changed to test_ prefix
     const password = "Password123!";
     
     // Scope for storing tokens within this test
@@ -177,6 +177,9 @@ describe("User Logout - Success Scenarios", () => {
         .send({ refreshToken: firstRefreshToken });
       
       expect(logoutResponse.status).toBe(200);
+      
+      // Add a small delay to ensure logout is processed
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Login again with same credentials
       const secondLogin = await request

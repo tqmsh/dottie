@@ -37,7 +37,7 @@ router.post('/', authenticateToken, (req, res) => {
     // Remove refresh token from store (if it exists)
     refreshTokens.delete(refreshToken);
     
-    res.json({ message: 'logged out successfully' });
+    res.json({ message: 'Logged out' });
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ error: 'Logout failed' });
