@@ -41,17 +41,39 @@ describe('Vercel Azure SQL Production Integration Tests', () => {
       } else {
         console.log(`API is using ${data.dbType} - Message: ${data.message}`);
       }
+    } else if (response.status === 504) {
+      // Log response for debugging
+      try {
+        const text = await response.text();
+        console.error('Response body:', text);
+      } catch (error) {
+        console.error('Could not read response body');
+      }
+      
+      // Fail the test on timeout to highlight database connection issues
+      throw new Error(`SQL hello endpoint returned timeout (504) - Database connection issue detected. Please verify Azure SQL credentials in production environment.`);
+    } else if (response.status === 500) {
+      // Log response for debugging
+      try {
+        const text = await response.text();
+        console.error('Response body:', text);
+      } catch (error) {
+        console.error('Could not read response body');
+      }
+      
+      // Fail the test on server error
+      throw new Error(`SQL hello endpoint returned server error (500). Please check server logs.`);
     } else {
       // Log response for debugging
       try {
         const text = await response.text();
-        console.log('Response body:', text);
+        console.error('Response body:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // For now, allow non-200 statuses for debugging
-      console.log(`Endpoint returned status ${response.status}`);
+      // Fail on any other non-200 status
+      throw new Error(`SQL hello endpoint returned unexpected status ${response.status}`);
     }
   }, TEST_TIMEOUT);
   
@@ -72,19 +94,41 @@ describe('Vercel Azure SQL Production Integration Tests', () => {
       
       console.log('Database status:', data.status);
       
-      // Ideally should be connected, but allow other states for debugging
-      expect(data.status).toBeDefined();
+      // Verify database is actually connected
+      expect(data.status).toBe('connected');
+    } else if (response.status === 504) {
+      // Log response for debugging
+      try {
+        const text = await response.text();
+        console.error('Response body:', text);
+      } catch (error) {
+        console.error('Could not read response body');
+      }
+      
+      // Fail the test on timeout to highlight database connection issues
+      throw new Error(`DB status endpoint returned timeout (504) - Database connection issue detected. Please verify Azure SQL credentials in production environment.`);
+    } else if (response.status === 500) {
+      // Log response for debugging
+      try {
+        const text = await response.text();
+        console.error('Response body:', text);
+      } catch (error) {
+        console.error('Could not read response body');
+      }
+      
+      // Fail the test on server error
+      throw new Error(`DB status endpoint returned server error (500). Please check server logs.`);
     } else {
       // Log response for debugging
       try {
         const text = await response.text();
-        console.log('Response body:', text);
+        console.error('Response body:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // For now, allow non-200 statuses for debugging
-      console.log(`DB status endpoint returned status ${response.status}`);
+      // Fail on any other non-200 status
+      throw new Error(`DB status endpoint returned unexpected status ${response.status}`);
     }
   }, TEST_TIMEOUT);
 }); 
