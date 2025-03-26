@@ -1,4 +1,5 @@
 import { resolveFromRoot } from '../../../../test-utilities/paths.js';
+import { vi } from 'vitest';
 
 // Import models and controllers directly from their absolute paths
 export const importModels = async () => {
@@ -10,10 +11,10 @@ export const importModels = async () => {
     // Return mock models for testing if imports fail
     return {
       User: {
-        create: jest.fn(),
-        findByEmail: jest.fn(),
-        findById: jest.fn(),
-        update: jest.fn(),
+        create: vi.fn(),
+        findByEmail: vi.fn(),
+        findById: vi.fn(),
+        update: vi.fn(),
       }
     };
   }
@@ -24,12 +25,12 @@ export const setupMocks = () => {
   return {
     db: {
       // Add mock db functions as needed
-      query: jest.fn(),
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      from: jest.fn().mockReturnThis(),
-      insert: jest.fn(),
-      returning: jest.fn(),
+      query: vi.fn(),
+      select: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      from: vi.fn().mockReturnThis(),
+      insert: vi.fn(),
+      returning: vi.fn(),
     },
     // Add other mocks as needed
   };
