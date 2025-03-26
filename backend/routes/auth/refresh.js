@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
           nonce: randomNonce,
           iat: Math.floor(Date.now() / 1000)
         },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET || 'dev-jwt-secret',
         { expiresIn: '15m' }
       );
       
