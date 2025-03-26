@@ -66,62 +66,79 @@ if (useAzure) {
   console.log('Using SQLite database');
 }
 
-// Initialize database connection
-const db = knex(dbConfig);
-
-// Handle connection errors
-db.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-});
-
-// Only verify connection in non-serverless environment
-// Check if we're in a serverless environment (Vercel)
-const isServerless = process.env.VERCEL === '1';
-
-// Verify connection in non-serverless environments
-if (useAzure && !isServerless) {
-  db.raw('SELECT 1')
-    .then(() => {
-      console.log('Successfully connected to Azure SQL Database');
+// Create a mock database object for testing
+const testDb = function(tableName) {
+  return {
+    where: (field, value) => ({
+      first: () => Promise.resolve(null),
+      delete: () => Promise.resolve(0),
+      update: () => Promise.resolve(0),
+      orderBy: () => ({
+        first: () => Promise.resolve(null)
+      })
+    }),
+    insert: () => Promise.resolve([1]),
+    orderBy: () => ({
+      first: () => Promise.resolve(null)
     })
-    .catch((err) => {
-      console.error('Failed to connect to Azure SQL Database:', err);
-    });
-}
+  };
+};
 
-// For testing, we'll just export a mock database object
-const testDb = {
-  // Test mode flag
-  isTestMode: process.env.TEST_MODE === 'true',
-  
-  // Mock schema checking (for test setup)
-  schema: {
-    hasTable: async (tableName) => {
-      console.log(`Mock checking if table ${tableName} exists`);
-      return false; // Always say tables don't exist in test mode
-    },
-    createTable: async (tableName, tableBuilder) => {
-      console.log(`Mock creating table ${tableName}`);
-      return true;
-    }
+// Add additional methods to the test database
+testDb.schema = {
+  hasTable: async (tableName) => {
+    console.log(`Mock checking if table ${tableName} exists`);
+    return false; // Always say tables don't exist in test mode
   },
-  
-  // Add a raw method for testing
-  raw: async (query) => {
-    console.log(`Mock executing raw query: ${query}`);
-    if (query.includes('1')) {
-      return [{ testValue: 1 }];
-    } else {
-      return [{ message: 'Hello World from Mock DB!' }];
-    }
-  },
-  
-  // Mock database destruction
-  destroy: async () => {
-    console.log('Mock database connection closed');
+  createTable: async (tableName, tableBuilder) => {
+    console.log(`Mock creating table ${tableName}`);
     return true;
   }
 };
 
+// Add a raw method for testing
+testDb.raw = async (query) => {
+  console.log(`Mock executing raw query: ${query}`);
+  if (query.includes('1')) {
+    return [{ testValue: 1 }];
+  } else {
+    return [{ message: 'Hello World from Mock DB!' }];
+  }
+};
+
+// Mock database destruction
+testDb.destroy = async () => {
+  console.log('Mock database connection closed');
+  return true;
+};
+
+// Initialize database connection or use mock for tests
+let db;
+if (isTestMode) {
+  db = testDb;
+} else {
+  db = knex(dbConfig);
+  
+  // Handle connection errors
+  db.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+  });
+  
+  // Only verify connection in non-serverless environment
+  // Check if we're in a serverless environment (Vercel)
+  const isServerless = process.env.VERCEL === '1';
+  
+  // Verify connection in non-serverless environments
+  if (useAzure && !isServerless) {
+    db.raw('SELECT 1')
+      .then(() => {
+        console.log('Successfully connected to Azure SQL Database');
+      })
+      .catch((err) => {
+        console.error('Failed to connect to Azure SQL Database:', err);
+      });
+  }
+}
+
 // Export the database object
-export default testDb;
+export default db;
