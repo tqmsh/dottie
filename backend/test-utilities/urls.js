@@ -17,10 +17,12 @@ export const getEnvironment = () => {
 // Get API URL for the current or specified environment
 export const getApiUrl = (env = getEnvironment()) => {
   const urlType = env in URLS ? env : 'DEV';
-  // Enable mock mode for all auth:prod tests
-  if (process.env.npm_lifecycle_script?.includes('test:auth:prod')) {
+  
+  // Enable mock mode for all auth:prod tests unless explicitly disabled
+  if (process.env.npm_lifecycle_script?.includes('test:auth:prod') && process.env.USE_MOCKS !== 'false') {
     process.env.USE_MOCKS = 'true';
     return URLS[urlType];
   }
+  
   return URLS[urlType];
 }; 
