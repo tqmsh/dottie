@@ -124,20 +124,30 @@ describe("Authentication Error Integration Tests", () => {
     });
     
     test("Should reject signup with duplicate email", async () => {
-      // Try to register with the same email as the test user
-      const duplicateUser = {
-        username: "duplicate_user",
-        email: testUser.email, // Using the same email as the test user
-        password: "DifferentPass123!",
-        age: "25_34"
+      // First create a user
+      const firstUser = {
+        username: 'first_user',
+        email: 'first@example.com',
+        password: 'Password123!'
       };
-      
+
+      await request
+        .post('/api/auth/signup')
+        .send(firstUser);
+
+      // Try to create another user with a duplicate email
+      const duplicateUser = {
+        username: 'duplicate_user',
+        email: 'duplicate@example.com',
+        password: 'Password123!'
+      };
+
       const response = await request
-        .post("/api/auth/signup")
+        .post('/api/auth/signup')
         .send(duplicateUser);
-      
+
       expect(response.status).toBe(409);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
   
