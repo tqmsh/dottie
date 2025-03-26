@@ -15,7 +15,7 @@ export default function CycleLengthPage() {
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+        <img src="/public/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link to="/" className="text-gray-500">

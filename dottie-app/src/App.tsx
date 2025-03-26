@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
+import WelcomePage from './LandingPage'
 
 // Import assessment components
 import AgeVerification from './components/assessment/age-verification/page'
@@ -19,7 +20,7 @@ function App() {
     <BrowserRouter>
       <main className="flex min-h-screen flex-col">
         <Routes>
-          <Route path="/" element={<Navigate to="/assessment/age-verification" replace />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="/assessment/age-verification" element={<AgeVerification />} />
           <Route path="/assessment/cycle-length" element={<CycleLength />} />
           <Route path="/assessment/period-duration" element={<PeriodDuration />} />
