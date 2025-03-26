@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 
 // Create a supertest instance
@@ -109,7 +109,7 @@ describe("User Signup - Error Scenarios", { tags: ['authentication', 'dev', 'err
       .post("/api/auth/signup")
       .send(duplicateUserData);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(409);
     expect(response.body).toHaveProperty("error");
   });
 }); 
