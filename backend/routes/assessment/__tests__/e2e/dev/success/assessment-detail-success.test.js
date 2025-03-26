@@ -87,12 +87,8 @@ afterAll(async () => {
 
 describe("Assessment Detail Endpoint - Success Cases", () => {
   // Test getting a specific assessment by ID
-  test.skip("GET /api/assessment/:id - should successfully return assessment details", async () => {
+  test("GET /api/assessment/:id - should successfully return assessment details", async () => {
     console.log('Running test with assessment ID:', testAssessmentId);
-    
-    // This test is skipped due to authentication issues in the test environment
-    // The token is correctly formed and decoded, but there's an issue with the route handler
-    // This needs further investigation
     
     const response = await request
       .get(`/api/assessment/${testAssessmentId}`)
