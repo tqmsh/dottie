@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../test-server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 
@@ -21,7 +21,7 @@ const TEST_PORT = 5004;
 const createMockToken = (userId) => {
   return jwt.sign(
     { id: userId, email: `test_${Date.now()}@example.com` },
-    process.env.JWT_SECRET || 'your-secret-key',
+    'test-secret-key',
     { expiresIn: '1h' }
   );
 };
