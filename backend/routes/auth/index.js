@@ -8,6 +8,18 @@ import { verifyToken, refreshTokens } from './middleware.js';
 
 const router = express.Router();
 
+// Helper functions for validation
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function isStrongPassword(password) {
+  // At least 8 characters, with at least one uppercase, one lowercase, one number and one special character
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_#])[A-Za-z\d@$!%*?&_#]{8,}$/;
+  return passwordRegex.test(password);
+}
+
 // Environment variables with defaults
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'dev-refresh-secret';
@@ -34,6 +46,11 @@ router.post('/login', async (req, res) => {
     // Validate request
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     // Find user
@@ -64,7 +81,7 @@ router.post('/login', async (req, res) => {
     );
 
     // Store refresh token (in-memory for dev, DB for prod)
-    refreshTokens.set(refreshToken, { userId: user.id, createdAt: new Date() });
+    refreshTokens.add(refreshToken);
 
     // Set tokens in cookies for enhanced security
     res.cookie('refreshToken', refreshToken, {
@@ -98,6 +115,16 @@ router.post('/signup', async (req, res) => {
     // Validate request
     if (!email || !username || !password) {
       return res.status(400).json({ error: 'Email, username, and password are required' });
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate password strength
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters and include uppercase, lowercase, number and special character' });
     }
 
     // Check if user already exists
@@ -137,7 +164,7 @@ router.post('/signup', async (req, res) => {
     );
 
     // Store refresh token
-    refreshTokens.set(refreshToken, { userId: newUser.id, createdAt: new Date() });
+    refreshTokens.add(refreshToken);
 
     // Set cookie
     res.cookie('refreshToken', refreshToken, {
@@ -194,8 +221,8 @@ router.post('/refresh', async (req, res) => {
     }
 
     // Check if token exists in our storage
-    const storedToken = refreshTokens.get(refreshToken);
-    if (!storedToken || storedToken.userId !== decoded.userId) {
+    const storedToken = refreshTokens.has(refreshToken);
+    if (!storedToken) {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
 
@@ -220,7 +247,7 @@ router.post('/refresh', async (req, res) => {
 
     // Remove old token and store new one
     refreshTokens.delete(refreshToken);
-    refreshTokens.set(newRefreshToken, { userId: user.id, createdAt: new Date() });
+    refreshTokens.add(newRefreshToken);
 
     // Update cookie
     res.cookie('refreshToken', newRefreshToken, {
@@ -242,10 +269,14 @@ router.post('/refresh', async (req, res) => {
 });
 
 // Logout endpoint
-router.post('/logout', (req, res) => {
+router.post('/logout', verifyToken, (req, res) => {
   try {
     // Get refresh token from cookies or body
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
 
     if (refreshToken) {
       // Remove from storage

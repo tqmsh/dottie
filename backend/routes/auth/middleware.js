@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 
 // In-memory storage for refresh tokens
 // In production, this would be stored in a database
-export const refreshTokens = new Map();
+export const refreshTokens = new Set();
 
 /**
  * Middleware to verify JWT token
@@ -46,6 +46,9 @@ export const verifyToken = (req, res, next) => {
     res.status(500).json({ error: 'Authentication error' });
   }
 };
+
+// Alias for verifyToken to maintain compatibility with both naming styles
+export const authenticateToken = verifyToken;
 
 /**
  * Optional token verification
