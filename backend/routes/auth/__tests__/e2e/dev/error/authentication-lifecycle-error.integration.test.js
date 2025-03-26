@@ -136,7 +136,7 @@ describe("Authentication Error Integration Tests", () => {
         .post("/api/auth/signup")
         .send(duplicateUser);
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.body).toHaveProperty("error");
     });
   });

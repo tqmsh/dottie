@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 
@@ -90,6 +90,7 @@ describe("Token Verification - Success Scenarios", () => {
     expect(response.body).toHaveProperty("authenticated", true);
     expect(response.body).toHaveProperty("user");
     expect(response.body.user).toHaveProperty("id");
+    expect(response.body.user).toHaveProperty("verified_at");
   });
 
   test("Should verify token from login", async () => {
@@ -129,6 +130,7 @@ describe("Token Verification - Success Scenarios", () => {
       expect(verifyResponse.status).toBe(200);
       expect(verifyResponse.body).toHaveProperty("authenticated", true);
       expect(verifyResponse.body.user).toHaveProperty("email", testUser.email);
+      expect(verifyResponse.body.user).toHaveProperty("verified_at");
     } catch (error) {
       // Fail the test with the error rather than silently skipping
       expect(error).toBeUndefined();

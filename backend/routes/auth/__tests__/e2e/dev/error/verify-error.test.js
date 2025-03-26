@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 
@@ -52,6 +52,7 @@ describe("Token Verification - Error Scenarios", { tags: ['authentication', 'dev
 
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty("code", "INVALID_TOKEN");
   });
 
   test("Should reject request with expired token", async () => {
@@ -71,6 +72,7 @@ describe("Token Verification - Error Scenarios", { tags: ['authentication', 'dev
 
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty("code", "TOKEN_EXPIRED");
   });
 
   test("Should reject request with token signed with wrong secret", async () => {
@@ -87,6 +89,7 @@ describe("Token Verification - Error Scenarios", { tags: ['authentication', 'dev
 
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty("code", "INVALID_TOKEN");
   });
 
   test("Should reject request with invalid token format", async () => {
