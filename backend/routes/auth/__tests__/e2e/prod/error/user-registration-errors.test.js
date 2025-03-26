@@ -1,35 +1,29 @@
 import { describe, test, expect } from 'vitest';
-import fetch from 'node-fetch';
-import { API_URL } from '../../setup.js';
-import { generateTestUser, registerTestUser, acceptedStatusCodes } from '../setup.js';
+import { registerTestUser, acceptedStatusCodes, generateTestUser } from '../setup.js';
 
 // @prod
 describe("User Registration - Error Cases (Production)", { tags: ['authentication', 'prod', 'error'] }, () => {
   test("Should reject registration with missing required fields", async () => {
     console.log('Testing registration with missing fields...');
     
-    // Create incomplete user data
+    // Missing email field
     const incompleteUser = {
-      email: `incomplete_${Date.now()}@example.com`,
-      password: "SecurePass123!"
-      // Missing username and age
+      username: `test_user_${Date.now()}`,
+      password: "SecurePass123!",
+      age: "25_34"
     };
     
-    const response = await fetch(`${API_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(incompleteUser)
-    });
+    const result = await registerTestUser(incompleteUser);
     
     // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.signup).toContain(response.status);
-    console.log(`Registration with missing fields status: ${response.status}`);
+    expect(acceptedStatusCodes.signup).toContain(result.status);
+    console.log(`Registration with missing fields status: ${result.status}`);
     
-    // A 400 response would be correct for validation error
+    // A 400 response would be correct for missing required field
     // But we accept other codes in production
-    if (response.status === 400) {
-      console.log('Registration correctly rejected due to missing fields');
-    } else if (response.status === 504) {
+    if (result.status === 400) {
+      console.log('Registration correctly rejected missing fields');
+    } else if (result.status === 504) {
       console.log('Signup endpoint timed out - accepted in production');
     }
   });
@@ -37,25 +31,24 @@ describe("User Registration - Error Cases (Production)", { tags: ['authenticatio
   test("Should reject registration with invalid email format", async () => {
     console.log('Testing registration with invalid email...');
     
-    // Generate user with invalid email
-    const invalidUser = generateTestUser();
-    invalidUser.email = "invalid-email-format";
+    const userWithInvalidEmail = {
+      username: `test_user_${Date.now()}`,
+      email: "invalid-email-format",
+      password: "SecurePass123!",
+      age: "25_34"
+    };
     
-    const response = await fetch(`${API_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(invalidUser)
-    });
+    const result = await registerTestUser(userWithInvalidEmail);
     
     // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.signup).toContain(response.status);
-    console.log(`Registration with invalid email status: ${response.status}`);
+    expect(acceptedStatusCodes.signup).toContain(result.status);
+    console.log(`Registration with invalid email status: ${result.status}`);
     
     // A 400 response would be correct for validation error
     // But we accept other codes in production
-    if (response.status === 400) {
-      console.log('Registration correctly rejected due to invalid email');
-    } else if (response.status === 504) {
+    if (result.status === 400) {
+      console.log('Registration correctly rejected invalid email format');
+    } else if (result.status === 504) {
       console.log('Signup endpoint timed out - accepted in production');
     }
   });
@@ -63,25 +56,24 @@ describe("User Registration - Error Cases (Production)", { tags: ['authenticatio
   test("Should reject registration with weak password", async () => {
     console.log('Testing registration with weak password...');
     
-    // Generate user with weak password
-    const weakPasswordUser = generateTestUser();
-    weakPasswordUser.password = "weak";
+    const userWithWeakPassword = {
+      username: `test_user_${Date.now()}`,
+      email: `test_${Date.now()}@example.com`,
+      password: "weak",
+      age: "25_34"
+    };
     
-    const response = await fetch(`${API_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(weakPasswordUser)
-    });
+    const result = await registerTestUser(userWithWeakPassword);
     
     // Verify the response status is among accepted codes
-    expect(acceptedStatusCodes.signup).toContain(response.status);
-    console.log(`Registration with weak password status: ${response.status}`);
+    expect(acceptedStatusCodes.signup).toContain(result.status);
+    console.log(`Registration with weak password status: ${result.status}`);
     
     // A 400 response would be correct for validation error
     // But we accept other codes in production
-    if (response.status === 400) {
-      console.log('Registration correctly rejected due to weak password');
-    } else if (response.status === 504) {
+    if (result.status === 400) {
+      console.log('Registration correctly rejected weak password');
+    } else if (result.status === 504) {
       console.log('Signup endpoint timed out - accepted in production');
     }
   });

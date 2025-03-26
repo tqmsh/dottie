@@ -40,16 +40,21 @@ export const verifyToken = (req, res, next) => {
       const decoded = jwt.verify(token, JWT_SECRET);
       
       // Ensure decoded token has the required fields
-      if (!decoded.id || !decoded.email) {
+      if (!decoded.userId && !decoded.id) {
         return res.status(401).json({ error: 'Invalid token payload', code: 'INVALID_TOKEN' });
       }
       
-      req.user = decoded;
+      // Map userId to id for consistency if needed
+      req.user = {
+        id: decoded.userId || decoded.id,
+        email: decoded.email
+      };
+      
       next();
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
+      if (error instanceof jwt.TokenExpiredError) {
         return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
-      } else if (error.name === 'JsonWebTokenError') {
+      } else if (error instanceof jwt.JsonWebTokenError) {
         return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
       }
       return res.status(401).json({ error: 'Authentication failed', code: 'AUTH_FAILED' });

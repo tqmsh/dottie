@@ -94,42 +94,42 @@ describe('Vercel Azure SQL Connection Tests', () => {
       } catch (error) {
         console.log('Could not read response body');
       }
-      
-      // Pass the test since 401 means the API is running
     } else if (response.status === 504) {
-      // 504 Gateway Timeout is expected when the database connection times out
-      console.log('API endpoint timed out (504) - this indicates the API is running but database connection timed out');
+      // 504 Gateway Timeout should fail the test to highlight the issue
+      console.error('API endpoint timed out (504) - DATABASE CONNECTION ISSUE DETECTED');
       
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // Pass the test since 504 means the API is running but the database connection timed out
+      // Fail the test to highlight database connection issues
+      throw new Error('Database connection timed out - Please verify Azure SQL credentials in production environment');
     } else if (response.status === 500) {
-      // TEMPORARILY ALLOW 500 STATUS DURING DEVELOPMENT
-      console.log('API returned 500 status - accepting this during development');
+      // 500 Internal Server Error should fail the test
+      console.error('API returned 500 status - SERVER ERROR DETECTED');
       
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // Pass the test temporarily
+      // Fail the test to highlight server errors
+      throw new Error('Server error detected - Please check server logs');
     } else {
       // Show response but fail the test on any other status
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // Fail the test with a clear message for non-200/401/504/500 status
+      // Fail the test with a clear message for non-200/401 status
       throw new Error(`API returned unexpected status: ${response.status}`);
     }
   }, TEST_TIMEOUT);
@@ -160,7 +160,7 @@ describe('Vercel Azure SQL Connection Tests', () => {
       if (data.status === 'connected') {
         console.log('Database status check successful, connection is active');
       } else {
-        console.log('Database is not connected, status:', data.status);
+        console.error('Database is not connected, status:', data.status);
         throw new Error(`Database is not connected, status: ${data.status}`);
       }
     } else if (response.status === 401) {
@@ -173,39 +173,39 @@ describe('Vercel Azure SQL Connection Tests', () => {
       } catch (error) {
         console.log('Could not read response body');
       }
-      
-      // Pass the test since 401 means the API is running
     } else if (response.status === 504) {
-      // 504 Gateway Timeout is expected when the database connection times out
-      console.log('DB status endpoint timed out (504) - this indicates the endpoint is running but database connection timed out');
+      // 504 Gateway Timeout should fail the test to highlight the issue
+      console.error('DB status endpoint timed out (504) - DATABASE CONNECTION ISSUE DETECTED');
       
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // Pass the test since 504 means the API is running but the database connection timed out
+      // Fail the test to highlight database connection issues
+      throw new Error('Database connection timed out - Please verify Azure SQL credentials in production environment');
     } else if (response.status === 500) {
-      // TEMPORARILY ALLOW 500 STATUS DURING DEVELOPMENT
-      console.log('DB status endpoint returned 500 status - accepting this during development');
+      // 500 Internal Server Error should fail the test
+      console.error('DB status endpoint returned 500 status - SERVER ERROR DETECTED');
       
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
-      // Pass the test temporarily
+      // Fail the test to highlight server errors
+      throw new Error('Server error detected - Please check server logs');
     } else {
       // Show response but fail the test
       try {
         const text = await response.text();
-        console.log('Response (first 100 chars):', text.substring(0, 100));
+        console.error('Response:', text);
       } catch (error) {
-        console.log('Could not read response body');
+        console.error('Could not read response body');
       }
       
       // Fail the test with a clear message for any other status
