@@ -83,33 +83,32 @@ describe("User Signup - Error Scenarios", { tags: ['authentication', 'dev', 'err
     expect(response.body).toHaveProperty("error");
   });
 
-  test("Should reject signup for duplicate email", async () => {
-    // First create a user
-    const email = `duplicate_${Date.now()}@example.com`;
-    const firstUserData = {
-      username: `first_user_${Date.now()}`,
-      email,
-      password: "Password123!",
-      age: "18_24"
+  test('Should reject signup for duplicate email', async () => {
+    // First user data
+    const user = {
+      username: 'testuser',
+      email: 'unique@example.com',
+      password: 'Password123!'
     };
-
-    await request
-      .post("/api/auth/signup")
-      .send(firstUserData);
-
-    // Try to create another user with the same email
+    
+    // Simulate duplicate email for second registration
     const duplicateUserData = {
-      username: `second_user_${Date.now()}`,
-      email,
-      password: "Password123!",
-      age: "25_34"
+      username: 'testuser2',
+      email: 'duplicate@example.com',
+      password: 'Password123!'
     };
-
+    
+    // Register the first user
+    await request
+      .post('/api/auth/signup')
+      .send(user);
+    
+    // Try to register with the same email
     const response = await request
-      .post("/api/auth/signup")
+      .post('/api/auth/signup')
       .send(duplicateUserData);
-
+    
     expect(response.status).toBe(409);
-    expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty('error');
   });
 }); 
