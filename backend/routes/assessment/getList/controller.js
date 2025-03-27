@@ -2,13 +2,18 @@ import { assessments } from "../store/index.js";
 import db from "../../../db/index.js";
 
 /**
- * Get list of all assessments for a specific user
+ * Get list of all assessments for the authenticated user
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 export const listAssessments = async (req, res) => {
   try {
-    const { userId } = req.params;
+    // Get userId from authenticated user
+    const userId = req.user.userId;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
     
     // For test users, try to fetch from the database
     if (userId.startsWith('test-')) {

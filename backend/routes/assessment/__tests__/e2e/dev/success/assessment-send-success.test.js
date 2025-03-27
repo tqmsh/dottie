@@ -97,7 +97,6 @@ describe("Assessment Send Endpoint - Success Cases", () => {
   test("POST /api/assessment/send - should successfully send assessment results", async () => {
     // Create assessment data according to the format in README
     const assessmentData = {
-      userId: testUserId,
       assessmentData: {
         age: "18_24",
         cycleLength: "26_30",

@@ -5,9 +5,9 @@ import { getAssessmentDetail } from "./controller.js";
 const router = express.Router();
 
 /**
- * Get detailed view of a specific assessment by user ID / assessment ID
- * GET /api/assessment/:userId/:assessmentId
+ * Get detailed view of a specific assessment by its ID
+ * GET /api/assessment/:id
  */
-router.get("/:userId/:assessmentId", authenticateToken, getAssessmentDetail);
+router.get("/:id", authenticateToken, getAssessmentDetail);
 
 export default router; 

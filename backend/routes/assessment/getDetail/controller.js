@@ -2,13 +2,22 @@ import { assessments } from "../store/index.js";
 import db from "../../../db/index.js";
 
 /**
- * Get detailed view of a specific assessment by user ID / assessment ID
+ * Get detailed view of a specific assessment by its ID
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 export const getAssessmentDetail = async (req, res) => {
   try {
-    const { userId, assessmentId } = req.params;
+    const assessmentId = req.params.id;
+    const userId = req.user.userId;
+    
+    if (!assessmentId) {
+      return res.status(400).json({ error: 'Assessment ID is required' });
+    }
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
     
     // For test IDs, try to fetch from the database
     if (assessmentId.startsWith('test-')) {

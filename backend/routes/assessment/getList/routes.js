@@ -5,9 +5,9 @@ import { listAssessments } from "./controller.js";
 const router = express.Router();
 
 /**
- * Get list of all assessments for a specific user
- * GET /api/assessment/:userId
+ * Get list of all assessments for the authenticated user
+ * GET /api/assessment/list
  */
-router.get("/:userId", authenticateToken, listAssessments);
+router.get("/list", authenticateToken, listAssessments);
 
 export default router; 

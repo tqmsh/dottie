@@ -10,7 +10,8 @@ import { validateAssessmentData } from "../validators/index.js";
  */
 export const createAssessment = async (req, res) => {
   try {
-    const { userId } = req.params;
+    // Get userId from the authenticated user
+    const userId = req.user.userId;
     const { assessmentData } = req.body;
     
     // Validate assessment data

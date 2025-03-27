@@ -6,8 +6,8 @@ const router = express.Router();
 
 /**
  * Send assessment results from frontend context, generates a new assessmentId
- * POST /api/assessment/:userId
+ * POST /api/assessment/send
  */
-router.post("/:userId", authenticateToken, createAssessment);
+router.post("/send", authenticateToken, createAssessment);
 
 export default router; 

@@ -146,7 +146,9 @@ app.get('/api/assessment/:id', async (req, res) => {
 // Send assessment
 app.post('/api/assessment/send', async (req, res) => {
   try {
-    const { userId, assessmentData } = req.body;
+    // Get userId from authenticated user
+    const userId = req.user.userId;
+    const { assessmentData } = req.body;
     
     // Simple validation
     if (!assessmentData) {
@@ -159,7 +161,7 @@ app.post('/api/assessment/send', async (req, res) => {
     // Insert assessment into database
     await db('assessments').insert({
       id: assessmentId,
-      user_id: userId || req.user.userId,
+      user_id: userId,
       created_at: new Date().toISOString(),
       age: assessmentData.age,
       cycle_length: assessmentData.cycleLength,
@@ -203,7 +205,7 @@ app.post('/api/assessment/send', async (req, res) => {
     // Return the created assessment
     return res.status(201).json({
       id: assessmentId,
-      userId: userId || req.user.userId,
+      userId: userId,
       createdAt: new Date().toISOString(),
       assessmentData
     });

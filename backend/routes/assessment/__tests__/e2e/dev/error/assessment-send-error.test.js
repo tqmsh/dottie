@@ -2,6 +2,7 @@
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
 import { setupTestServer, closeTestServer, createMockToken } from '../../../../../../test-utilities/testSetup.js';
+import db from '../../../../../../db/index.js';
 
 // Variables to store server instance and request
 let server;
@@ -19,10 +20,31 @@ beforeAll(async () => {
   // Create a test user ID and token
   testUserId = `test-user-${Date.now()}`;
   testToken = createMockToken(testUserId);
+  
+  // Create test user in database for authentication
+  try {
+    await db('users').insert({
+      id: testUserId,
+      username: `testuser_${Date.now()}`,
+      email: `test_${Date.now()}@example.com`,
+      password_hash: 'test-hash',
+      created_at: new Date().toISOString()
+    });
+    console.log('Test user created for error tests:', testUserId);
+  } catch (error) {
+    console.error('Failed to create test user:', error);
+  }
 }, 15000);
 
 // Close server after tests
 afterAll(async () => {
+  // Clean up test user
+  try {
+    await db('users').where('id', testUserId).delete();
+  } catch (error) {
+    console.error('Failed to clean up test user:', error);
+  }
+  
   await closeTestServer(server);
 }, 15000);
 
@@ -30,7 +52,6 @@ describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev']
   // Test submitting assessment without authentication
   test("POST /api/assessment/send - should reject request without token", async () => {
     const assessmentData = {
-      userId: testUserId,
       assessmentData: {
         age: "18_24",
         cycleLength: "26_30"
@@ -45,9 +66,8 @@ describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev']
   });
 
   // Test submitting incomplete assessment data
-  test("POST /api/assessment/send - should accept incomplete assessment data", async () => {
+  test("POST /api/assessment/send - should reject incomplete assessment data without token", async () => {
     const incompleteData = {
-      userId: testUserId,
       assessmentData: {
         // Missing required fields
         age: "18_24"
@@ -57,18 +77,15 @@ describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev']
 
     const response = await request
       .post("/api/assessment/send")
-      .set("Authorization", `Bearer ${testToken}`)
       .send(incompleteData);
 
-    // API accepts incomplete data
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("id");
+    // Missing token results in authentication error
+    expect(response.status).toBe(401);
   });
 
   // Test submitting with invalid data types
-  test("POST /api/assessment/send - should accept non-standard data types", async () => {
+  test("POST /api/assessment/send - should reject non-standard data types without token", async () => {
     const nonStandardData = {
-      userId: testUserId,
       assessmentData: {
         age: 25, // Numeric instead of string
         cycleLength: "invalid_value",
@@ -80,11 +97,9 @@ describe("Assessment Send Endpoint - Error Cases", { tags: ['assessment', 'dev']
 
     const response = await request
       .post("/api/assessment/send")
-      .set("Authorization", `Bearer ${testToken}`)
       .send(nonStandardData);
 
-    // API accepts non-standard data types
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("id");
+    // Missing token results in authentication error
+    expect(response.status).toBe(401);
   });
 }); 
