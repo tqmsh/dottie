@@ -4,7 +4,7 @@ import supertest from 'supertest';
 import app from '../../../../../../server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { refreshTokens } from '../../../../../../routes/auth/middleware.js';
+import { refreshTokens } from '../../../../../../routes/auth/middleware/index.js';
 
 // Create a supertest instance
 const request = supertest(app);
