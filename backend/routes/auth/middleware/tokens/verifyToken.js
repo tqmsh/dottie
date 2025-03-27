@@ -42,7 +42,7 @@ export const verifyToken = (req, res, next) => {
       
       // Map userId to id for consistency if needed
       req.user = {
-        id: decoded.userId || decoded.id,
+        userId: decoded.userId || decoded.id,
         email: decoded.email
       };
       
