@@ -42,6 +42,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });
 });
 
+// Direct hello endpoint for tests
+app.get('/api/hello', (req, res) => {
+  res.status(200).json({ message: "Hello World from Dottie API!" });
+});
+
 // Mount route modules
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/auth", authRoutes);

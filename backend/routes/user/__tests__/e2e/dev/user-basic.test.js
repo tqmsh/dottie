@@ -1,22 +1,44 @@
+// @ts-check
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setupTestClient, closeTestServer } from '../../../../../test-utilities/setup.js';
+import supertest from 'supertest';
+import db from '../../../../../db/index.js';
+import app from '../../../../../server.js';
+import { createServer } from 'http';
 
 // Test data
 let server;
 let request;
+const TEST_PORT = 5025;
 
 // Setup before all tests
 beforeAll(async () => {
-  // Setup the test client for local development
-  const setup = await setupTestClient({ port: 5005 });
-  server = setup.server;
-  request = setup.request;
+  try {
+    // Create server and supertest instance
+    server = createServer(app);
+    request = supertest(app);
+    
+    // Start server
+    await new Promise(resolve => {
+      server.listen(TEST_PORT, () => {
+        console.log(`Test server started on port ${TEST_PORT}`);
+        resolve(true);
+      });
+    });
+  } catch (error) {
+    console.error('Error in test setup:', error);
+    throw error;
+  }
 }, 30000);
 
 // Cleanup after all tests
 afterAll(async () => {
   if (server) {
-    await closeTestServer(server);
+    await new Promise(resolve => {
+      server.close(() => {
+        console.log('Test server closed');
+        resolve(true);
+      });
+    });
   }
 }, 30000);
 

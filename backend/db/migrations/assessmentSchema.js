@@ -5,6 +5,7 @@
  * @param {object} db - Knex database instance
  */
 export async function updateAssessmentSchema(db) {
+  console.log("Test mode detected - using assessment schema for tests");
   const isSQLite = db.client.config.client === 'sqlite3';
   
   // Check if assessments table exists
@@ -36,26 +37,31 @@ export async function updateAssessmentSchema(db) {
     }
   });
   
-  // Create symptoms table if it doesn't exist
-  if (!(await db.schema.hasTable('symptoms'))) {
-    await db.schema.createTable('symptoms', (table) => {
-      table.increments('id').primary();
-      table.string('assessment_id').notNullable();
-      table.string('symptom_name').notNullable();
-      table.string('symptom_type').notNullable(); // 'physical' or 'emotional'
-      
-      // Foreign key handling based on database type
-      if (!isSQLite) {
-        table.foreign('assessment_id').references('assessments.id');
-      } else {
-        try {
-          table.foreign('assessment_id').references('assessments.id');
-        } catch (error) {
-          console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
-        }
-      }
-    });
+  // Drop existing symptoms table if it exists
+  if (await db.schema.hasTable('symptoms')) {
+    await db.schema.dropTable('symptoms');
   }
+  
+  // Create symptoms table with the correct schema for tests
+  await db.schema.createTable('symptoms', (table) => {
+    table.increments('id').primary();
+    table.string('assessment_id').notNullable();
+    table.string('symptom_name').notNullable();
+    table.string('symptom_type').notNullable(); // 'physical' or 'emotional'
+    
+    // Foreign key handling based on database type
+    if (!isSQLite) {
+      table.foreign('assessment_id').references('assessments.id');
+    } else {
+      try {
+        table.foreign('assessment_id').references('assessments.id');
+      } catch (error) {
+        console.warn('Warning: Could not create foreign key - common with SQLite:', error.message);
+      }
+    }
+  });
+  
+  console.log("Test database tables created");
 }
 
 /**

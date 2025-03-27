@@ -41,7 +41,7 @@ describe("Assessment Detail Error Tests", () => {
       .get(`/api/assessment/${nonExistentId}`)
       .set("Authorization", `Bearer ${testToken}`);
 
-    expect(response.status).toBe(401); // API returns 401 instead of 404 for non-existent IDs
+    expect(response.status).toBe(404); // Updated from 401 to 404 for non-existent IDs
   });
 
   // Test getting assessment with invalid ID format
@@ -50,6 +50,6 @@ describe("Assessment Detail Error Tests", () => {
       .get("/api/assessment/invalid-id-format")
       .set("Authorization", `Bearer ${testToken}`);
 
-    expect(response.status).toBe(401); // API returns 401 instead of 404 for invalid ID formats
+    expect(response.status).toBe(404); // Updated from 401 to 404 for invalid ID formats
   });
 }); 

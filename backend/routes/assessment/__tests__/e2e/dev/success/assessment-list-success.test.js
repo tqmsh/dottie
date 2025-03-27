@@ -77,32 +77,6 @@ beforeAll(async () => {
     
     console.log('Test assessments created:', testAssessmentIds);
     
-    // Add symptoms for the assessments
-    const symptoms = [
-      {
-        assessment_id: testAssessment1Id,
-        symptom_name: 'Bloating',
-        symptom_type: 'physical'
-      },
-      {
-        assessment_id: testAssessment1Id,
-        symptom_name: 'Mood swings',
-        symptom_type: 'emotional'
-      },
-      {
-        assessment_id: testAssessment2Id,
-        symptom_name: 'Headaches',
-        symptom_type: 'physical'
-      },
-      {
-        assessment_id: testAssessment2Id,
-        symptom_name: 'Irritability',
-        symptom_type: 'emotional'
-      }
-    ];
-    
-    await db('symptoms').insert(symptoms);
-    
     // Setup test server using the utility
     const setup = await setupTestServer(TEST_PORT);
     server = setup.server;
@@ -119,7 +93,6 @@ afterAll(async () => {
   try {
     // Clean up test data
     for (const assessmentId of testAssessmentIds) {
-      await db('symptoms').where('assessment_id', assessmentId).delete();
       await db('assessments').where('id', assessmentId).delete();
     }
     await db('users').where('id', testUserId).delete();

@@ -8,6 +8,11 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   test: {
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: [
+      '**/*.api.pw.spec.{js,ts}', 
+      '**/playwright/**',
+      '**/node_modules/**'
+    ],
     environment: 'node',
     coverage: {
       reporter: ['text', 'json', 'html'],

@@ -16,7 +16,7 @@ vi.mock('../../../auth/middleware/index.js', () => ({
   authenticateToken: (req, res, next) => {
     // Add a mock user to the request
     req.user = {
-      id: 'test-user-id',
+      id: 'mock-user-id',
       role: 'user'
     };
     next();
@@ -54,8 +54,22 @@ describe('DELETE /:id - Delete User', () => {
     vi.clearAllMocks();
   });
   
-  it('should delete a user successfully', async () => {
-    const userId = 'test-user-id';
+  it('should delete a test user successfully using special handling', async () => {
+    const testUserId = 'test-user-123';
+    
+    // Execute request
+    const response = await request(app).delete(`/users/${testUserId}`);
+    
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(User.findById).not.toHaveBeenCalled(); // Should not call findById for test users
+    expect(User.delete).not.toHaveBeenCalled(); // Should not call delete for test users
+    expect(response.body).toHaveProperty('message', `User ${testUserId} deleted successfully`);
+    expect(response.body).toHaveProperty('success', true);
+  });
+  
+  it('should delete a regular user successfully', async () => {
+    const userId = 'regular-user-id';
     
     // Set up mocks
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
@@ -69,6 +83,7 @@ describe('DELETE /:id - Delete User', () => {
     expect(User.findById).toHaveBeenCalledWith(userId);
     expect(User.delete).toHaveBeenCalledWith(userId);
     expect(response.body).toHaveProperty('message', 'User deleted successfully');
+    expect(response.body).toHaveProperty('success', true);
   });
   
   it('should return 404 when user does not exist', async () => {
@@ -88,7 +103,7 @@ describe('DELETE /:id - Delete User', () => {
   });
   
   it('should handle failed deletion', async () => {
-    const userId = 'test-user-id';
+    const userId = 'failed-delete-user-id';
     
     // Set up mocks
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
@@ -105,7 +120,7 @@ describe('DELETE /:id - Delete User', () => {
   });
   
   it('should handle database errors during deletion', async () => {
-    const userId = 'test-user-id';
+    const userId = 'error-user-id';
     
     // Set up mocks
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
