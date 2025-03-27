@@ -8,7 +8,7 @@ import { createServer } from 'http';
 // Test data
 let server;
 let request;
-const TEST_PORT = 5005;
+const TEST_PORT = 5025;
 
 // Setup before all tests
 beforeAll(async () => {
