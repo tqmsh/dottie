@@ -3,7 +3,7 @@ import db from '../../../db/index.js';
 
 const router = express.Router();
 
-router.get("/api/sql-hello", async (req, res) => {
+router.get("/hello", async (req, res) => {
   try {
     // Determine the database type
     const dbType = db.client.config.client;

@@ -52,16 +52,16 @@ afterAll(async () => {
 
 describe("API Endpoints Error Tests", () => {
   // Test the db-status endpoint for errors
-  test("GET /api/db-status - should handle database connection errors", async () => {
-    const response = await request.get("/api/db-status");
+  test("GET /api/setup/database/status - should handle database connection errors", async () => {
+    const response = await request.get("/api/setup/database/status");
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty("status", "error");
     expect(response.body).toHaveProperty("message");
   });
 
   // Test the sql-hello endpoint for errors
-  test("GET /api/sql-hello - should handle database query errors", async () => {
-    const response = await request.get("/api/sql-hello");
+  test("GET /api/setup/database/hello - should handle database query errors", async () => {
+    const response = await request.get("/api/setup/database/hello");
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty("dbType", "mssql");
     expect(response.body).toHaveProperty("isConnected", false);

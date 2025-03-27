@@ -2,7 +2,7 @@ import express from 'express';
 
 const router = express.Router();
 
-router.get("/api/serverless-test", (req, res) => {
+router.get("/serverless", (req, res) => {
   const now = new Date();
   res.json({ 
     message: "Serverless function is working!",
