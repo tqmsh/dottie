@@ -1,9 +1,22 @@
 // @ts-check
-import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import supertest from 'supertest';
 import app from './test-server.js';
 import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
+
+// Mock the database operations
+vi.mock('../../../../../db/index.js', () => ({
+  default: {
+    query: vi.fn(),
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    first: vi.fn(),
+    whereIn: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis()
+  }
+}));
 
 // Create a supertest instance
 const request = supertest(app);
@@ -33,7 +46,8 @@ const TEST_PORT = 5011;
 
 // Create a mock token for testing
 const createMockToken = (userId) => {
-  return jwt.sign({ id: userId }, 'test-secret-key');
+  const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
+  return jwt.sign({ id: userId, userId: userId }, JWT_SECRET);
 };
 
 describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }, () => {
@@ -48,6 +62,7 @@ describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }
         // Set up test data
         testUserId = `test-user-${Date.now()}`;
         testToken = createMockToken(testUserId);
+        testAssessmentId = `test-assessment-${Date.now()}`;
         
         testAssessmentData = {
           userId: testUserId,
@@ -94,7 +109,7 @@ describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }
     expect(testToken).toBeTruthy();
   });
   
-  // Skipping integration tests since we're focusing on unit testing
+  // Skip further tests since we need to update the test database structure
   test.skip("3. Submit Assessment - POST /api/assessment/send", async () => {
     const response = await request
       .post('/api/assessment/send')
@@ -106,6 +121,7 @@ describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }
     
     // Store assessment ID for later tests
     testAssessmentId = response.body.id;
+    console.log(`Created test assessment with ID: ${testAssessmentId}`);
   });
   
   test.skip("4. Retrieve Assessment - GET /api/assessment/:id", async () => {
@@ -133,6 +149,8 @@ describe("Assessment Success Integration Tests", { tags: ['assessment', 'dev'] }
     }
   });
   
+  // Since update and delete endpoints are using a different pattern in the test server,
+  // we'll skip these tests for now
   test.skip("6. Update Assessment - PUT /api/assessment/:id", async () => {
     const updateData = {
       assessmentData: {
