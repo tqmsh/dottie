@@ -2,7 +2,7 @@ import User from '../../../models/User.js';
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.getAll();
     
     // Remove sensitive information from all users
     const sanitizedUsers = users.map(user => {

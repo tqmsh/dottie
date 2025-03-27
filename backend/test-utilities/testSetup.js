@@ -24,7 +24,7 @@ export const setupTestServer = async (port = 5001) => {
  */
 export const createMockToken = (userId, isProd = false) => {
   const email = `test_${isProd ? 'prod_' : ''}${Date.now()}@example.com`;
-  const secret = process.env.JWT_SECRET || 'your-secret-key';
+  const secret = process.env.JWT_SECRET || 'dev-jwt-secret';
   
   return jwt.sign(
     { userId: userId, email },
