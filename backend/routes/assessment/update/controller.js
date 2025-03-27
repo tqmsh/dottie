@@ -1,4 +1,4 @@
-import { assessments } from "../store.js";
+import { assessments } from "../store/index.js";
 import db from "../../../db/index.js";
 
 /**
