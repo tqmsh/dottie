@@ -1,32 +1,67 @@
+// @ts-check
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setupTestClient, closeTestServer } from '../../../../../test-utilities/setup.js';
+import supertest from 'supertest';
+import db from '../../../../../db/index.js';
+import app from '../../../../../server.js';
+import { createServer } from 'http';
+import jwt from 'jsonwebtoken';
 
 // Test data
 let server;
 let request;
 let testUser;
+let testUserId;
 let accessToken;
+const TEST_PORT = 5004;
 
 // Setup before all tests
 beforeAll(async () => {
-  // Setup the test client for local development
-  const setup = await setupTestClient({ port: 5004 });
-  server = setup.server;
-  request = setup.request;
-
-  // Create test user data (with random email to avoid conflicts)
-  testUser = {
-    username: 'e2etestuser',
-    email: `e2e-test-${Date.now()}@example.com`,
-    password: 'TestPass123!',
-    age: '25_34'
-  };
+  try {
+    // Create server and supertest instance
+    server = createServer(app);
+    request = supertest(app);
+    
+    // Create test user data with random email to avoid conflicts
+    testUser = {
+      username: 'e2etestuser',
+      email: `e2e-test-${Date.now()}@example.com`,
+      password: 'TestPass123!',
+      age: '25_34'
+    };
+    
+    // Start server
+    await new Promise(resolve => {
+      server.listen(TEST_PORT, () => {
+        console.log(`Test server started on port ${TEST_PORT}`);
+        resolve(true);
+      });
+    });
+  } catch (error) {
+    console.error('Error in test setup:', error);
+    throw error;
+  }
 }, 30000);
 
 // Cleanup after all tests
 afterAll(async () => {
-  if (server) {
-    await closeTestServer(server);
+  try {
+    // Clean up test user if created
+    if (testUserId) {
+      await db('users').where('id', testUserId).delete();
+      console.log('Test user deleted:', testUserId);
+    }
+    
+    // Close server
+    if (server) {
+      await new Promise(resolve => {
+        server.close(() => {
+          console.log('Test server closed');
+          resolve(true);
+        });
+      });
+    }
+  } catch (error) {
+    console.error('Error in test cleanup:', error);
   }
 }, 30000);
 
@@ -58,22 +93,26 @@ describe('User Authentication Flow (E2E)', () => {
     expect(response.body).toHaveProperty('username', testUser.username);
     expect(response.body).toHaveProperty('email', testUser.email);
     
-    // Store user ID for subsequent tests
+    // Store user ID for subsequent tests and cleanup
+    testUserId = response.body.id;
     testUser.id = response.body.id;
   }, 10000);
 
-  it('3. should verify test token functionality returns 401 for invalid tokens', async () => {
-    // Create a test user ID that would be recognized by the authentication middleware
-    const testUserId = `test-user-${Date.now()}`;
-    const testToken = await request.get(`/api/auth/verify/test-token?userId=${testUserId}`);
+  it('3. should verify authentication with valid token', async () => {
+    // Skip if we don't have a user ID
+    if (!testUserId) {
+      console.log('Skipping test: No user ID');
+      return;
+    }
     
-    console.log('Test token response:', testToken.body);
+    // Create a test token with the secret
+    const secret = process.env.JWT_SECRET || 'dev-jwt-secret';
+    accessToken = jwt.sign(
+      { userId: testUserId, email: testUser.email },
+      secret,
+      { expiresIn: '1h' }
+    );
     
-    // If we can't get a test token, try to use the test-utilities createTestToken function
-    console.log('Falling back to test utilities token creation');
-    // Import the createTestToken function
-    const { createTestToken } = await import('../../../../../test-utilities/setup.js');
-    accessToken = createTestToken(testUserId, false, 'admin');
     console.log('Created test token for:', testUserId);
     
     // Verify the token works by accessing a protected resource
@@ -83,13 +122,9 @@ describe('User Authentication Flow (E2E)', () => {
     
     console.log('Authentication test response:', response.status, response.body);
     
-    // Test tokens created locally may not be valid in the current implementation
-    // So we're expecting 401 Unauthorized instead of 200
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty('error');
-    
-    // Store the test user ID for subsequent tests
-    testUser.id = testUserId;
+    // We expect 200 OK for a valid token
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
   });
 
   it('4. should validate input for test user IDs before authentication', async () => {
