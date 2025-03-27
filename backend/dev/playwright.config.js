@@ -16,6 +16,9 @@ export default defineConfig({
     baseURL: 'http://localhost:5000',
     trace: 'on-first-retry',
   },
+  
+  // Specific file pattern to avoid conflicts with vitest
+  testMatch: '**/*.pw.spec.js',
 
   // Create separate projects for API tests and browser tests
   projects: [
@@ -24,7 +27,7 @@ export default defineConfig({
       use: {
         // No browser needed for API tests
       },
-      testMatch: /.*api.*\.spec\.js/,
+      testMatch: '**/*.api.pw.spec.js',
     },
     {
       name: 'browser',
@@ -32,7 +35,7 @@ export default defineConfig({
         // Using only Safari as per instructions
         browserName: 'webkit',
       },
-      testIgnore: /.*api.*\.spec\.js/,
+      testMatch: '**/*.ui.pw.spec.js',
     },
   ],
 }); 

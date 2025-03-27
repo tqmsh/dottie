@@ -7,15 +7,6 @@ export const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     
-    // Special handling for test user IDs in tests
-    if (userId.startsWith('test-user-')) {
-      // Return success response for test
-      return res.json({
-        message: `User ${userId} deleted successfully`,
-        success: true
-      });
-    }
-    
     // Find the user
     const user = await User.findById(userId);
     
