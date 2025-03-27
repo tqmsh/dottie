@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { assessmentData, setupUser } from './api-assessment-setup';
 
 /**
- * Test for PUT /api/assessment/:id endpoint
+ * Test for PUT /api/assessment/:userId/:assessmentId endpoint
  */
 test.describe('Assessment API - Update Assessment', () => {
   let authToken = null;
@@ -42,7 +42,7 @@ test.describe('Assessment API - Update Assessment', () => {
     }
   });
   
-  test('PUT /api/assessment/:id - should update assessment', async ({ request }) => {
+  test('PUT /api/assessment/:userId/:assessmentId - should update assessment', async ({ request }) => {
     // Skip this test if no assessment ID is available
     test.skip(!authToken || !assessmentId, 'No auth token or assessment ID available');
     
@@ -55,8 +55,8 @@ test.describe('Assessment API - Update Assessment', () => {
       }
     };
     
-    // Update assessment
-    const response = await request.put(`/api/assessment/${assessmentId}`, {
+    // Update assessment using the correct endpoint path
+    const response = await request.put(`/api/assessment/${userId}/${assessmentId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       },

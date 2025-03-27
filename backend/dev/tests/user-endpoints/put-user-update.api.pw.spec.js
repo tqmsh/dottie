@@ -19,10 +19,15 @@ test.describe('User API - Update User', () => {
     // Skip this test if no auth token or user ID is available
     test.skip(!authToken || !userId, 'No auth token or user ID available');
     
-    // Updated user data
+    // Updated user data with valid format
+    // Username can only contain letters, numbers, and underscores
+    const timestamp = Date.now();
     const updatedData = {
-      username: `updated-${Date.now()}`
+      username: `updated_user_${timestamp}`
     };
+    
+    console.log('Updating user with ID:', userId);
+    console.log('Update data:', updatedData);
     
     // Update user
     const response = await request.put(`/api/auth/users/${userId}`, {
@@ -31,6 +36,9 @@ test.describe('User API - Update User', () => {
       },
       data: updatedData
     });
+    
+    // Log response status for debugging
+    console.log('Update response status:', response.status());
     
     // Verify successful update
     expect(response.status()).toBe(200);
