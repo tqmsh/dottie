@@ -34,7 +34,7 @@ app.use((req, res, next) => {
     
     // Add the decoded user to the request
     req.user = {
-      id: decodedToken.userId || decodedToken.id,
+      userId: decodedToken.userId || decodedToken.id,
       email: decodedToken.email || 'test@example.com'
     };
     
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 // Get assessment list
 app.get('/api/assessment/list', async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     // Get all assessments for this user
     const assessments = await db('assessments').where('user_id', userId);
@@ -159,7 +159,7 @@ app.post('/api/assessment/send', async (req, res) => {
     // Insert assessment into database
     await db('assessments').insert({
       id: assessmentId,
-      user_id: userId || req.user.id,
+      user_id: userId || req.user.userId,
       created_at: new Date().toISOString(),
       age: assessmentData.age,
       cycle_length: assessmentData.cycleLength,
@@ -203,7 +203,7 @@ app.post('/api/assessment/send', async (req, res) => {
     // Return the created assessment
     return res.status(201).json({
       id: assessmentId,
-      userId: userId || req.user.id,
+      userId: userId || req.user.userId,
       createdAt: new Date().toISOString(),
       assessmentData
     });
