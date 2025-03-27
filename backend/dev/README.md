@@ -72,15 +72,23 @@ npm run test:api:report
 - `api-basic-endpoints.api.pw.spec.js` - Tests for basic endpoints:
   - `/api/hello` - Simple greeting endpoint
   - `/api/setup/database/status` - Database connection status
-- `api-auth-endpoints.api.pw.spec.js` - Tests for authentication-related endpoints
-- `api-assessment-endpoints.api.pw.spec.js` - Tests for assessment-related endpoints
-- `api-setup-endpoints.api.pw.spec.js` - Tests for setup-related endpoints including:
+- `api-auth-endpoints.api.pw.spec.js` - Tests for authentication-related endpoints:
+  - `/api/auth/signup` - Register a new user
+  - `/api/auth/login` - Authenticate and get token
+  - `/api/auth/users` - Get all users
+  - `/api/auth/users/:id` - Get specific user
+  - `/api/auth/logout` - Logout user
+- `api-assessment-endpoints.api.pw.spec.js` - Tests for assessment-related endpoints:
+  - `/api/assessment/send` - Submit a new assessment
+  - `/api/assessment/list` - Get all assessments
+  - `/api/assessment/:id` - Get, update or delete specific assessment
+- `api-setup-endpoints.api.pw.spec.js` - Tests for setup-related endpoints:
   - `/api/setup/health/hello` - Health check endpoint
   - `/api/setup/database/status` - Database connection status
   - `/api/setup/database/hello` - Database connectivity test with query
-- `api-user-endpoints.api.pw.spec.js` - Tests for user-related endpoints:
-  - `/api/user` - List all users
-  - `/api/user/:id` - Get, update and delete specific users
+- `api-user-endpoints.api.pw.spec.js` - Tests for user-related endpoints (using auth routes):
+  - `/api/auth/users` - List all users
+  - `/api/auth/users/:id` - Get, update and delete specific users
 
 ## Notes
 

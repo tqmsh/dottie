@@ -28,7 +28,9 @@ test.describe('User API Endpoints', () => {
     
     if (signupResponse.ok()) {
       const signupData = await signupResponse.json();
-      if (signupData.user && signupData.user.id) {
+      if (signupData.id) {
+        userId = signupData.id;
+      } else if (signupData.user && signupData.user.id) {
         userId = signupData.user.id;
       }
       
@@ -51,13 +53,13 @@ test.describe('User API Endpoints', () => {
     }
   });
   
-  // Test for GET /api/user endpoint
-  test('GET /api/user - should return list of users', async ({ request }) => {
+  // Test for GET /api/auth/users endpoint
+  test('GET /api/auth/users - should return list of users', async ({ request }) => {
     // Skip this test if no auth token is available
     test.skip(!authToken, 'No auth token available');
     
     // Get all users
-    const response = await request.get('/api/user', {
+    const response = await request.get('/api/auth/users', {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -71,13 +73,13 @@ test.describe('User API Endpoints', () => {
     expect(Array.isArray(data)).toBe(true);
   });
   
-  // Test for GET /api/user/:id endpoint
-  test('GET /api/user/:id - should return user by ID', async ({ request }) => {
+  // Test for GET /api/auth/users/:id endpoint
+  test('GET /api/auth/users/:id - should return user by ID', async ({ request }) => {
     // Skip this test if no auth token or user ID is available
     test.skip(!authToken || !userId, 'No auth token or user ID available');
     
     // Get specific user
-    const response = await request.get(`/api/user/${userId}`, {
+    const response = await request.get(`/api/auth/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -96,8 +98,8 @@ test.describe('User API Endpoints', () => {
     expect(data).not.toHaveProperty('password_hash');
   });
   
-  // Test for PUT /api/user/:id endpoint
-  test('PUT /api/user/:id - should update user', async ({ request }) => {
+  // Test for PUT /api/auth/users/:id endpoint
+  test('PUT /api/auth/users/:id - should update user', async ({ request }) => {
     // Skip this test if no auth token or user ID is available
     test.skip(!authToken || !userId, 'No auth token or user ID available');
     
@@ -107,7 +109,7 @@ test.describe('User API Endpoints', () => {
     };
     
     // Update user
-    const response = await request.put(`/api/user/${userId}`, {
+    const response = await request.put(`/api/auth/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       },
@@ -123,13 +125,13 @@ test.describe('User API Endpoints', () => {
     expect(data).toHaveProperty('username', updatedData.username);
   });
   
-  // Test for DELETE /api/user/:id endpoint - this should be the last test
-  test.skip('DELETE /api/user/:id - should delete user', async ({ request }) => {
+  // Test for DELETE /api/auth/users/:id endpoint - this should be the last test
+  test.skip('DELETE /api/auth/users/:id - should delete user', async ({ request }) => {
     // Skip this test if no auth token or user ID is available
     test.skip(!authToken || !userId, 'No auth token or user ID available');
     
     // Delete user
-    const response = await request.delete(`/api/user/${userId}`, {
+    const response = await request.delete(`/api/auth/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -143,7 +145,7 @@ test.describe('User API Endpoints', () => {
     expect(data).toHaveProperty('message');
     
     // Try to get the deleted user - should return 404
-    const getResponse = await request.get(`/api/user/${userId}`, {
+    const getResponse = await request.get(`/api/auth/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
