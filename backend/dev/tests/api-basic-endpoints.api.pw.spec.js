@@ -22,10 +22,10 @@ test.describe('Basic API Endpoints', () => {
     expect(data).toHaveProperty('message');
   });
   
-  // Test for /api/db-status endpoint
-  test('GET /api/db-status - should return database connection status', async ({ request }) => {
-    // Send GET request to the /api/db-status endpoint
-    const response = await request.get('/api/db-status');
+  // Test for database status endpoint
+  test('GET /api/setup/database/status - should return database connection status', async ({ request }) => {
+    // Send GET request to the database status endpoint
+    const response = await request.get('/api/setup/database/status');
     
     // Verify response status is 200 OK
     expect(response.status()).toBe(200);

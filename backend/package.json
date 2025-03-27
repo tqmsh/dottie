@@ -41,7 +41,15 @@
     "test:assessment:prod": "vitest run routes/assessment/__tests__/e2e/prod",
     "test:assessment:prod:success": "vitest run routes/assessment/__tests__/e2e/prod/success",
     "test:assessment:prod:error": "vitest run routes/assessment/__tests__/e2e/prod/error",
-    "test:assessment": "vitest run routes/assessment/__tests__"
+    "test:assessment": "vitest run routes/assessment/__tests__",
+    "test:api": "playwright test",
+    "test:api:setup": "playwright test -g \"setup\"",
+    "test:api:basic": "playwright test -g \"Basic API\"",
+    "test:api:auth": "playwright test -g \"Authentication\"",
+    "test:api:assessment": "playwright test -g \"Assessment\"",
+    "test:api:user": "playwright test -g \"User\"",
+    "test:api:report": "playwright show-report",
+    "test:api:ordered": "npm run test:api:setup && npm run test:api:basic && npm run test:api:auth && npm run test:api:assessment && npm run test:api:user"
   },
   "keywords": [],
   "author": "",

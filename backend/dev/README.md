@@ -15,6 +15,17 @@ To avoid conflicts between Playwright and Vitest, we use the following naming co
 
 This separation ensures that Playwright doesn't try to run Vitest tests and vice versa.
 
+## Test Order
+
+When running tests, it's important to follow this order:
+1. Setup endpoints tests
+2. Basic API endpoints tests 
+3. Authentication endpoints tests
+4. Assessment endpoints tests
+5. User endpoints tests
+
+This order ensures that dependencies between tests are respected (e.g., auth tests need to run before user tests).
+
 ## Automatic Server Management
 
 These tests run against the actual backend server. The Playwright configuration includes a `webServer` setting that automatically:
@@ -26,16 +37,21 @@ These tests run against the actual backend server. The Playwright configuration 
 
 ## Running Tests
 
-From the `backend/dev` directory, run:
+From the `backend` directory, run:
 
 ```bash
 # Run all tests
 npx playwright test
 
+# Run tests in the correct order
+npm run test:api:ordered
+
 # Run specific test suites
-npx playwright test tests/api-basic-endpoints.api.pw.spec.js
-npx playwright test tests/api-auth-endpoints.api.pw.spec.js
-npx playwright test tests/api-assessment-endpoints.api.pw.spec.js
+npx playwright test -g "setup"
+npx playwright test -g "Basic API"
+npx playwright test -g "Authentication"
+npx playwright test -g "Assessment"  
+npx playwright test -g "User"
 
 # Run only API tests (without browser)
 npx playwright test --project=api
@@ -48,14 +64,23 @@ npx playwright test --project=browser
 
 After running tests, you can view the generated HTML report:
 ```bash
-npx playwright show-report
+npm run test:api:report
 ```
 
 ## Test Files
 
-- `api-basic-endpoints.api.pw.spec.js` - Tests for `/api/hello` and `/api/db-status` endpoints
+- `api-basic-endpoints.api.pw.spec.js` - Tests for basic endpoints:
+  - `/api/hello` - Simple greeting endpoint
+  - `/api/setup/database/status` - Database connection status
 - `api-auth-endpoints.api.pw.spec.js` - Tests for authentication-related endpoints
 - `api-assessment-endpoints.api.pw.spec.js` - Tests for assessment-related endpoints
+- `api-setup-endpoints.api.pw.spec.js` - Tests for setup-related endpoints including:
+  - `/api/setup/health/hello` - Health check endpoint
+  - `/api/setup/database/status` - Database connection status
+  - `/api/setup/database/hello` - Database connectivity test with query
+- `api-user-endpoints.api.pw.spec.js` - Tests for user-related endpoints:
+  - `/api/user` - List all users
+  - `/api/user/:id` - Get, update and delete specific users
 
 ## Notes
 
