@@ -1,53 +1,43 @@
 import express from 'express';
 import cors from 'cors';
-import assessmentRoutes from '../../../index.js';
 import jwt from 'jsonwebtoken';
+import db from '../../../../../db/index.js';
 
 // Create Express app for testing
 const app = express();
-
-// Add storage for test data
-const testData = {
-  assessments: new Map()
-};
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Mock authentication middleware for testing
-app.use('/api/assessment', (req, res, next) => {
+app.use((req, res, next) => {
   // Extract token from Authorization header
   const authHeader = req.headers.authorization;
-  
-  console.log('Auth header:', authHeader);
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No token provided' });
   }
   
   const token = authHeader.split(' ')[1];
-  console.log('Token:', token);
   
   try {
-    // For tests, use a dummy secret key since we're in test mode
-    const JWT_SECRET = 'test-secret-key';
+    // For tests, use the same jwt secret as in the real middleware
+    const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
     
-    // For test purposes, we'll just decode without verification
-    const decodedToken = jwt.decode(token);
-    console.log('Decoded token:', decodedToken);
+    // Verify the token
+    const decodedToken = jwt.verify(token, JWT_SECRET);
     
-    if (!decodedToken || !decodedToken.id) {
+    if (!decodedToken || (!decodedToken.userId && !decodedToken.id)) {
       return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
     }
     
     // Add the decoded user to the request
     req.user = {
-      id: decodedToken.id,
-      email: decodedToken.email || 'test@example.com',
-      name: 'Test User'
+      id: decodedToken.userId || decodedToken.id,
+      email: decodedToken.email || 'test@example.com'
     };
-    console.log('User set:', req.user);
+    
     next();
   } catch (error) {
     console.error('Auth error:', error);
@@ -55,139 +45,177 @@ app.use('/api/assessment', (req, res, next) => {
   }
 });
 
-// Add test routes for specific test cases
-// These routes override the main routes
+// Add database-backed routes for testing
 
-// Add a test route to verify auth is working
-app.get('/api/assessment/test-auth', (req, res) => {
-  res.status(200).json({ message: 'Authentication successful', user: req.user });
-});
-
-// Special mock route for assessment list
-// IMPORTANT: This must be defined BEFORE the :id route to avoid conflict
-app.get('/api/assessment/list', (req, res) => {
-  console.log(`TEST SERVER: Listing assessments for user ${req.user.id}`);
-  
-  // Create mock assessments for this user
-  const assessments = [];
-  
-  // Add a couple of mock assessments
-  const assessment1 = {
-    id: `test-assessment-1-${Date.now()}`,
-    userId: req.user.id,
-    assessmentData: {
-      age: "18_24",
-      cycleLength: "26_30",
-      periodDuration: "4_5",
-      flowHeaviness: "moderate",
-      painLevel: "moderate",
-      symptoms: {
-        physical: ["Bloating", "Headaches"],
-        emotional: ["Mood swings"]
-      }
-    },
-    createdAt: new Date().toISOString()
-  };
-  
-  const assessment2 = {
-    id: `test-assessment-2-${Date.now()}`,
-    userId: req.user.id,
-    assessmentData: {
-      age: "25_34",
-      cycleLength: "31_35",
-      periodDuration: "6_7",
-      flowHeaviness: "heavy",
-      painLevel: "severe",
-      symptoms: {
-        physical: ["Cramps", "Backache"],
-        emotional: ["Anxiety"]
-      }
-    },
-    createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-  };
-  
-  assessments.push(assessment1, assessment2);
-  
-  // Store them for future requests
-  testData.assessments.set(assessment1.id, assessment1);
-  testData.assessments.set(assessment2.id, assessment2);
-  
-  return res.status(200).json(assessments);
-});
-
-// Special mock route for assessment detail
-app.get('/api/assessment/:id', (req, res, next) => {
-  const { id } = req.params;
-  
-  console.log(`TEST SERVER: Fetching assessment with ID: ${id}`);
-  
-  // Check if we have this assessment in our test data
-  if (testData.assessments.has(id)) {
-    console.log(`TEST SERVER: Found assessment ${id} in test data`);
-    return res.status(200).json(testData.assessments.get(id));
-  }
-  
-  // For tests, we'll return a mock assessment if the ID follows our test pattern
-  if (id.startsWith('test-assessment-')) {
-    console.log(`TEST SERVER: Generating mock data for ${id}`);
-    const assessment = {
-      id,
-      userId: req.user.id,
-      assessmentData: {
-        age: "18_24",
-        cycleLength: "26_30",
-        periodDuration: "4_5",
-        flowHeaviness: "moderate",
-        painLevel: "moderate",
-        symptoms: {
-          physical: ["Bloating", "Headaches"],
-          emotional: ["Mood swings"]
+// IMPORTANT: Define the list route before the :id route to avoid conflicts
+// Get assessment list
+app.get('/api/assessment/list', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get all assessments for this user
+    const assessments = await db('assessments').where('user_id', userId);
+    
+    if (!assessments || assessments.length === 0) {
+      return res.status(200).json([]);
+    }
+    
+    // Get all symptoms for these assessments
+    const assessmentIds = assessments.map(a => a.id);
+    const allSymptoms = await db('symptoms').whereIn('assessment_id', assessmentIds);
+    
+    // Format assessments
+    const formattedAssessments = assessments.map(assessment => {
+      // Get symptoms for this assessment
+      const symptoms = allSymptoms.filter(s => s.assessment_id === assessment.id);
+      
+      // Group symptoms by type
+      const groupedSymptoms = {
+        physical: symptoms.filter(s => s.symptom_type === 'physical').map(s => s.symptom_name),
+        emotional: symptoms.filter(s => s.symptom_type === 'emotional').map(s => s.symptom_name)
+      };
+      
+      return {
+        id: assessment.id,
+        userId: assessment.user_id,
+        createdAt: assessment.created_at,
+        assessmentData: {
+          age: assessment.age,
+          cycleLength: assessment.cycle_length,
+          periodDuration: assessment.period_duration,
+          flowHeaviness: assessment.flow_heaviness,
+          painLevel: assessment.pain_level,
+          symptoms: groupedSymptoms
         }
-      },
-      createdAt: new Date().toISOString()
+      };
+    });
+    
+    return res.status(200).json(formattedAssessments);
+  } catch (error) {
+    console.error('Error fetching assessments:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get assessment by ID
+app.get('/api/assessment/:id', async (req, res) => {
+  try {
+    const assessmentId = req.params.id;
+    
+    console.log(`Fetching assessment with ID: ${assessmentId}`);
+    
+    // Get assessment from database
+    const assessment = await db('assessments').where('id', assessmentId).first();
+    
+    if (!assessment) {
+      console.log(`Assessment not found: ${assessmentId}`);
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+    
+    // Get symptoms for this assessment
+    const symptoms = await db('symptoms').where('assessment_id', assessmentId);
+    
+    // Group symptoms by type
+    const groupedSymptoms = {
+      physical: symptoms.filter(s => s.symptom_type === 'physical').map(s => s.symptom_name),
+      emotional: symptoms.filter(s => s.symptom_type === 'emotional').map(s => s.symptom_name)
     };
     
-    // Store it for future requests
-    testData.assessments.set(id, assessment);
+    // Format the assessment
+    const result = {
+      id: assessment.id,
+      userId: assessment.user_id,
+      createdAt: assessment.created_at,
+      assessmentData: {
+        age: assessment.age,
+        cycleLength: assessment.cycle_length,
+        periodDuration: assessment.period_duration,
+        flowHeaviness: assessment.flow_heaviness,
+        painLevel: assessment.pain_level,
+        symptoms: groupedSymptoms
+      }
+    };
     
-    return res.status(200).json(assessment);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error fetching assessment:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-  
-  // Pass to the next handler if not a test ID
-  return next();
 });
 
-// Process assessment submission
-app.post('/api/assessment/send', (req, res) => {
-  console.log('TEST SERVER: Processing assessment submission');
-  
-  const { userId, assessmentData } = req.body;
-  
-  // Simple validation
-  if (!assessmentData) {
-    return res.status(400).json({ error: 'Assessment data is required' });
+// Send assessment
+app.post('/api/assessment/send', async (req, res) => {
+  try {
+    const { userId, assessmentData } = req.body;
+    
+    // Simple validation
+    if (!assessmentData) {
+      return res.status(400).json({ error: 'Assessment data is required' });
+    }
+    
+    // Create a new assessment ID
+    const assessmentId = `test-assessment-${Date.now()}`;
+    
+    // Insert assessment into database
+    await db('assessments').insert({
+      id: assessmentId,
+      user_id: userId || req.user.id,
+      created_at: new Date().toISOString(),
+      age: assessmentData.age,
+      cycle_length: assessmentData.cycleLength,
+      period_duration: assessmentData.periodDuration,
+      flow_heaviness: assessmentData.flowHeaviness,
+      pain_level: assessmentData.painLevel
+    });
+    
+    // Insert symptoms if available
+    if (assessmentData.symptoms) {
+      const symptoms = [];
+      
+      // Add physical symptoms
+      if (assessmentData.symptoms.physical && Array.isArray(assessmentData.symptoms.physical)) {
+        for (const symptom of assessmentData.symptoms.physical) {
+          symptoms.push({
+            assessment_id: assessmentId,
+            symptom_name: symptom,
+            symptom_type: 'physical'
+          });
+        }
+      }
+      
+      // Add emotional symptoms
+      if (assessmentData.symptoms.emotional && Array.isArray(assessmentData.symptoms.emotional)) {
+        for (const symptom of assessmentData.symptoms.emotional) {
+          symptoms.push({
+            assessment_id: assessmentId,
+            symptom_name: symptom,
+            symptom_type: 'emotional'
+          });
+        }
+      }
+      
+      // Insert symptoms if any exist
+      if (symptoms.length > 0) {
+        await db('symptoms').insert(symptoms);
+      }
+    }
+    
+    // Return the created assessment
+    return res.status(201).json({
+      id: assessmentId,
+      userId: userId || req.user.id,
+      createdAt: new Date().toISOString(),
+      assessmentData
+    });
+  } catch (error) {
+    console.error('Error creating assessment:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-  
-  // Create a new assessment
-  const assessmentId = `assessment-${Date.now()}`;
-  const newAssessment = {
-    id: assessmentId,
-    userId: userId || req.user.id,
-    createdAt: new Date().toISOString(),
-    assessmentData
-  };
-  
-  // Store in our test data
-  testData.assessments.set(assessmentId, newAssessment);
-  
-  return res.status(201).json(newAssessment);
 });
-
-// Mount assessment routes for any paths not handled by our test routes
-app.use('/api/assessment', assessmentRoutes);
 
 // Catch-all 404 handler
 app.use((req, res) => {
+  console.log(`Route not found: ${req.method} ${req.path}`);
   res.status(404).json({ error: 'Resource not found' });
 });
 

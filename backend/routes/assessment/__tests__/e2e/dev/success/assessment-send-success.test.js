@@ -1,7 +1,7 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../../../../../../server.js';
+import app from '../test-server.js';
 import { createServer } from 'http';
 import db from '../../../../../../db/index.js';
 import jwt from 'jsonwebtoken';
@@ -45,9 +45,13 @@ beforeAll(async () => {
     console.log('Test user created:', testUserId);
     
     // Create a JWT token for this test user
-    const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key';
+    // Use the same JWT_SECRET as in the verifyToken middleware
+    const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
     testToken = jwt.sign(
-      { id: testUserId, email: userData.email },
+      { 
+        userId: testUserId, // Must use userId as expected by verifyToken
+        email: userData.email 
+      },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
