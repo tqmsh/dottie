@@ -1,3 +1,11 @@
+// THIS FILE IS DEPRECATED AND NO LONGER USED
+// The functionality has been split into:
+// - userRoutes.js - route definitions
+// - userValidators.js - validation middleware
+// - controllers/UserQueryController.js - read operations
+// - controllers/UserUpdateController.js - update operations
+// - controllers/UserDeleteController.js - delete operations
+
 import express from 'express';
 import User from '../../models/User.js';
 import { authenticateToken } from './middleware.js';

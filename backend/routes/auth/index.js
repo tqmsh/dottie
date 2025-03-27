@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { verifyToken, refreshTokens } from './middleware.js';
 
 // Import route modules
-import usersRoutes from './users.js';
+import userRoutes from './userRoutes.js';
 import verifyRoutes from './verify.js';
 import loginRoutes from './login.js';
 import signupRoutes from './signup.js';
@@ -19,7 +19,7 @@ import resetPasswordRoutes from './resetPassword.js';
 const router = express.Router();
 
 // Mount modular routes
-router.use('/users', usersRoutes);
+router.use('/users', userRoutes);
 router.use('/verify', verifyRoutes);
 router.use('/login', loginRoutes);
 router.use('/signup', signupRoutes);
