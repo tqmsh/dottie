@@ -1,11 +1,32 @@
-import { expect, describe, it, beforeEach } from 'vitest';
+import { expect, describe, it, beforeEach, vi } from 'vitest';
 import { createAssessment } from '../../create/controller.js';
 import { listAssessments } from '../../getList/controller.js';
 import { getAssessmentDetail } from '../../getDetail/controller.js';
 import { updateAssessment } from '../../update/controller.js';
 import { deleteAssessment } from '../../delete/controller.js';
-import db from '../../../db/index.js';
 import { assessments } from '../../store/index.js';
+
+// Mock the database module
+vi.mock('../../../../../db/index.js', () => {
+  return {
+    default: {
+      raw: vi.fn().mockImplementation((query) => {
+        return [{ message: 'Hello World from Mocked DB!' }];
+      }),
+      select: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      from: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockResolvedValue([1]),
+      first: vi.fn().mockReturnThis(),
+      client: {
+        config: {
+          client: 'sqlite3',
+        }
+      },
+      destroy: vi.fn().mockResolvedValue(undefined)
+    }
+  };
+});
 
 describe('Assessment Controller Unit Tests', () => {
   let req;
@@ -31,7 +52,7 @@ describe('Assessment Controller Unit Tests', () => {
           }
         }
       },
-      user: { id: 'test-user-123' }
+      user: { userId: 'test-user-123' }
     };
     
     res = {
