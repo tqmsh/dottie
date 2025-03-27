@@ -19,7 +19,7 @@ const TEST_PORT = 5020;
 // Create a mock token for testing
 const createMockToken = (userId) => {
   return jwt.sign(
-    { id: userId, email: `test_${Date.now()}@example.com` },
+    { userId: userId, email: `test_${Date.now()}@example.com` },
     process.env.JWT_SECRET || 'dev-jwt-secret',
     { expiresIn: '1h' }
   );

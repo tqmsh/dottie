@@ -8,17 +8,10 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
 // Import route modules
-import assessmentRoutes from "./routes/assessmentRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
+import assessmentRoutes from "./routes/assessment/index.js";
+import userRoutes from "./routes/user/index.js";
 import authRoutes from "./routes/auth/index.js";
-import serverlessTestRoutes from "./routes/serverlessTestRoutes.js";
-
-// Import refactored endpoints
-import helloEndpoint from "./routes/setup/hello.js";
-import serverlessTestEndpoint from "./routes/setup/serverlessTest.js";
-import sqlHelloEndpoint from "./routes/setup/database/sqlHello.js";
-import dbStatusEndpoint from "./routes/setup/database/dbStatus.js";
-import errorHandlers from "./routes/setup/errorHandlers.js";
+import setupRoutes from "./routes/setup/index.js";
 
 // Load environment variables
 dotenv.config();
@@ -49,20 +42,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });
 });
 
-// Mount refactored endpoint routers
-app.use(helloEndpoint);
-app.use(serverlessTestEndpoint);
-app.use(sqlHelloEndpoint);
-app.use(dbStatusEndpoint);
-
 // Mount route modules
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/serverless-test", serverlessTestRoutes);
-
-// Mount error handlers (this should be last)
-app.use(errorHandlers);
+app.use("/api/setup", setupRoutes);
 
 // For local development
 const PORT = process.env.PORT || 5000;
