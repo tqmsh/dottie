@@ -1,7 +1,7 @@
-import User from '../../../../models/User.js';
+import User from '../../../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { refreshTokens } from '../../middleware/index.js';
+import { refreshTokens } from '../middleware/index.js';
 
 // Helper function for validation
 function isValidEmail(email) {

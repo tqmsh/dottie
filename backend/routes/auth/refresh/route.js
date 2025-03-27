@@ -1,5 +1,5 @@
 import express from 'express';
-import { refresh } from '../../controllers/auth/refresh.js';
+import { refresh } from './controller.js';
 
 const router = express.Router();
 
