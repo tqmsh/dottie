@@ -1,89 +1,116 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../test-server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
+import db from '../../../../../../db/index.js';
 import jwt from 'jsonwebtoken';
 
 // Create a supertest instance
 const request = supertest(app);
 
-// Store server instance and test user data
+// Store server instance and test data
 let server;
 let testUserId;
 let testToken;
 let testAssessmentId;
 
-// Use a different port for tests to avoid conflicts with the running server
+// Use a different port for tests
 const TEST_PORT = 5008;
-
-// Create a mock token for testing
-const createMockToken = (userId) => {
-  return jwt.sign(
-    { id: userId, email: `test_${Date.now()}@example.com` },
-    'test-secret-key',
-    { expiresIn: '1h' }
-  );
-};
 
 // Start server before all tests
 beforeAll(async () => {
-  // Create a test user ID and token
-  testUserId = `test-user-${Date.now()}`;
-  testToken = createMockToken(testUserId);
-  testAssessmentId = `test-assessment-${Date.now()}`;
-  
-  // Add a mock route for retrieving a specific assessment
-  // This route needs to be defined BEFORE the routes are mounted
-  app._router.stack = app._router.stack.filter(layer => 
-    !(layer.route && layer.route.path === `/api/assessment/${testAssessmentId}`)
-  );
-  
-  app.get(`/api/assessment/${testAssessmentId}`, (req, res) => {
-    // Check if the request has authorization
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  try {
+    // Initialize test database first
+    console.log('Initializing database for assessment detail tests...');
     
-    console.log('Mock assessment detail route triggered for ID:', testAssessmentId);
+    // Clear any existing test data
+    await db('assessments').where('id', 'like', 'test-%').delete();
+    await db('users').where('id', 'like', 'test-%').delete();
     
-    // Return a mock assessment
-    return res.status(200).json({
+    console.log('Test database cleared');
+    
+    // Create a test user directly in the database
+    testUserId = `test-user-${Date.now()}`;
+    const userData = {
+      id: testUserId,
+      username: `testuser_${Date.now()}`,
+      email: `test_${Date.now()}@example.com`,
+      password_hash: 'test-hash', // Not used for auth in these tests
+      age: '18_24',
+      created_at: new Date().toISOString()
+    };
+    
+    await db('users').insert(userData);
+    console.log('Test user created:', testUserId);
+    
+    // Create a test assessment in the database
+    testAssessmentId = `test-assessment-${Date.now()}`;
+    const assessmentData = {
       id: testAssessmentId,
-      userId: testUserId,
-      assessmentData: {
-        age: "18_24",
-        cycleLength: "26_30",
-        periodDuration: "4_5",
-        flowHeaviness: "moderate",
-        painLevel: "moderate",
-        symptoms: {
-          physical: ["Bloating", "Headaches"],
-          emotional: ["Mood swings"]
-        }
-      },
-      createdAt: new Date().toISOString()
+      user_id: testUserId,
+      created_at: new Date().toISOString(),
+      age: '18_24',
+      cycle_length: '26_30',
+      period_duration: '4_5',
+      flow_heaviness: 'moderate',
+      pain_level: 'moderate'
+    };
+    
+    await db('assessments').insert(assessmentData);
+    
+    // Add some symptoms for this assessment
+    const symptoms = [
+      { assessment_id: testAssessmentId, symptom_name: 'Bloating', symptom_type: 'physical' },
+      { assessment_id: testAssessmentId, symptom_name: 'Headaches', symptom_type: 'physical' },
+      { assessment_id: testAssessmentId, symptom_name: 'Mood swings', symptom_type: 'emotional' }
+    ];
+    
+    await db('symptoms').insert(symptoms);
+    
+    console.log('Test assessment created:', testAssessmentId);
+    
+    // Create a JWT token for this test user
+    const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key';
+    testToken = jwt.sign(
+      { id: testUserId, email: userData.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    
+    // Start the server
+    server = createServer(app);
+    await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
+      server.listen(TEST_PORT, () => {
+        console.log(`Assessment detail success test server started on port ${TEST_PORT}`);
+        resolve(true);
+      });
     });
-  });
-  
-  server = createServer(app);
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.listen(TEST_PORT, () => {
-      console.log(`Assessment detail success test server started on port ${TEST_PORT}`);
-      resolve(true);
-    });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  } catch (error) {
+    console.error('Error in test setup:', error);
+    throw error;
+  }
+}, 15000); // Increased timeout for setup
 
-// Close server after all tests
+// Close server and cleanup after all tests
 afterAll(async () => {
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.close(() => {
-      console.log('Assessment detail success test server closed');
-      resolve(true);
+  try {
+    // Clean up test data
+    await db('symptoms').where('assessment_id', testAssessmentId).delete();
+    await db('assessments').where('id', testAssessmentId).delete();
+    await db('users').where('id', testUserId).delete();
+    
+    // Close the server
+    await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
+      server.close(() => {
+        console.log('Assessment detail success test server closed');
+        resolve(true);
+      });
     });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  } catch (error) {
+    console.error('Error in test cleanup:', error);
+  }
+}, 15000);
 
 describe("Assessment Detail Endpoint - Success Cases", () => {
   // Test getting a specific assessment by ID
@@ -95,22 +122,20 @@ describe("Assessment Detail Endpoint - Success Cases", () => {
       .set("Authorization", `Bearer ${testToken}`);
     
     console.log('Response status:', response.status);
-    console.log('Response body:', response.body);
-
+    
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("id");
     expect(response.body.id).toBe(testAssessmentId);
     expect(response.body).toHaveProperty("userId");
     expect(response.body.userId).toBe(testUserId);
-    expect(response.body).toHaveProperty("assessmentData");
     
-    // Check assessment data structure
-    const { assessmentData } = response.body;
-    expect(assessmentData).toHaveProperty("age");
-    expect(assessmentData).toHaveProperty("cycleLength");
-    expect(assessmentData).toHaveProperty("periodDuration");
-    expect(assessmentData).toHaveProperty("flowHeaviness");
-    expect(assessmentData).toHaveProperty("painLevel");
-    expect(assessmentData).toHaveProperty("symptoms");
+    // Check for assessment data properties
+    expect(response.body).toHaveProperty("assessmentData");
+    expect(response.body.assessmentData).toHaveProperty("age");
+    expect(response.body.assessmentData).toHaveProperty("cycleLength");
+    expect(response.body.assessmentData).toHaveProperty("periodDuration");
+    expect(response.body.assessmentData).toHaveProperty("flowHeaviness");
+    expect(response.body.assessmentData).toHaveProperty("painLevel");
+    expect(response.body.assessmentData).toHaveProperty("symptoms");
   });
 }); 

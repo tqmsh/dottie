@@ -1,55 +1,92 @@
 // @ts-check
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
-import app from '../test-server.js';
+import app from '../../../../../../server.js';
 import { createServer } from 'http';
+import db from '../../../../../../db/index.js';
 import jwt from 'jsonwebtoken';
 
 // Create a supertest instance
 const request = supertest(app);
 
-// Store server instance and test user data
+// Store server instance and test data
 let server;
 let testUserId;
 let testToken;
 let testAssessmentId;
 
-// Use a different port for tests to avoid conflicts with the running server
+// Use a different port for tests
 const TEST_PORT = 5004;
-
-// Create a mock token for testing
-const createMockToken = (userId) => {
-  return jwt.sign(
-    { id: userId, email: `test_${Date.now()}@example.com` },
-    'test-secret-key',
-    { expiresIn: '1h' }
-  );
-};
 
 // Start server before all tests
 beforeAll(async () => {
-  server = createServer(app);
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.listen(TEST_PORT, () => {
-      console.log(`Assessment send success test server started on port ${TEST_PORT}`);
-      resolve(true);
+  try {
+    // Initialize test database first
+    console.log('Initializing database for assessment send tests...');
+    
+    // Clear any existing test data
+    await db('assessments').where('id', 'like', 'test-%').delete();
+    await db('users').where('id', 'like', 'test-%').delete();
+    
+    console.log('Test database cleared');
+    
+    // Create a test user directly in the database
+    testUserId = `test-user-${Date.now()}`;
+    const userData = {
+      id: testUserId,
+      username: `testuser_${Date.now()}`,
+      email: `test_${Date.now()}@example.com`,
+      password_hash: 'test-hash', // Not used for auth in these tests
+      age: '18_24',
+      created_at: new Date().toISOString()
+    };
+    
+    await db('users').insert(userData);
+    console.log('Test user created:', testUserId);
+    
+    // Create a JWT token for this test user
+    const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key';
+    testToken = jwt.sign(
+      { id: testUserId, email: userData.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    
+    // Start the server
+    server = createServer(app);
+    await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
+      server.listen(TEST_PORT, () => {
+        console.log(`Assessment send success test server started on port ${TEST_PORT}`);
+        resolve(true);
+      });
     });
-  });
+  } catch (error) {
+    console.error('Error in test setup:', error);
+    throw error;
+  }
+}, 15000); // Increased timeout for setup
 
-  // Create a test user ID and token
-  testUserId = `test-user-${Date.now()}`;
-  testToken = createMockToken(testUserId);
-}, 15000); // Increased timeout to 15 seconds
-
-// Close server after all tests
+// Close server and cleanup after all tests
 afterAll(async () => {
-  await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
-    server.close(() => {
-      console.log('Assessment send success test server closed');
-      resolve(true);
+  try {
+    // Clean up test data
+    if (testAssessmentId) {
+      await db('symptoms').where('assessment_id', testAssessmentId).delete();
+      await db('assessments').where('id', testAssessmentId).delete();
+    }
+    await db('users').where('id', testUserId).delete();
+    
+    // Close the server
+    await new Promise(/** @param {(value: unknown) => void} resolve */ (resolve) => {
+      server.close(() => {
+        console.log('Assessment send success test server closed');
+        resolve(true);
+      });
     });
-  });
-}, 15000); // Increased timeout to 15 seconds
+  } catch (error) {
+    console.error('Error in test cleanup:', error);
+  }
+}, 15000);
 
 describe("Assessment Send Endpoint - Success Cases", () => {
   // Test submitting a complete assessment
@@ -88,12 +125,16 @@ describe("Assessment Send Endpoint - Success Cases", () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("id");
     
-    // Save assessment ID for later tests
+    // Save assessment ID for later cleanup
     testAssessmentId = response.body.id;
     
-    // Export the test assessment ID and token for use in other test files
-    global.testAssessmentId = testAssessmentId;
-    global.testToken = testToken;
-    global.testUserId = testUserId;
+    // Verify the assessment was actually created in the database
+    const dbAssessment = await db('assessments').where('id', testAssessmentId).first();
+    expect(dbAssessment).toBeTruthy();
+    expect(dbAssessment.user_id).toBe(testUserId);
+    
+    // Check if symptoms were saved
+    const symptoms = await db('symptoms').where('assessment_id', testAssessmentId);
+    expect(symptoms.length).toBeGreaterThan(0);
   });
 }); 
