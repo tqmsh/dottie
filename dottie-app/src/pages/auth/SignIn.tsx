@@ -1,19 +1,26 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DotIcon } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login, error, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Implement sign in logic
-    console.log("Sign in:", { email, password })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await login({
+      email: email,
+      password: password,
+    });
+    // Redirect or handle successful login
+    navigate('/assessment/age-verification');
   }
 
   return (
@@ -35,6 +42,7 @@ export default function SignInPage() {
             <h1 className="text-2xl font-bold text-center mb-6">Welcome Back</h1>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <p className="text-red-500 text-center">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -59,8 +67,8 @@ export default function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-pink-500 hover:bg-pink-600 text-white">
-                Sign In
+              <Button type="submit" disabled={isLoading} className="w-full bg-pink-500 hover:bg-pink-600 text-white">
+                {isLoading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
 

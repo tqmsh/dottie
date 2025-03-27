@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DotIcon } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function SignUpPage() {
   const [name, setName] = useState("")
@@ -12,15 +13,24 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signup, error, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password !== confirmPassword) {
-      alert("Passwords do not match")
-      return
+    try {
+      await signup({
+        name: name,
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+      });
+      navigate('/assessment/age-verification');
+    } catch (error) {
+      console.log(error)
     }
-    // TODO: Implement sign up logic
-    console.log("Sign up:", { name, email, password })
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -41,6 +51,7 @@ export default function SignUpPage() {
             <h1 className="text-2xl font-bold text-center mb-6">Create Account</h1>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <p className="text-red-500 text-center">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -89,8 +100,8 @@ export default function SignUpPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-pink-500 hover:bg-pink-600 text-white">
-                Sign Up
+              <Button type="submit" disabled={isLoading} className="w-full bg-pink-500 hover:bg-pink-600 text-white">
+                {isLoading ? 'Signing Up...' : 'Sign Up'}
               </Button>
             </form>
 
