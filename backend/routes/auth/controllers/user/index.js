@@ -1,14 +1,7 @@
-import { getAllUsers } from './getUserList.js';
-import { getUserById } from './getUserDetail.js';
-import { updateUser } from './updateUser.js';
-import { deleteUser } from './deleteUser.js';
-
-export {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser
-};
+export * from './getUser.js';
+export * from './getAllUsers.js';
+export * from './updateUser.js';
+export * from './deleteUser.js';
 
 export default {
   getAllUsers,
