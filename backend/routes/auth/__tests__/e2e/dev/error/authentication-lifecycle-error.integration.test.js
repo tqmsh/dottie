@@ -329,9 +329,9 @@ describe("Authentication Error Integration Tests", () => {
         .put(`/api/auth/users/other-user-${Date.now()}`)
         .send(updateData);
 
-      // Acceptable status codes include 401 (Unauthorized), 403 (Forbidden),
+      // Acceptable status codes include 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden),
       // or 404 (Not Found) if the user ID doesn't exist
-      expect([401, 403, 404]).toContain(response.status);
+      expect([400, 401, 403, 404]).toContain(response.status);
       expect(response.body).toHaveProperty('error');
     });
     

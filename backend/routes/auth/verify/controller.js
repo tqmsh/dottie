@@ -3,7 +3,7 @@ export const verify = (req, res) => {
   res.status(200).json({ 
     authenticated: true,
     user: { 
-      id: req.user.id, 
+      id: req.user.userId, 
       email: req.user.email,
       // Add timestamp to show when verification was performed
       verified_at: new Date().toISOString()
