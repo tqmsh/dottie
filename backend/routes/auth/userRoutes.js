@@ -1,7 +1,8 @@
 import express from 'express';
 import { authenticateToken } from './middleware.js';
 import { validateUserUpdate, validateUserAccess } from './userValidators.js';
-import { getAllUsers, getUserById } from './controllers/UserQueryController.js';
+import { getAllUsers } from './controllers/UserListController.js';
+import { getUserById } from './controllers/UserDetailController.js';
 import { updateUser } from './controllers/UserUpdateController.js';
 import { deleteUser } from './controllers/UserDeleteController.js';
 
