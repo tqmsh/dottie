@@ -20,6 +20,14 @@ export default defineConfig({
   // Specific file pattern to avoid conflicts with vitest
   testMatch: '**/*.pw.spec.js',
 
+  // Configure webServer to automatically start the backend server during tests
+  webServer: {
+    command: 'cd .. && npm run dev',
+    url: 'http://localhost:5000/api/hello',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
+
   // Create separate projects for API tests and browser tests
   projects: [
     {
