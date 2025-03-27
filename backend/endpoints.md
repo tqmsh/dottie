@@ -23,12 +23,11 @@
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/assessment/start` | POST | Start a new assessment |
-| `/api/assessment/answer` | POST | Submit an answer to the assessment |
-| `/api/assessment/results/:assessmentId` | GET | Get assessment results by ID |
-| `/api/assessment/send` | POST | Send assessment results from frontend context |
-| `/api/assessment/list` | GET | Get list of all assessments for current user |
-| `/api/assessment/:id` | GET | Get detailed view of a specific assessment |
+| `/api/assessment/:userId` | POST | Send assessment results from frontend context, generates a new assessmentId |
+| `/api/assessment/:userId` | GET | Get list of all assessments for a specific user |
+| `/api/assessment/:userId/:assessmentId` | GET | Get detailed view of a specific assessment by user ID / assessment ID |
+| `/api/assessment/:userId/:assessmentId` | PUT | Update a specific assessment by user ID / assessment ID |
+| `/api/assessment/:userId/:assessmentId` | DELETE | Delete a specific assessment by user ID / assessment ID |
 
 ## Request Examples
 
