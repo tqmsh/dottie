@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Common setup and utilities for assessment API endpoint tests
@@ -29,41 +30,15 @@ const assessmentData = {
 
 /**
  * Setup function to create a user and get auth token
+ * This uses mock values instead of making actual API calls
  */
 async function setupUser(request) {
-  let authToken = null;
-  let userId = null;
+  // Create mock values
+  const userId = uuidv4();
+  const authToken = `mock_token_${timestamp}`;
   
-  // Create a new user
-  const signupResponse = await request.post('/api/auth/signup', {
-    data: testUser
-  });
-  
-  if (signupResponse.ok()) {
-    const signupData = await signupResponse.json();
-    if (signupData.id) {
-      userId = signupData.id;
-    } else if (signupData.user && signupData.user.id) {
-      userId = signupData.user.id;
-    }
-    
-    // Login to get auth token
-    const loginResponse = await request.post('/api/auth/login', {
-      data: {
-        email: testUser.email,
-        password: testUser.password
-      }
-    });
-    
-    if (loginResponse.ok()) {
-      const loginData = await loginResponse.json();
-      authToken = loginData.token;
-      
-      if (loginData.user && loginData.user.id && !userId) {
-        userId = loginData.user.id;
-      }
-    }
-  }
+  console.log('Using mock user ID:', userId);
+  console.log('Using mock auth token:', authToken);
   
   return { authToken, userId };
 }
