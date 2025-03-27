@@ -10,38 +10,36 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Mock authentication middleware for testing
+// Authentication middleware for tests - extracts userId from JWT token
 app.use((req, res, next) => {
-  // Extract token from Authorization header
+  // Get authorization header
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No token provided' });
   }
   
+  // Extract token
   const token = authHeader.split(' ')[1];
   
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  
   try {
-    // For tests, use the same jwt secret as in the real middleware
+    // Verify token - same secret as in auth middleware
     const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
+    const decoded = jwt.verify(token, JWT_SECRET);
     
-    // Verify the token
-    const decodedToken = jwt.verify(token, JWT_SECRET);
-    
-    if (!decodedToken || (!decodedToken.userId && !decodedToken.id)) {
-      return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
-    }
-    
-    // Add the decoded user to the request
+    // Set user info in request
     req.user = {
-      userId: decodedToken.userId || decodedToken.id,
-      email: decodedToken.email || 'test@example.com'
+      userId: decoded.userId || decoded.id // Accept both formats for compatibility
     };
     
     next();
   } catch (error) {
-    console.error('Auth error:', error);
-    return res.status(401).json({ error: 'Authentication failed' });
+    console.error('Token validation error:', error);
+    return res.status(401).json({ error: 'Invalid token' });
   }
 });
 
@@ -56,7 +54,7 @@ app.get('/api/assessment/list', async (req, res) => {
     // Get all assessments for this user
     const assessments = await db('assessments').where('user_id', userId);
     
-    if (!assessments || assessments.length === 0) {
+    if (!assessments || !Array.isArray(assessments) || assessments.length === 0) {
       return res.status(200).json([]);
     }
     
@@ -101,11 +99,17 @@ app.get('/api/assessment/list', async (req, res) => {
 app.get('/api/assessment/:id', async (req, res) => {
   try {
     const assessmentId = req.params.id;
+    const userId = req.user.userId;
     
     console.log(`Fetching assessment with ID: ${assessmentId}`);
     
     // Get assessment from database
-    const assessment = await db('assessments').where('id', assessmentId).first();
+    const assessment = await db('assessments')
+      .where({
+        'id': assessmentId,
+        'user_id': userId
+      })
+      .first();
     
     if (!assessment) {
       console.log(`Assessment not found: ${assessmentId}`);
@@ -171,9 +175,8 @@ app.post('/api/assessment/send', async (req, res) => {
     });
     
     // Insert symptoms if available
+    const symptoms = [];
     if (assessmentData.symptoms) {
-      const symptoms = [];
-      
       // Add physical symptoms
       if (assessmentData.symptoms.physical && Array.isArray(assessmentData.symptoms.physical)) {
         for (const symptom of assessmentData.symptoms.physical) {
