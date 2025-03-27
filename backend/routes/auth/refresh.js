@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { refreshTokens } from './middleware.js';
+import { refreshTokens } from './middleware/index.js';
 import crypto from 'crypto';
 
 const router = express.Router();

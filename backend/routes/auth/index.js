@@ -5,10 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
 // Import middleware
-import { verifyToken, refreshTokens } from './middleware.js';
+import { verifyToken, refreshTokens } from './middleware/index.js';
 
 // Import route modules
-import userRoutes from './userRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import verifyRoutes from './verify.js';
 import loginRoutes from './login.js';
 import signupRoutes from './signup.js';
