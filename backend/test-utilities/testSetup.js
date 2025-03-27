@@ -27,7 +27,7 @@ export const createMockToken = (userId, isProd = false) => {
   const secret = process.env.JWT_SECRET || 'your-secret-key';
   
   return jwt.sign(
-    { id: userId, email },
+    { userId: userId, email },
     secret,
     { expiresIn: '1h' }
   );
