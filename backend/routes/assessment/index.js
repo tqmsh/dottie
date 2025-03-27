@@ -1,34 +1,19 @@
 import express from "express";
-import { verifyToken } from '../auth/middleware/index.js';
-import { 
-  startAssessment, 
-  submitAssessment, 
-  getAssessment 
-} from '../../controllers/assessmentController.js';
 
-// Import individual route files
-import sendRouter from './send.js';
-import listRouter from './list.js';
-import getByIdRouter from './getById.js';
-import updateRouter from './update.js';
-import deleteRouter from './delete.js';
+// Import route files
+import createRouter from "./create/routes.js";
+import listRouter from "./getList/routes.js";
+import detailRouter from "./getDetail/routes.js";
+import updateRouter from "./update/routes.js";
+import deleteRouter from "./delete/routes.js";
 
 const router = express.Router();
 
-// Start a new assessment
-router.post('/start', verifyToken, startAssessment);
-
-// Submit an assessment
-router.post('/:assessmentId/submit', verifyToken, submitAssessment);
-
-// Get assessment by ID
-router.get('/:assessmentId', verifyToken, getAssessment);
-
 // Mount individual route handlers
-router.use(sendRouter);
+router.use(createRouter);
 router.use(listRouter);
-router.use(getByIdRouter);
+router.use(detailRouter);
 router.use(updateRouter);
 router.use(deleteRouter);
 
-export default router; 
+export default router;

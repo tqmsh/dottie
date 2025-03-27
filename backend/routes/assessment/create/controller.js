@@ -1,21 +1,22 @@
-import express from "express";
-import { authenticateToken } from "./middleware.js";
-import { assessments } from "./store.js";
-import db from "../../db/index.js";
+import db from "../../../db/index.js";
 import { v4 as uuidv4 } from "uuid";
+import { assessments } from "../store/index.js";
+import { validateAssessmentData } from "../validators/index.js";
 
-const router = express.Router();
-
-router.post("/send", authenticateToken, async (req, res) => {
+/**
+ * Create a new assessment for a user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const createAssessment = async (req, res) => {
   try {
+    const { userId } = req.params;
     const { assessmentData } = req.body;
     
     // Validate assessment data
     if (!assessmentData) {
       return res.status(400).json({ error: 'Assessment data is required' });
     }
-    
-    const userId = req.user.id;
     
     // For test users, save to database
     if (userId.startsWith('test-')) {
@@ -96,9 +97,7 @@ router.post("/send", authenticateToken, async (req, res) => {
     
     res.status(201).json(assessment);
   } catch (error) {
-    console.error('Error sending assessment:', error);
-    res.status(500).json({ error: 'Failed to send assessment' });
+    console.error('Error creating assessment:', error);
+    res.status(500).json({ error: 'Failed to create assessment' });
   }
-});
-
-export default router; 
+}; 

@@ -1,13 +1,14 @@
-import express from "express";
-import { authenticateToken } from "./middleware.js";
-import { assessments } from "./store.js";
-import db from "../../db/index.js";
+import { assessments } from "../store.js";
+import db from "../../../db/index.js";
 
-const router = express.Router();
-
-router.get("/list", authenticateToken, async (req, res) => {
+/**
+ * Get list of all assessments for a specific user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const listAssessments = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const { userId } = req.params;
     
     // For test users, try to fetch from the database
     if (userId.startsWith('test-')) {
@@ -59,6 +60,4 @@ router.get("/list", authenticateToken, async (req, res) => {
     console.error('Error fetching assessments:', error);
     res.status(500).json({ error: 'Failed to fetch assessments' });
   }
-});
-
-export default router; 
+}; 

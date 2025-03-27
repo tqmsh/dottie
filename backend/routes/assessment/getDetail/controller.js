@@ -1,19 +1,25 @@
-import express from "express";
-import { authenticateToken } from "./middleware.js";
-import { assessments } from "./store.js";
-import db from "../../db/index.js";
+import { assessments } from "../store.js";
+import db from "../../../db/index.js";
 
-const router = express.Router();
-
-router.get("/:id", authenticateToken, async (req, res) => {
+/**
+ * Get detailed view of a specific assessment by user ID / assessment ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const getAssessmentDetail = async (req, res) => {
   try {
-    const assessmentId = req.params.id;
+    const { userId, assessmentId } = req.params;
     
     // For test IDs, try to fetch from the database
     if (assessmentId.startsWith('test-')) {
       // Try to find the assessment in the database first
       try {
-        const dbAssessment = await db('assessments').where('id', assessmentId).first();
+        const dbAssessment = await db('assessments')
+          .where({
+            'id': assessmentId,
+            'user_id': userId
+          })
+          .first();
         
         if (dbAssessment) {
           // Get symptoms for this assessment
@@ -46,37 +52,11 @@ router.get("/:id", authenticateToken, async (req, res) => {
       }
     }
     
-    // Find the assessment by ID in memory
-    const assessment = assessments.find(a => a.id === assessmentId);
+    // Find the assessment by ID and userId in memory
+    const assessment = assessments.find(a => a.id === assessmentId && a.userId === userId);
     
     if (!assessment) {
-      // If not found in memory, return a mock assessment
-      return res.json({
-        id: assessmentId,
-        userId: req.user.id,
-        createdAt: new Date().toISOString(),
-        assessmentData: {
-          age: "18_24",
-          cycleLength: "26_30",
-          periodDuration: "4_5",
-          flowHeaviness: "moderate",
-          painLevel: "moderate",
-          symptoms: {
-            physical: ["Bloating", "Headaches"],
-            emotional: ["Mood swings", "Irritability"]
-          },
-          recommendations: [
-            {
-              title: "Track Your Cycle",
-              description: "Keep a record of when your period starts and stops to identify patterns."
-            },
-            {
-              title: "Pain Management",
-              description: "Over-the-counter pain relievers like ibuprofen can help with cramps."
-            }
-          ]
-        }
-      });
+      return res.status(404).json({ error: 'Assessment not found' });
     }
     
     res.json(assessment);
@@ -84,6 +64,4 @@ router.get("/:id", authenticateToken, async (req, res) => {
     console.error('Error fetching assessment:', error);
     res.status(500).json({ error: 'Failed to fetch assessment' });
   }
-});
-
-export default router; 
+}; 
