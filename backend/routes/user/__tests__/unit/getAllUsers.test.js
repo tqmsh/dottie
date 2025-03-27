@@ -6,7 +6,7 @@ import User from '../../../../models/User.js';
 // Mock the User model
 vi.mock('../../../../models/User.js', () => ({
   default: {
-    findAll: vi.fn()
+    getAll: vi.fn()
   }
 }));
 
@@ -52,14 +52,14 @@ describe('GET / - Get All Users', () => {
     ];
     
     // Set up mocks
-    User.findAll.mockResolvedValue(mockUsers);
+    User.getAll.mockResolvedValue(mockUsers);
     
     // Execute the request
     const response = await request(app).get('/users');
     
     // Assertions
     expect(response.status).toBe(200);
-    expect(User.findAll).toHaveBeenCalledTimes(1);
+    expect(User.getAll).toHaveBeenCalledTimes(1);
     expect(response.body).toHaveLength(2);
     
     // Verify that password_hash is removed from each user
@@ -73,14 +73,14 @@ describe('GET / - Get All Users', () => {
 
   it('should handle database errors', async () => {
     // Set up mocks to simulate an error
-    User.findAll.mockRejectedValue(new Error('Database error'));
+    User.getAll.mockRejectedValue(new Error('Database error'));
     
     // Execute the request
     const response = await request(app).get('/users');
     
     // Assertions
     expect(response.status).toBe(500);
-    expect(User.findAll).toHaveBeenCalledTimes(1);
+    expect(User.getAll).toHaveBeenCalledTimes(1);
     expect(response.body).toHaveProperty('error', 'Failed to fetch users');
   });
 }); 
