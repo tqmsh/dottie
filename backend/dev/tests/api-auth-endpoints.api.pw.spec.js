@@ -13,7 +13,7 @@ test.describe('Authentication API Endpoints', () => {
   const timestamp = Date.now();
   const testUser = {
     username: `testuser-${timestamp}`,
-    email: `test-${timestamp}@example.com`,
+    email: `test_user-${timestamp}@example.com`,
     password: 'Password123!'
   };
   
@@ -69,13 +69,22 @@ test.describe('Authentication API Endpoints', () => {
     const status = response.status();
     console.log(`Login status: ${status}`);
     
+    // Log the response body for debugging
+    const responseBody = await response.text();
+    console.log(`Login response body: ${responseBody}`);
+    
     if (status === 200) {
       // If login was successful, verify token
-      const data = await response.json();
+      const data = JSON.parse(responseBody);
       expect(data).toHaveProperty('token');
       
       // Save token for subsequent tests
       authToken = data.token;
+      
+      // Save refresh token for logout test
+      if (data.refreshToken) {
+        testUser.refreshToken = data.refreshToken;
+      }
       
       // If the response includes user ID and we don't have it yet, save it
       if (data.user && data.user.id && !userId) {
@@ -134,12 +143,15 @@ test.describe('Authentication API Endpoints', () => {
   // Test for /api/auth/logout endpoint
   test('POST /api/auth/logout - should logout user and invalidate token', async ({ request }) => {
     // Skip this test if no auth token is available
-    test.skip(!authToken, 'No auth token available');
+    test.skip(!authToken || !testUser.refreshToken, 'No auth token or refresh token available');
     
-    // Send logout request with auth token
+    // Send logout request with auth token and refresh token
     const response = await request.post('/api/auth/logout', {
       headers: {
         'Authorization': `Bearer ${authToken}`
+      },
+      data: {
+        refreshToken: testUser.refreshToken
       }
     });
     
