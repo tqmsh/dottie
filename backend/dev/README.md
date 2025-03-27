@@ -15,63 +15,32 @@ To avoid conflicts between Playwright and Vitest, we use the following naming co
 
 This separation ensures that Playwright doesn't try to run Vitest tests and vice versa.
 
-## Mock Testing vs. Live Testing
+## Automatic Server Management
 
-The tests support two modes:
-1. **Mock mode**: Tests run with mock responses without requiring a live server
-2. **Live mode**: Tests run against a live server
+These tests run against the actual backend server. The Playwright configuration includes a `webServer` setting that automatically:
 
-To switch between modes, change the `useMockServer` flag in each test file:
-```javascript
-const useMockServer = true; // Set to false for live testing
-```
+- Starts the backend server before tests run
+- Waits for it to be available at http://localhost:5000
+- Runs the tests
+- Shuts down the server when tests complete
 
 ## Running Tests
 
-### With Mock Server (no backend required)
+From the `backend/dev` directory, run:
 
-To run all tests with mock responses:
 ```bash
-cd backend/dev
+# Run all tests
 npx playwright test
-```
 
-### With Live Server (Automatic Server Start)
-
-The Playwright configuration includes a `webServer` setting that automatically starts and stops the backend server during test runs. To use this feature:
-
-1. Set `useMockServer = false` in the test files
-2. Run the tests:
-```bash
-cd backend/dev
-npx playwright test
-```
-
-This will automatically:
-- Start the backend server
-- Wait for it to be available at http://localhost:5000
-- Run the tests
-- Shut down the server when tests complete
-
-To run specific test suites:
-```bash
-# Basic API endpoints
+# Run specific test suites
 npx playwright test tests/api-basic-endpoints.api.pw.spec.js
-
-# Authentication endpoints
 npx playwright test tests/api-auth-endpoints.api.pw.spec.js
-
-# Assessment endpoints
 npx playwright test tests/api-assessment-endpoints.api.pw.spec.js
-```
 
-To run only API tests (without browser):
-```bash
+# Run only API tests (without browser)
 npx playwright test --project=api
-```
 
-To run only browser tests (with Safari):
-```bash
+# Run only browser tests (with Safari)
 npx playwright test --project=browser
 ```
 
@@ -92,4 +61,4 @@ npx playwright show-report
 
 - The `webServer` feature automatically manages the backend server for live testing
 - Some tests may be skipped if prerequisites aren't met (e.g., authentication token not available)
-- Test data is generated with randomized values to avoid conflicts 
+- Test user data includes timestamps to avoid conflicts with existing data 

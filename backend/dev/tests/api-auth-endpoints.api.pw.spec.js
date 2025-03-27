@@ -3,97 +3,70 @@ import { test, expect } from '@playwright/test';
 /**
  * Test suite for authentication API endpoints
  * 
- * This file can run in two modes:
- * 1. MOCK MODE: Uses mock responses without requiring a live server
- * 2. LIVE MODE: Tests against a live server (uses the webServer config)
- * 
- * To switch modes, change the useMockServer flag below
+ * These tests run against the actual backend server.
+ * The webServer config in playwright.config.js automatically starts
+ * and stops the backend server during test runs.
  */
 test.describe('Authentication API Endpoints', () => {
   
-  // ==== CONFIGURATION ====
-  // Set to TRUE for mock testing, FALSE for live server testing
-  const useMockServer = true;
-  
-  // Test user data
+  // Test user data with unique values to avoid conflicts
+  const timestamp = Date.now();
   const testUser = {
-    username: 'testuser',
-    email: 'test@example.com',
+    username: `testuser-${timestamp}`,
+    email: `test-${timestamp}@example.com`,
     password: 'Password123!'
   };
   
   let authToken = null;
+  let userId = null;
   
   // Test for /api/auth/signup endpoint
   test('POST /api/auth/signup - should register a new user', async ({ request }) => {
-    // Generate a unique email to avoid conflicts
-    const uniqueEmail = `test-${Date.now()}@example.com`;
-    const uniqueUsername = `testuser-${Date.now()}`;
+    // Send request to register a new user
+    const response = await request.post('/api/auth/signup', {
+      data: {
+        username: testUser.username,
+        email: testUser.email,
+        password: testUser.password
+      }
+    });
     
-    if (useMockServer) {
-      // MOCK MODE: Test with mock response
-      const mockResponse = {
-        status: 201,
-        json: () => Promise.resolve({ 
-          message: 'User registered successfully',
-          user: { id: 'mock-user-id', username: uniqueUsername, email: uniqueEmail }
-        }),
-      };
-      
-      expect(mockResponse.status).toBe(201);
-      const data = await mockResponse.json();
-      expect(data).toHaveProperty('message');
-      expect(data).toHaveProperty('user');
-    } else {
-      // LIVE MODE: Test with actual API
-      const response = await request.post('/api/auth/signup', {
-        data: {
-          username: uniqueUsername,
-          email: uniqueEmail,
-          password: testUser.password
-        }
-      });
-      
-      expect(response.status()).toBeLessThan(300);
-      const data = await response.json();
-      expect(data).toHaveProperty('message');
-      // or expect(data).toHaveProperty('user');
+    // Verify successful registration (status code 200 or 201)
+    expect(response.status()).toBeLessThan(300);
+    
+    // Verify response contains expected data
+    const data = await response.json();
+    expect(data).toHaveProperty('message');
+    
+    // If the response includes a user object, save the ID
+    if (data.user && data.user.id) {
+      userId = data.user.id;
     }
   });
   
   // Test for /api/auth/login endpoint
   test('POST /api/auth/login - should authenticate user and return token', async ({ request }) => {
-    if (useMockServer) {
-      // MOCK MODE: Test with mock response
-      const mockResponse = {
-        status: 200,
-        json: () => Promise.resolve({ 
-          token: 'mock-jwt-token',
-          user: { id: 'mock-user-id', email: testUser.email }
-        }),
-      };
-      
-      expect(mockResponse.status).toBe(200);
-      const data = await mockResponse.json();
-      expect(data).toHaveProperty('token');
-      
-      // Save the token for other tests
-      authToken = data.token;
-    } else {
-      // LIVE MODE: Test with actual API
-      const response = await request.post('/api/auth/login', {
-        data: {
-          email: testUser.email,
-          password: testUser.password
-        }
-      });
-      
-      expect(response.status()).toBe(200);
-      const data = await response.json();
-      expect(data).toHaveProperty('token');
-      
-      // Save the token for other tests
-      authToken = data.token;
+    // Send login request with test user credentials
+    const response = await request.post('/api/auth/login', {
+      data: {
+        email: testUser.email,
+        password: testUser.password
+      }
+    });
+    
+    // Verify successful login
+    expect(response.status()).toBe(200);
+    
+    // Verify response contains auth token
+    const data = await response.json();
+    expect(data).toHaveProperty('token');
+    
+    // Save token for subsequent tests
+    authToken = data.token;
+    
+    // If the response includes user ID and we don't have it yet, save it
+    if (data.user && data.user.id && !userId) {
+      userId = data.user.id;
     }
   });
   
@@ -102,21 +75,39 @@ test.describe('Authentication API Endpoints', () => {
     // Skip this test if no auth token is available
     test.skip(!authToken, 'No auth token available');
     
-    // Send a GET request to the users endpoint with auth token
+    // Send request to get users with auth token
     const response = await request.get('/api/auth/users', {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
     });
     
-    // Assert that the response status is 200 (OK)
+    // Verify successful response
     expect(response.status()).toBe(200);
     
-    // Parse the response JSON
+    // Verify response contains array of users
     const data = await response.json();
-    
-    // Assert that the response contains an array of users
     expect(Array.isArray(data)).toBe(true);
+  });
+  
+  // Test for /api/auth/users/:id endpoint - GET
+  test('GET /api/auth/users/:id - should get user by ID', async ({ request }) => {
+    // Skip this test if no auth token or user ID is available
+    test.skip(!authToken || !userId, 'No auth token or user ID available');
+    
+    // Send request to get specific user
+    const response = await request.get(`/api/auth/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    // Verify successful response
+    expect(response.status()).toBe(200);
+    
+    // Verify response contains user with matching ID
+    const data = await response.json();
+    expect(data).toHaveProperty('id', userId);
   });
   
   // Test for /api/auth/logout endpoint
@@ -124,20 +115,18 @@ test.describe('Authentication API Endpoints', () => {
     // Skip this test if no auth token is available
     test.skip(!authToken, 'No auth token available');
     
-    // Send a POST request to the logout endpoint with auth token
+    // Send logout request with auth token
     const response = await request.post('/api/auth/logout', {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
     });
     
-    // Assert that the response status is 200 (OK)
+    // Verify successful logout
     expect(response.status()).toBe(200);
     
-    // Parse the response JSON
+    // Verify response contains success message
     const data = await response.json();
-    
-    // Assert that the response contains a success message
     expect(data).toHaveProperty('message');
   });
 }); 
