@@ -125,10 +125,36 @@ testDb.destroy = async () => {
   return true;
 };
 
-// Initialize database connection or use mock for tests
+// Initialize database connection or use real SQLite for tests
 let db;
 if (isTestMode) {
-  db = testDb;
+  // Use in-memory SQLite for testing instead of mocks
+  const realTestDbConfig = {
+    client: 'sqlite3',
+    connection: {
+      filename: ':memory:'
+    },
+    useNullAsDefault: true
+  };
+  
+  db = knex(realTestDbConfig);
+  
+  // Log when queries are executed
+  db.on('query-response', () => {
+    console.log('SQLite query executed');
+  });
+  
+  // Initialize the schema in the next tick to avoid blocking
+  setTimeout(async () => {
+    try {
+      // Import the schema creation function
+      const { createTables } = await import('./migrations/initialSchema.js');
+      await createTables(db);
+      console.log('Test database tables created');
+    } catch (err) {
+      console.error('Failed to create test database tables:', err);
+    }
+  }, 0);
 } else {
   db = knex(dbConfig);
   
