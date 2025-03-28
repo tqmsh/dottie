@@ -11,6 +11,11 @@ import { DotIcon, ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 export default function CycleLengthPage() {
   const [selectedLength, setSelectedLength] = useState<string | null>(null)
 
+  const handleLengthChange = (value: string) => {
+    setSelectedLength(value)
+    sessionStorage.setItem("cycleLength", value)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
@@ -38,7 +43,7 @@ export default function CycleLengthPage() {
           Count from the first day of one period to the first day of the next period
         </p>
 
-        <RadioGroup value={selectedLength || ""} onValueChange={setSelectedLength} className="mb-6">
+        <RadioGroup value={selectedLength || ""} onValueChange={handleLengthChange} className="mb-6">
           <div className="space-y-3">
             <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
               <RadioGroupItem value="21-25" id="21-25" />
