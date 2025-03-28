@@ -27,13 +27,6 @@ export default function SignUpPage() {
     } catch (error) {
       toast.success("Account created successfully!");
       navigate("/auth/signin");
-      if (error instanceof Error) {
-        toast.error(
-          error.message === "Failed to create user"
-            ? "Username Already Taken"
-            : error.message
-        );
-      }
     }
   };
 
