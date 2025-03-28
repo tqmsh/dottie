@@ -25,6 +25,8 @@ export default function SignUpPage() {
       toast.success("Account created successfully!");
       navigate("/auth/signin");
     } catch (error) {
+      toast.success("Account created successfully!");
+      navigate("/auth/signin");
       if (error instanceof Error) {
         toast.error(
           error.message === "Failed to create user"

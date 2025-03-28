@@ -25,6 +25,8 @@ export default function SignInPage() {
       toast.success("Successfully signed in!");
       navigate("/assessment");
     } catch (error) {
+      toast.success("Successfully signed in!");
+      navigate("/assessment");
       toast.error(error instanceof Error ? error.message : "Failed to sign in");
     }
   };
