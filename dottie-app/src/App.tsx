@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
-import SignIn from './pages/auth/SignIn'
-import SignUp from './pages/auth/SignUp'
+import SignIn from './pages/auth/sign-in'
+import SignUp from './pages/auth/sign-up'
 import WelcomePage from './LandingPage'
+import { Toaster } from 'sonner'
 
 // Import assessment components
 import AgeVerification from './components/assessment/age-verification/page'
@@ -21,34 +22,37 @@ import ScrollToTop from './components/scroll-to-top'
 
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <main className="flex min-h-screen flex-col">
-        <Routes>
-          <Route index element={<WelcomePage />} />
-          
-          {/* Assessment routes */}
-          <Route path="/assessment">
-            <Route path="age-verification" element={<AgeVerification />} />
-            <Route path="cycle-length" element={<CycleLength />} />
-            <Route path="period-duration" element={<PeriodDuration />} />
-            <Route path="flow" element={<FlowLevel />} />
-            <Route path="pain" element={<PainLevel />} />
-            <Route path="symptoms" element={<Symptoms />} />
-            <Route path="results" element={<Results />} />
-            <Route path="resources" element={<ResourcesPage />} />
-            <Route path='history' element={<HistoryPage />} />
-            <Route path="history/:id" element={<DetailsPage />} />
-          </Route>
+    <>
+      <Toaster position="top-center" richColors />
+      <BrowserRouter>
+        <ScrollToTop />
+        <main className="flex min-h-screen flex-col">
+          <Routes>
+            <Route index element={<WelcomePage />} />
+            
+            {/* Assessment routes */}
+            <Route path="/assessment">
+              <Route path="age-verification" element={<AgeVerification />} />
+              <Route path="cycle-length" element={<CycleLength />} />
+              <Route path="period-duration" element={<PeriodDuration />} />
+              <Route path="flow" element={<FlowLevel />} />
+              <Route path="pain" element={<PainLevel />} />
+              <Route path="symptoms" element={<Symptoms />} />
+              <Route path="results" element={<Results />} />
+              <Route path="resources" element={<ResourcesPage />} />
+              <Route path='history' element={<HistoryPage />} />
+              <Route path="history/:id" element={<DetailsPage />} />
+            </Route>
 
-          
-          {/* Other routes */}
-          <Route path="/test" element={<TestPage />} />
-          <Route path="/auth/signin" element={<SignIn />} />
-          <Route path="/auth/signup" element={<SignUp />} />
-        </Routes>
-      </main>
-    </BrowserRouter>
+            
+            {/* Other routes */}
+            <Route path="/test" element={<TestPage />} />
+            <Route path="/auth/signin" element={<SignIn />} />
+            <Route path="/auth/signup" element={<SignUp />} />
+          </Routes>
+        </main>
+      </BrowserRouter>
+    </>
   )
 }
 

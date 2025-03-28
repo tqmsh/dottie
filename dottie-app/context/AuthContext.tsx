@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authApi, User, LoginInput, SignupInput } from '@/src/api/auth';
 
 interface AuthState {
@@ -10,7 +10,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginInput) => Promise<void>;
-  signup: (userData: SignupInput) => Promise<void>;
+  signup: (userData: SignupInput) => Promise<User>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -121,17 +121,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (userData: SignupInput) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      const { user, token } = await authApi.signup(userData);
+      const response = await authApi.signup(userData);
       
-      localStorage.setItem('auth_user', JSON.stringify(user));
-      localStorage.setItem('auth_token', token);
-      
-      setState({
-        user,
-        isAuthenticated: true,
+      setState(prev => ({
+        ...prev,
         isLoading: false,
         error: null,
-      });
+      }));
+  
+      return response;
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -141,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   };
-
+  
   const logout = async () => {
     try {
       await authApi.logout();
