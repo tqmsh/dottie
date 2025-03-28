@@ -11,6 +11,8 @@ import FlowLevel from './components/assessment/flow/page'
 import PainLevel from './components/assessment/pain/page'
 import Symptoms from './components/assessment/symptoms/page'
 import Results from './components/assessment/results/page'
+import HistoryPage from './components/assessment/history/page'
+import DetailsPage from './components/assessment/history/[id]/page'
 // Import TestPage component
 import TestPage from './components/test_page/page'
 
@@ -27,6 +29,9 @@ function App() {
           <Route path="/assessment/pain" element={<PainLevel />} />
           <Route path="/assessment/symptoms" element={<Symptoms />} />
           <Route path="/assessment/results" element={<Results />} />
+          <Route path="/assessment-history" element={<HistoryPage />} />
+          <Route path="/assessment-history/:id" element={<DetailsPage />} />
+          
           <Route path="/test" element={<TestPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
