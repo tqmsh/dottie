@@ -29,6 +29,16 @@
 | `/api/assessment/:id` | PUT | Update a specific assessment by ID |
 | `/api/assessment/:id` | DELETE | Delete a specific assessment by ID |
 
+
+## User Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/user/` | GET | Get list of all users |
+| `/api/user/:id` | GET | Get user by ID |
+| `/api/user/:id` | PUT | Update a user |
+| `/api/user/:id` | DELETE | Delete a user |
+
 ## Request Examples
 
 ### Authentication

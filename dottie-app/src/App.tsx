@@ -2,6 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import SignIn from './pages/auth/sign-in'
 import SignUp from './pages/auth/sign-up'
+import SignOut from './pages/auth/signout'
+
+// Import account management pages
+import ProfilePage from './pages/account/profile'
+import PasswordPage from './pages/account/password'
 import WelcomePage from './LandingPage'
 import { Toaster } from 'sonner'
 
@@ -47,8 +52,15 @@ function App() {
             
             {/* Other routes */}
             <Route path="/test" element={<TestPage />} />
+          
+          {/* Authentication routes */}
             <Route path="/auth/signin" element={<SignIn />} />
             <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/signout" element={<SignOut />} />
+          
+          {/* Account management routes */}
+          <Route path="/account/profile" element={<ProfilePage />} />
+          <Route path="/account/password" element={<PasswordPage />} />
           </Routes>
         </main>
       </BrowserRouter>
