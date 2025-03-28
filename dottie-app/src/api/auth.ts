@@ -87,16 +87,13 @@ export const authApi = {
   },
 
   // Signup
-  signup: async (userData: SignupInput): Promise<User> => {
-    try {
-      const response = await axios.post<User>(
-        "/api/auth/signup",
-        userData
-      );
-      const validatedData = UserSchema.parse(response.data);
-      return validatedData;
-    } catch (error) { 
-    }
+  signup: async (userData: SignupInput): Promise<User> => { 
+    const response = await axios.post<User>(
+      "/api/auth/signup",
+      userData
+    );
+    const validatedData = UserSchema.parse(response.data);
+    return validatedData; 
   },
 
   // Logout

@@ -88,49 +88,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //   };
   // }, [state.isAuthenticated]);
 
-  const login = async (credentials: LoginInput) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const { user, token } = await authApi.login(credentials);
+  const login = async (credentials: LoginInput) => { 
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    const { user, token } = await authApi.login(credentials);
 
-      localStorage.setItem("auth_user", JSON.stringify(user));
-      localStorage.setItem("auth_token", token);
+    localStorage.setItem("auth_user", JSON.stringify(user));
+    localStorage.setItem("auth_token", token);
 
-      setState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : "Login failed",
-      }));
-      throw error;
-    }
+    setState({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    }); 
   };
 
-  const signup = async (userData: SignupInput) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const response = await authApi.signup(userData);
+  const signup = async (userData: SignupInput) => { 
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    const response = await authApi.signup(userData);
 
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: null,
-      }));
+    setState((prev) => ({
+      ...prev,
+      isLoading: false,
+      error: null,
+    }));
 
-      return response;
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false, 
-      }));
-      throw error;
-    }
+    return response; 
   };
 
   const logout = async () => {
