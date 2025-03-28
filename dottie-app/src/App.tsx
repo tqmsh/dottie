@@ -24,6 +24,7 @@ import DetailsPage from "./components/assessment/history/[id]/page";
 // Import TestPage component
 import TestPage from "./components/test_page/page";
 import ScrollToTop from "./components/scroll-to-top";
+import LandingPage from "./components/landing-page/page";
 
 function App() {
   return (
@@ -33,10 +34,11 @@ function App() {
         <ScrollToTop />
         <main className="flex min-h-screen flex-col">
           <Routes>
-            <Route index element={<WelcomePage />} />
+            <Route index element={<LandingPage />} />
 
             {/* Assessment routes */}
             <Route path="/assessment">
+              <Route index element={<WelcomePage />} />
               <Route path="age-verification" element={<AgeVerification />} />
               <Route path="cycle-length" element={<CycleLength />} />
               <Route path="period-duration" element={<PeriodDuration />} />

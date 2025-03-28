@@ -23,7 +23,7 @@ export default function SignInPage() {
     try {
       await login(data);
       toast.success("Successfully signed in!");
-      navigate("/");
+      navigate("/assessment");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign in");
     }
