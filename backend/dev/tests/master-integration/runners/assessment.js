@@ -24,6 +24,8 @@ export async function createAssessment(request, token, userId, assessmentData = 
     assessmentData: data
   };
   
+  console.log('Assessment payload:', payload);
+  
   const response = await request.post('/api/assessment/send', {
     headers: {
       Authorization: `Bearer ${token}`
@@ -31,11 +33,13 @@ export async function createAssessment(request, token, userId, assessmentData = 
     data: payload
   });
   
+  const result = await response.json();
+  console.log('Create assessment response:', result);
+  
   if (response.status() !== 201) {
     throw new Error(`Failed to create assessment: ${response.status()}`);
   }
   
-  const result = await response.json();
   return result.id;
 }
 
@@ -54,11 +58,14 @@ export async function getAssessments(request, token) {
     }
   });
   
+  const result = await response.json();
+  console.log('Get assessments response:', result);
+  
   if (response.status() !== 200) {
     throw new Error(`Failed to get assessments: ${response.status()}`);
   }
   
-  return response.json();
+  return result;
 }
 
 /**
@@ -77,11 +84,14 @@ export async function getAssessmentById(request, token, assessmentId) {
     }
   });
   
+  const result = await response.json();
+  console.log('Get assessment by ID response:', result);
+  
   if (response.status() !== 200) {
     throw new Error(`Failed to get assessment: ${response.status()}`);
   }
   
-  return response.json();
+  return result;
 }
 
 /**
@@ -94,21 +104,49 @@ export async function getAssessmentById(request, token, assessmentId) {
  */
 export async function updateAssessment(request, token, assessmentId, updateData) {
   console.log('Updating assessment:', assessmentId);
+  console.log('Update data:', updateData);
+  
+  // The API might expect the full assessment structure with the updated data
+  const payload = {
+    assessmentData: updateData
+  };
   
   const response = await request.put(`/api/assessment/${assessmentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
-    data: {
-      assessmentData: updateData
-    }
+    data: payload
   });
+  
+  // Log the response status and body for debugging
+  console.log('Update assessment status:', response.status());
+  let responseText;
+  try {
+    responseText = await response.text();
+    console.log('Update assessment response text:', responseText);
+  } catch (error) {
+    console.error('Failed to get response text:', error);
+  }
   
   if (response.status() !== 200) {
     throw new Error(`Failed to update assessment: ${response.status()}`);
   }
   
-  return response.json();
+  let result;
+  try {
+    // Try to parse as JSON only if we haven't already
+    if (responseText && !result) {
+      result = JSON.parse(responseText);
+    } else {
+      result = await response.json();
+    }
+    console.log('Update assessment parsed response:', result);
+  } catch (error) {
+    console.error('Failed to parse JSON response:', error);
+    throw new Error(`Failed to parse update response: ${error.message}`);
+  }
+  
+  return result;
 }
 
 /**
@@ -126,6 +164,16 @@ export async function deleteAssessment(request, token, assessmentId) {
       Authorization: `Bearer ${token}`
     }
   });
+  
+  console.log('Delete assessment status:', response.status());
+  
+  // Log the response for debugging
+  try {
+    const responseText = await response.text();
+    console.log('Delete assessment response:', responseText);
+  } catch (error) {
+    console.error('Failed to get delete response text:', error);
+  }
   
   return response.status() === 200;
 }

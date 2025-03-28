@@ -30,7 +30,6 @@ The integration tests follow this flow, separating concerns into logical modules
    - Get user information
    - Update user profiles
    - Manage user accounts
-
 ## Modular Design
 
 The test is designed with a modular approach:

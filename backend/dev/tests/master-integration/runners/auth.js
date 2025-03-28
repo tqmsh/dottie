@@ -18,16 +18,21 @@ export async function registerUser(request, userData) {
     data: userData
   });
   
+  const data = await response.json();
+  console.log('Registration response:', data);
+  
   if (response.status() !== 201) {
+    console.error('Registration failed:', data);
     throw new Error(`Failed to register user: ${response.status()}`);
   }
   
-  const data = await response.json();
-  
+  // The API directly returns the user object and doesn't wrap it in a 'user' property
+  // and the token is generated separately - we'll handle this by logging in after registration
   return {
-    userId: data.user.id,
-    token: data.token,
-    userData: data.user
+    userId: data.id, // Use the user ID directly from the response
+    userData: data,
+    // We'll need to log in to get the token
+    token: null
   };
 }
 
@@ -47,11 +52,19 @@ export async function loginUser(request, credentials) {
     }
   });
   
+  const data = await response.json();
+  console.log('Login response:', data);
+  
   if (response.status() !== 200) {
+    console.error('Login failed:', data);
     throw new Error(`Failed to login: ${response.status()}`);
   }
   
-  const data = await response.json();
+  if (!data.token) {
+    console.error('No token in login response:', data);
+    throw new Error('Invalid login response format');
+  }
+  
   return data.token;
 }
 
@@ -63,13 +76,25 @@ export async function loginUser(request, credentials) {
  */
 export async function verifyToken(request, token) {
   // Try to access a protected endpoint to verify the token
-  const response = await request.get('/api/auth/users', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  console.log('Verifying token validity');
   
-  return response.status() === 200;
+  if (!token) {
+    console.error('No token provided for verification');
+    return false;
+  }
+  
+  try {
+    const response = await request.get('/api/auth/users', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    return response.status() === 200;
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return false;
+  }
 }
 
 /**
