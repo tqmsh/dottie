@@ -98,12 +98,13 @@ export async function getAssessmentById(request, token, assessmentId) {
  * Update an existing assessment
  * @param {Object} request - Playwright request object
  * @param {string} token - Authentication token
+ * @param {string} userId - User ID
  * @param {string} assessmentId - Assessment ID
  * @param {Object} updateData - Updated assessment data
  * @returns {Promise<Object>} Updated assessment
  */
-export async function updateAssessment(request, token, assessmentId, updateData) {
-  console.log('Updating assessment:', assessmentId);
+export async function updateAssessment(request, token, userId, assessmentId, updateData) {
+  console.log('Updating assessment:', assessmentId, 'for user:', userId);
   console.log('Update data:', updateData);
   
   // The API might expect the full assessment structure with the updated data
@@ -111,7 +112,8 @@ export async function updateAssessment(request, token, assessmentId, updateData)
     assessmentData: updateData
   };
   
-  const response = await request.put(`/api/assessment/${assessmentId}`, {
+  // The correct URL format includes both userId and assessmentId
+  const response = await request.put(`/api/assessment/${userId}/${assessmentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -153,13 +155,15 @@ export async function updateAssessment(request, token, assessmentId, updateData)
  * Delete an assessment
  * @param {Object} request - Playwright request object
  * @param {string} token - Authentication token
+ * @param {string} userId - User ID
  * @param {string} assessmentId - Assessment ID
  * @returns {Promise<boolean>} True if deleted successfully
  */
-export async function deleteAssessment(request, token, assessmentId) {
-  console.log('Deleting assessment:', assessmentId);
+export async function deleteAssessment(request, token, userId, assessmentId) {
+  console.log('Deleting assessment:', assessmentId, 'for user:', userId);
   
-  const response = await request.delete(`/api/assessment/${assessmentId}`, {
+  // The correct URL format includes both userId and assessmentId
+  const response = await request.delete(`/api/assessment/${userId}/${assessmentId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
