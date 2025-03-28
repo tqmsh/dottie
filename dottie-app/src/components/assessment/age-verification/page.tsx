@@ -11,6 +11,11 @@ import { DotIcon, ChevronRight, ChevronLeft } from "lucide-react"
 export default function AgeVerificationPage() {
   const [selectedAge, setSelectedAge] = useState<string | null>(null)
 
+  const handleAgeChange = (value: string) => {
+    setSelectedAge(value)
+    sessionStorage.setItem("age", value)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
@@ -32,7 +37,7 @@ export default function AgeVerificationPage() {
 
         <Card className="w-full mb-8">
           <CardContent className="pt-6">
-            <RadioGroup value={selectedAge || ""} onValueChange={setSelectedAge}>
+            <RadioGroup value={selectedAge || ""} onValueChange={handleAgeChange}>
               <div className="space-y-4">
                 <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
                   <RadioGroupItem value="under-13" id="under-13" />

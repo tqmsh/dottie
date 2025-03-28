@@ -11,6 +11,11 @@ import { DotIcon, ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 export default function PainPage() {
   const [selectedPain, setSelectedPain] = useState<string | null>(null)
 
+  const handlePainChange = (value: string) => {
+    setSelectedPain(value)
+    sessionStorage.setItem("painLevel", value)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
@@ -38,7 +43,7 @@ export default function PainPage() {
           Select the option that best describes your typical pain level during your period
         </p>
 
-        <RadioGroup value={selectedPain || ""} onValueChange={setSelectedPain} className="mb-6">
+        <RadioGroup value={selectedPain || ""} onValueChange={handlePainChange} className="mb-6">
           <div className="space-y-3">
             <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
               <RadioGroupItem value="no-pain" id="no-pain" />
