@@ -2,6 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
+import SignOut from './pages/auth/signout'
+
+// Import account management pages
+import ProfilePage from './pages/account/profile'
+import PasswordPage from './pages/account/password'
 import WelcomePage from './LandingPage'
 
 // Import assessment components
@@ -31,8 +36,15 @@ function App() {
           <Route path="/assessment/results" element={<Results />} />
           <Route path="/assessment/resources" element={<ResourcesPage />} />
           <Route path="/test" element={<TestPage />} />
+          
+          {/* Authentication routes */}
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/signout" element={<SignOut />} />
+          
+          {/* Account management routes */}
+          <Route path="/account/profile" element={<ProfilePage />} />
+          <Route path="/account/password" element={<PasswordPage />} />
         </Routes>
       </main>
     </BrowserRouter>
