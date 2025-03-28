@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SignOut() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     const performSignOut = async () => {
       try {
         // Call the sign-out endpoint
-        await axios.post('/api/auth/signout');
+        await logout();
         toast.success('You have been signed out successfully');
       } catch (error) {
         console.error('Error signing out:', error);
@@ -22,7 +23,7 @@ export default function SignOut() {
     };
 
     performSignOut();
-  }, [navigate]);
+  }, [navigate, logout]);
 
   return (
     <div className="flex justify-center items-center h-screen">
