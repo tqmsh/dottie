@@ -1,10 +1,6 @@
 import axios from "axios";
 import { z } from "zod";
 
-// API base URL
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://dottie-api-zeta.vercel.app";
-
 // Zod schemas for validation
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -28,18 +24,25 @@ export const SignupSchema = z
         path: ["confirmPassword"],
       });
     }
-  });
+});
 
 export const UserSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
+  username: z.string(),
   email: z.string().email(),
-  name: z.string(),
-  createdAt: z.string(),
+  age: z.nullable(z.number()),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 
 export const AuthResponseSchema = z.object({
-  user: UserSchema,
   token: z.string(),
+  refreshToken: z.string(),
+  user: UserSchema,
+});
+
+export const ErrorResponseSchema = z.object({
+  error: z.string(),
 });
 
 // Types
@@ -49,8 +52,7 @@ export type User = z.infer<typeof UserSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 
 // Create axios instance with default config
-const api = axios.create({
-  baseURL: API_BASE_URL,
+export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
@@ -78,24 +80,24 @@ export const authApi = {
       return validatedData;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || "Login failed");
+        throw new Error(error.response?.data.error || "Login failed, please try again later");
       }
       throw error;
     }
   },
 
   // Signup
-  signup: async (userData: SignupInput): Promise<AuthResponse> => {
+  signup: async (userData: SignupInput): Promise<User> => {
     try {
-      const response = await api.post<AuthResponse>(
-        "/auth/signup",
+      const response = await axios.post<User>(
+        "/api/auth/signup",
         userData
       );
-      const validatedData = AuthResponseSchema.parse(response.data);
+      const validatedData = UserSchema.parse(response.data);
       return validatedData;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || "Signup failed");
+        throw new Error(error.response?.data.error || "Signup failed, please try again later");
       }
       throw error;
     }
@@ -107,7 +109,7 @@ export const authApi = {
       await api.post("/api/auth/logout");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || "Logout failed");
+        throw new Error(error.response?.data?.error || "Logout failed");
       }
       throw error;
     }
@@ -122,7 +124,7 @@ export const authApi = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(
-          error.response?.data?.message || "Failed to get user data"
+          error.response?.data?.error || "Failed to get user data"
         );
       }
       throw error;
@@ -137,7 +139,7 @@ export const authApi = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(
-          error.response?.data?.message || "Token refresh failed"
+          error.response?.data?.error || "Token refresh failed"
         );
       }
       throw error;

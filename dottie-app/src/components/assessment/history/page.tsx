@@ -1,30 +1,56 @@
-// import { useAuth } from '@/context/AuthContext';
-// import { useAssessmentResult } from '@/hooks/useAssessmentResult';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { assessmentApi, type Assessment } from '@/src/api/assessment';
+import { toast } from 'sonner';
 
 export default function HistoryPage() {
-  // const { user } = useAuth();
-  // const { loadFromSessionStorage } = useAssessmentResult();
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  // const dummyAssessments = [
+  //   {
+  //     id: '1',
+  //     date: new Date(),
+  //     pattern: 'regular',
+  //     age: '18_24',
+  //     cycleLength: '26_30',
+  //   },
+  //   {
+  //     id: '2',
+  //     date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+  //     pattern: 'irregular',
+  //     age: '18_24',
+  //     cycleLength: 'irregular',
+  //   },
+  // ];
 
-  // In a real app, this would come from an API
-  const assessments = [
-    {
-      id: '1',
-      date: new Date(),
-      pattern: 'regular',
-      age: '18_24',
-      cycleLength: '26_30',
-    },
-    {
-      id: '2',
-      date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-      pattern: 'irregular',
-      age: '18_24',
-      cycleLength: 'irregular',
-    },
-  ];
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        const data = await assessmentApi.list();
+        setAssessments(data);
+      } catch (error) {
+        toast.error('Failed to load assessments');
+        console.error('Error fetching assessments:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading assessments...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,7 +96,7 @@ export default function HistoryPage() {
                         {assessment.pattern.charAt(0).toUpperCase() + assessment.pattern.slice(1)}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {format(assessment.date, 'MMM d, yyyy')}
+                        {format(new Date(assessment.date), 'MMM d, yyyy')}
                       </span>
                     </div>
                     <div className="mt-2 text-sm text-gray-600">
