@@ -118,7 +118,14 @@ export const authApi = {
   // Get current user
   getCurrentUser: async (): Promise<User> => {
     try {
-      const response = await api.get<User>("/auth/me");
+      const storedUser = localStorage.getItem('auth_user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      
+      if (!user?.id) {
+        throw new Error('No user ID found');
+      }
+
+      const response = await api.get<User>(`/api/auth/users/${user.id}`);
       const validatedData = UserSchema.parse(response.data);
       return validatedData;
     } catch (error) {

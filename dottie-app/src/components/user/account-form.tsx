@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
+import { api } from '@/src/api/auth';
 
 interface AccountFormProps {
   user: {
@@ -9,14 +9,13 @@ interface AccountFormProps {
     email: string;
     name?: string;
   };
-  onUpdate: () => void;
 }
 
-export default function AccountForm({ user, onUpdate }: AccountFormProps) {
+export default function AccountForm({ user }: AccountFormProps) {
   const [formData, setFormData] = useState({
     username: user.username || '',
     email: user.email || '',
-    name: user.name || '',
+    // name: user.name || '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -31,9 +30,8 @@ export default function AccountForm({ user, onUpdate }: AccountFormProps) {
     setIsLoading(true);
 
     try {
-      await axios.put(`/api/user/${user.id}`, formData);
+      await api.put(`/api/auth/users/${user.id}`, formData);
       toast.success('Account updated successfully');
-      onUpdate();
     } catch (error) {
       console.error('Error updating account:', error);
       toast.error('Failed to update account');
@@ -52,7 +50,7 @@ export default function AccountForm({ user, onUpdate }: AccountFormProps) {
           type="text"
           id="name"
           name="name"
-          value={formData.name}
+          // value={formData.name}
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
