@@ -11,11 +11,16 @@ import { DotIcon, ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 export default function PeriodDurationPage() {
   const [selectedDuration, setSelectedDuration] = useState<string | null>(null)
 
+  const handleDurationChange = (value: string) => {
+    setSelectedDuration(value)
+    sessionStorage.setItem("periodDuration", value)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+        <img src="/public/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link to="/" className="text-gray-500">
@@ -36,7 +41,7 @@ export default function PeriodDurationPage() {
         <h2 className="text-lg font-semibold mb-1">How many days does your period typically last?</h2>
         <p className="text-sm text-gray-500 mb-6">Count the days from when bleeding starts until it completely stops</p>
 
-        <RadioGroup value={selectedDuration || ""} onValueChange={setSelectedDuration} className="mb-6">
+        <RadioGroup value={selectedDuration || ""} onValueChange={handleDurationChange} className="mb-6">
           <div className="space-y-3">
             <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
               <RadioGroupItem value="1-3" id="1-3" />

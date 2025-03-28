@@ -7,6 +7,7 @@ import SignOut from './pages/auth/signout'
 // Import account management pages
 import ProfilePage from './pages/account/profile'
 import PasswordPage from './pages/account/password'
+import WelcomePage from './LandingPage'
 
 // Import assessment components
 import AgeVerification from './components/assessment/age-verification/page'
@@ -16,6 +17,7 @@ import FlowLevel from './components/assessment/flow/page'
 import PainLevel from './components/assessment/pain/page'
 import Symptoms from './components/assessment/symptoms/page'
 import Results from './components/assessment/results/page'
+import ResourcesPage from './components/assessment/resources/page'
 // Import TestPage component
 import TestPage from './components/test_page/page'
 
@@ -24,7 +26,7 @@ function App() {
     <BrowserRouter>
       <main className="flex min-h-screen flex-col">
         <Routes>
-          <Route path="/" element={<Navigate to="/assessment/age-verification" replace />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="/assessment/age-verification" element={<AgeVerification />} />
           <Route path="/assessment/cycle-length" element={<CycleLength />} />
           <Route path="/assessment/period-duration" element={<PeriodDuration />} />
@@ -32,6 +34,7 @@ function App() {
           <Route path="/assessment/pain" element={<PainLevel />} />
           <Route path="/assessment/symptoms" element={<Symptoms />} />
           <Route path="/assessment/results" element={<Results />} />
+          <Route path="/assessment/resources" element={<ResourcesPage />} />
           <Route path="/test" element={<TestPage />} />
           
           {/* Authentication routes */}
