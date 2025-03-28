@@ -38,7 +38,7 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
     setIsLoading(true)
 
     try {
-      const aiResponse = await getAIFeedback(userData)
+      const aiResponse = await getAIFeedback(userData, userMessage)
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
     } catch (error) {
       console.error('Error getting AI response:', error)

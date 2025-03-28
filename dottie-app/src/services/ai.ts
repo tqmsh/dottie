@@ -12,7 +12,7 @@ interface UserData {
   symptoms: string[];
 }
 
-export const getAIFeedback = async (userData: UserData) => {
+export const getAIFeedback = async (userData: UserData, userMessage?: string) => {
   try {
     const userDataString = `
       Age: ${userData.age}
@@ -23,15 +23,16 @@ export const getAIFeedback = async (userData: UserData) => {
       Additional Symptoms: ${userData.symptoms.join(', ')}
     `;
 
-    const response = await axios.post(
-      `${API_URL}?key=${API_KEY}`,
-      {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `System Instructions (Dottie Advisor)
+    const systemPrompt = userMessage 
+      ? `You are Dottie, an AI menstrual health advisor. You've already provided initial recommendations based on the user's data. Now, engage in a friendly, supportive conversation to answer their follow-up question. Use a warm, approachable tone while maintaining medical accuracy.
+
+User Data:
+${userDataString}
+
+User's Question: ${userMessage}
+
+Your Response:`
+      : `System Instructions (Dottie Advisor)
 You are Dottie, an AI menstrual health advisor. Analyze the user's responses and provide feedback based on ACOG guidelines. Use a supportive, non-alarming tone. Always:
 Acknowledge their input.
 Highlight key observations.
@@ -41,7 +42,17 @@ Encourage professional consultation if needed.
 Current User Input:
 ${userDataString}
 
-Your Feedback:`
+Your Feedback:`;
+
+    const response = await axios.post(
+      `${API_URL}?key=${API_KEY}`,
+      {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: systemPrompt
               }
             ]
           }
