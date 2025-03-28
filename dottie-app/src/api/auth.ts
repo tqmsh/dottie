@@ -95,10 +95,7 @@ export const authApi = {
       );
       const validatedData = UserSchema.parse(response.data);
       return validatedData;
-    } catch (error) {
-      if (axios.isAxiosError(error)) { 
-      }
-      throw error;
+    } catch (error) { 
     }
   },
 
