@@ -52,7 +52,7 @@ export type User = z.infer<typeof UserSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 
 // Create axios instance with default config
-const api = axios.create({
+export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },

@@ -1,5 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { authApi, User, LoginInput, SignupInput } from '@/src/api/auth';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { authApi, User, LoginInput, SignupInput } from "@/src/api/auth";
 
 interface AuthState {
   user: User | null;
@@ -19,9 +25,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Helper function to get stored auth data
 const getStoredAuthData = (): { user: User | null; token: string | null } => {
-  const userStr = localStorage.getItem('auth_user');
-  const token = localStorage.getItem('auth_token');
-  
+  const userStr = localStorage.getItem("auth_user");
+  const token = localStorage.getItem("auth_token");
+
   return {
     user: userStr ? JSON.parse(userStr) : null,
     token,
@@ -39,31 +45,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state from storage
   useEffect(() => {
     const initializeAuth = async () => {
-      try {
-        const { user, token } = getStoredAuthData();
-        
-        if (user && token) {
-          // Verify token validity by fetching current user
-          const currentUser = await authApi.getCurrentUser();
-          setState({
-            user: currentUser,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
-        } else {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
-      } catch (error) {
-        // Clear invalid stored data
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('auth_token');
+      const { user, token } = getStoredAuthData();
+
+      if (user && token) {
+        // Verify token validity by fetching current user
+        const currentUser = await authApi.getCurrentUser();
         setState({
-          user: null,
-          isAuthenticated: false,
+          user: currentUser,
+          isAuthenticated: true,
           isLoading: false,
-          error: 'Session expired. Please login again.',
+          error: null,
         });
+      } else {
+        setState((prev) => ({ ...prev, isLoading: false }));
       }
     };
 
@@ -71,37 +65,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Handle token refresh
-  useEffect(() => {
-    let refreshInterval: NodeJS.Timeout;
+  // useEffect(() => {
+  //   let refreshInterval: NodeJS.Timeout;
 
-    if (state.isAuthenticated) {
-      // Refresh token every 14 minutes (assuming 15-minute token expiry)
-      refreshInterval = setInterval(async () => {
-        try {
-          const { token } = await authApi.refreshToken();
-          localStorage.setItem('auth_token', token);
-        } catch (error) {
-          // If refresh fails, logout user
-          await logout();
-        }
-      }, 14 * 60 * 1000);
-    }
+  //   if (state.isAuthenticated) {
+  //     // Refresh token every 14 minutes (assuming 15-minute token expiry)
+  //     refreshInterval = setInterval(async () => {
+  //       try {
+  //         const { token } = await authApi.refreshToken();
+  //         localStorage.setItem('auth_token', token);
+  //       } catch (error) {
+  //         // If refresh fails, logout user
+  //         await logout();
+  //       }
+  //     }, 14 * 60 * 1000);
+  //   }
 
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [state.isAuthenticated]);
+  //   return () => {
+  //     if (refreshInterval) {
+  //       clearInterval(refreshInterval);
+  //     }
+  //   };
+  // }, [state.isAuthenticated]);
 
   const login = async (credentials: LoginInput) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
       const { user, token } = await authApi.login(credentials);
-      
-      localStorage.setItem('auth_user', JSON.stringify(user));
-      localStorage.setItem('auth_token', token);
-      
+
+      localStorage.setItem("auth_user", JSON.stringify(user));
+      localStorage.setItem("auth_token", token);
+
       setState({
         user,
         isAuthenticated: true,
@@ -109,10 +103,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error: null,
       });
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Login failed',
+        error: error instanceof Error ? error.message : "Login failed",
       }));
       throw error;
     }
@@ -120,34 +114,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (userData: SignupInput) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
       const response = await authApi.signup(userData);
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         isLoading: false,
         error: null,
       }));
-  
+
       return response;
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Signup failed',
+        error: error instanceof Error ? error.message : "Signup failed",
       }));
       throw error;
     }
   };
-  
+
   const logout = async () => {
     try {
       await authApi.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem("auth_user");
+      localStorage.removeItem("auth_token");
       setState({
         user: null,
         isAuthenticated: false,
@@ -158,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const clearError = () => {
-    setState(prev => ({ ...prev, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
   };
 
   return (
@@ -179,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}
