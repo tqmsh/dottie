@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { DotIcon, ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
+import { ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 
 export default function PainPage() {
   const [selectedPain, setSelectedPain] = useState<string | null>(null)
@@ -20,7 +20,7 @@ export default function PainPage() {
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-        <img src="/public/chatb.png" alt="Dottie Logo" width={32} height={32} />
+        <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link to="/" className="text-gray-500">
