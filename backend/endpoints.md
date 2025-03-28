@@ -23,12 +23,11 @@
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/assessment/start` | POST | Start a new assessment |
-| `/api/assessment/answer` | POST | Submit an answer to the assessment |
-| `/api/assessment/results/:assessmentId` | GET | Get assessment results by ID |
-| `/api/assessment/send` | POST | Send assessment results from frontend context |
-| `/api/assessment/list` | GET | Get list of all assessments for current user |
-| `/api/assessment/:id` | GET | Get detailed view of a specific assessment |
+| `/api/assessment/send` | POST | Send assessment results from frontend context, generates a new assessmentId |
+| `/api/assessment/list` | GET | Get list of all assessments for the authenticated user |
+| `/api/assessment/:id` | GET | Get detailed view of a specific assessment by ID |
+| `/api/assessment/:id` | PUT | Update a specific assessment by ID |
+| `/api/assessment/:id` | DELETE | Delete a specific assessment by ID |
 
 ## Request Examples
 
@@ -68,6 +67,7 @@ fetch("/api/assessment/send", {
     "Authorization": "Bearer your-access-token"
   },
   body: JSON.stringify({
+    userId: "user-123",
     assessmentData: {
       age: "18_24",
       cycleLength: "26_30",

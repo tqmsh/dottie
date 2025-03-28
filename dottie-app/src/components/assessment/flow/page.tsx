@@ -11,11 +11,16 @@ import { DotIcon, ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 export default function FlowPage() {
   const [selectedFlow, setSelectedFlow] = useState<string | null>(null)
 
+  const handleFlowChange = (value: string) => {
+    setSelectedFlow(value)
+    sessionStorage.setItem("flowLevel", value)
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+        <img src="/public/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link to="/" className="text-gray-500">
@@ -36,7 +41,7 @@ export default function FlowPage() {
         <h2 className="text-lg font-semibold mb-1">How would you describe your menstrual flow?</h2>
         <p className="text-sm text-gray-500 mb-6">Select the option that best describes your typical flow heaviness</p>
 
-        <RadioGroup value={selectedFlow || ""} onValueChange={setSelectedFlow} className="mb-6">
+        <RadioGroup value={selectedFlow || ""} onValueChange={handleFlowChange} className="mb-6">
           <div className="space-y-3">
             <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50">
               <RadioGroupItem value="light" id="light" />

@@ -59,15 +59,15 @@ afterAll(async () => {
 
 describe("Basic API Endpoints Tests", () => {
   // Test the hello endpoint
-  test("GET /api/hello - should return Hello World message", async () => {
-    const response = await request.get("/api/hello");
+  test("GET /api/setup/health/hello - should return Hello World message", async () => {
+    const response = await request.get("/api/setup/health/hello");
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("message");
     expect(response.body.message).toBe("Hello World from Dottie API!");
   });
 
   // Test the db-status endpoint
-  test("GET /api/db-status - should return database status", async () => {
+  test("GET /api/setup/database/status - should return database status", async () => {
     // Mock the response for db-status since it depends on the database
     // This is a workaround since we're not testing the actual db connection here
     const mockResponse = {

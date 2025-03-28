@@ -60,7 +60,7 @@ export default function HistoryPage() {
             {assessments.map((assessment) => (
               <Link
                 key={assessment.id}
-                to={`/assessment-history/${assessment.id}`}
+                to={`/assessment/history/${assessment.id}`}
                 className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
               >
                 <div className="flex items-center justify-between">

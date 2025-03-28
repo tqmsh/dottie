@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
+import WelcomePage from './LandingPage'
 
 // Import assessment components
 import AgeVerification from './components/assessment/age-verification/page'
@@ -11,27 +12,37 @@ import FlowLevel from './components/assessment/flow/page'
 import PainLevel from './components/assessment/pain/page'
 import Symptoms from './components/assessment/symptoms/page'
 import Results from './components/assessment/results/page'
+import ResourcesPage from './components/assessment/resources/page'
 import HistoryPage from './components/assessment/history/page'
 import DetailsPage from './components/assessment/history/[id]/page'
 // Import TestPage component
 import TestPage from './components/test_page/page'
+import ScrollToTop from './components/scroll-to-top'
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <main className="flex min-h-screen flex-col">
         <Routes>
-          <Route path="/" element={<Navigate to="/assessment/age-verification" replace />} />
-          <Route path="/assessment/age-verification" element={<AgeVerification />} />
-          <Route path="/assessment/cycle-length" element={<CycleLength />} />
-          <Route path="/assessment/period-duration" element={<PeriodDuration />} />
-          <Route path="/assessment/flow" element={<FlowLevel />} />
-          <Route path="/assessment/pain" element={<PainLevel />} />
-          <Route path="/assessment/symptoms" element={<Symptoms />} />
-          <Route path="/assessment/results" element={<Results />} />
-          <Route path="/assessment-history" element={<HistoryPage />} />
-          <Route path="/assessment-history/:id" element={<DetailsPage />} />
+          <Route index element={<WelcomePage />} />
           
+          {/* Assessment routes */}
+          <Route path="/assessment">
+            <Route path="age-verification" element={<AgeVerification />} />
+            <Route path="cycle-length" element={<CycleLength />} />
+            <Route path="period-duration" element={<PeriodDuration />} />
+            <Route path="flow" element={<FlowLevel />} />
+            <Route path="pain" element={<PainLevel />} />
+            <Route path="symptoms" element={<Symptoms />} />
+            <Route path="results" element={<Results />} />
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path='history' element={<HistoryPage />} />
+            <Route path="history/:id" element={<DetailsPage />} />
+          </Route>
+
+          
+          {/* Other routes */}
           <Route path="/test" element={<TestPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />

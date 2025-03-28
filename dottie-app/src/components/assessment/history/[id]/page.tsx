@@ -1,36 +1,41 @@
 import { useParams, Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, Activity, Droplet, Heart, Brain } from 'lucide-react';
+import { ArrowLeft, Calendar, Activity, Droplet, Heart, Brain, AlertCircle } from 'lucide-react';
 
 // In a real app, this would come from an API
-const getAssessmentDetails = (id: string) => ({
-  id,
-  date: new Date(),
-  pattern: 'regular',
-  age: '18_24',
-  cycleLength: '26_30',
-  periodDuration: '4_5',
-  flowHeaviness: 'moderate',
-  painLevel: 'mild',
-  symptoms: {
-    physical: ['Bloating', 'Headaches', 'Fatigue'],
-    emotional: ['Mood swings', 'Irritability', 'Anxiety'],
-  },
-  recommendations: [
-    {
-      title: 'Track Your Cycle',
-      description: 'Keep a record of when your period starts and stops to identify patterns.',
+const getAssessmentDetails = (id: string) => {
+  // Simulate API call that might return null
+  if (id === 'not-found') return null;
+  
+  return {
+    id,
+    date: new Date(),
+    pattern: 'regular',
+    age: '18_24',
+    cycleLength: '26_30',
+    periodDuration: '4_5',
+    flowHeaviness: 'moderate',
+    painLevel: 'mild',
+    symptoms: {
+      physical: ['Bloating', 'Headaches', 'Fatigue'],
+      emotional: ['Mood swings', 'Irritability', 'Anxiety'],
     },
-    {
-      title: 'Exercise Regularly',
-      description: 'Regular physical activity can help manage symptoms and improve overall well-being.',
-    },
-    {
-      title: 'Maintain a Balanced Diet',
-      description: 'Focus on nutrient-rich foods and stay hydrated throughout your cycle.',
-    },
-  ],
-});
+    recommendations: [
+      {
+        title: 'Track Your Cycle',
+        description: 'Keep a record of when your period starts and stops to identify patterns.',
+      },
+      {
+        title: 'Exercise Regularly',
+        description: 'Regular physical activity can help manage symptoms and improve overall well-being.',
+      },
+      {
+        title: 'Maintain a Balanced Diet',
+        description: 'Focus on nutrient-rich foods and stay hydrated throughout your cycle.',
+      },
+    ],
+  };
+};
 
 export default function DetailsPage() {
   const { id } = useParams();
@@ -42,11 +47,46 @@ export default function DetailsPage() {
     ).join(' ');
   };
 
+  // Fallback state when no assessment is found
+  if (!assessment) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <Link
+            to="/assessment/history"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to History
+          </Link>
+
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="flex flex-col items-center justify-center py-12">
+              <AlertCircle className="h-12 w-12 text-gray-400 mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Assessment Not Found
+              </h2>
+              <p className="text-gray-600 mb-6">
+                The assessment you're looking for doesn't exist or has been removed.
+              </p>
+              <Link
+                to="/assessment/history"
+                className="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+              >
+                Return to History
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Link
-          to="/assessment-history"
+          to="/assessment/history"
           className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

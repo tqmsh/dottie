@@ -162,22 +162,31 @@ export default function ResultsPage() {
   const [isChatOpen, setIsChatOpen] = useState(false)
 
   const [pattern, setPattern] = useState<MenstrualPattern>("developing")
-  const [age, setAge] = useState<string>("14 years (Early to Late Adolescence)")
-  const [cycleLength, setCycleLength] = useState<string>("21-32 days")
-  const [periodDuration, setPeriodDuration] = useState<string>("2-6 days")
-  const [flowLevel, setFlowLevel] = useState<string>("Moderate")
-  const [painLevel, setPainLevel] = useState<string>("Moderate")
-  const [symptoms, setSymptoms] = useState<string[]>(["Bloating", "Headaches", "Fatigue", "Acne", "Mood swings", "Irritability"])
+  const [age, setAge] = useState<string>("")
+  const [cycleLength, setCycleLength] = useState<string>("")
+  const [periodDuration, setPeriodDuration] = useState<string>("")
+  const [flowLevel, setFlowLevel] = useState<string>("")
+  const [painLevel, setPainLevel] = useState<string>("")
+  const [symptoms, setSymptoms] = useState<string[]>([])
 
   useEffect(() => {
     // Get data from session storage
-    const storedAge = sessionStorage.getItem("age") || ""
-    const storedCycleLength = sessionStorage.getItem("cycleLength") || ""
-    const storedPeriodDuration = sessionStorage.getItem("periodDuration") || ""
-    const storedFlowLevel = sessionStorage.getItem("flowLevel") || ""
-    const storedPainLevel = sessionStorage.getItem("painLevel") || ""
+    const storedAge = sessionStorage.getItem("age")
+    const storedCycleLength = sessionStorage.getItem("cycleLength")
+    const storedPeriodDuration = sessionStorage.getItem("periodDuration")
+    const storedFlowLevel = sessionStorage.getItem("flowLevel")
+    const storedPainLevel = sessionStorage.getItem("painLevel")
     const storedSymptoms = sessionStorage.getItem("symptoms")
     
+    console.log("Stored values:", {
+      age: storedAge,
+      cycleLength: storedCycleLength,
+      periodDuration: storedPeriodDuration,
+      flowLevel: storedFlowLevel,
+      painLevel: storedPainLevel,
+      symptoms: storedSymptoms
+    })
+
     if (storedAge) setAge(storedAge)
     if (storedCycleLength) setCycleLength(storedCycleLength)
     if (storedPeriodDuration) setPeriodDuration(storedPeriodDuration)
@@ -187,7 +196,6 @@ export default function ResultsPage() {
       try {
         setSymptoms(JSON.parse(storedSymptoms))
       } catch (e) {
-        // If parsing fails, keep default symptoms
         console.error("Error parsing symptoms:", e)
       }
     }
@@ -226,11 +234,23 @@ export default function ResultsPage() {
 
   const patternInfo = patternData[pattern]
 
+  // Calculate progress bar widths based on values
+  const getProgressWidth = (value: string) => {
+    if (value.includes("Less than")) return "20%"
+    if (value.includes("More than")) return "80%"
+    if (value === "Heavy") return "80%"
+    if (value === "Severe") return "80%"
+    if (value === "Moderate") return "50%"
+    if (value === "Light") return "20%"
+    if (value === "Mild") return "20%"
+    return "50%"
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <DotIcon className="h-5 w-5 text-pink-500 fill-pink-500" />
+        <img src="/public/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
         <Link to="/" className="text-gray-500">
@@ -272,64 +292,68 @@ export default function ResultsPage() {
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Age</span>
-                <span className="text-sm text-gray-500">{age}</span>
+                <span className="text-sm text-gray-500">{age || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full w-[30%]"></div>
+                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(age) }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Cycle Length</span>
-                <span className="text-sm text-gray-500">{cycleLength}</span>
+                <span className="text-sm text-gray-500">{cycleLength || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full w-[60%]"></div>
+                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(cycleLength) }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Period Duration</span>
-                <span className="text-sm text-gray-500">{periodDuration}</span>
+                <span className="text-sm text-gray-500">{periodDuration || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
+                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(periodDuration) }}></div>
               </div>
             </div>
 
             <div>
               <h3 className="text-sm font-medium mb-2">Symptoms</h3>
               <div className="grid grid-cols-2 gap-2">
-                {symptoms.map((symptom, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded-sm bg-pink-100 flex items-center justify-center">
-                      <span className="text-pink-500 text-xs">✓</span>
+                {symptoms.length > 0 ? (
+                  symptoms.map((symptom, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="h-4 w-4 rounded-sm bg-pink-100 flex items-center justify-center">
+                        <span className="text-pink-500 text-xs">✓</span>
+                      </div>
+                      <span className="text-sm">{symptom}</span>
                     </div>
-                    <span className="text-sm">{symptom}</span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-500">No symptoms selected</span>
+                )}
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Pain Level</span>
-                <span className="text-sm text-gray-500">{painLevel}</span>
+                <span className="text-sm text-gray-500">{painLevel || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
+                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(painLevel) }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Flow Heaviness</span>
-                <span className="text-sm text-gray-500">{flowLevel}</span>
+                <span className="text-sm text-gray-500">{flowLevel || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full w-[50%]"></div>
+                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(flowLevel) }}></div>
               </div>
             </div>
           </div>
