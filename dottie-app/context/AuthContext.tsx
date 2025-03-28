@@ -127,8 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       setState((prev) => ({
         ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : "Signup failed",
+        isLoading: false, 
       }));
       throw error;
     }

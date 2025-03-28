@@ -96,8 +96,7 @@ export const authApi = {
       const validatedData = UserSchema.parse(response.data);
       return validatedData;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data.error || "Signup failed, please try again later");
+      if (axios.isAxiosError(error)) { 
       }
       throw error;
     }
