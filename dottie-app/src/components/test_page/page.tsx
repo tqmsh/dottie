@@ -1,106 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
+import { EndpointTable, EndpointRow } from './page-components';
 
 export default function TestPage() {
-  const [apiMessage, setApiMessage] = useState<string>('');
-  const [dbMessage, setDbMessage] = useState<string>('');
-  const [loading, setLoading] = useState<{ api: boolean; db: boolean }>({
-    api: false,
-    db: false,
-  });
-  const [apiStatus, setApiStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [dbStatus, setDbStatus] = useState<'idle' | 'success' | 'error' | 'partial'>('idle');
-
   const environment = process.env.NODE_ENV || 'development';
-
-  const testApiConnection = async () => {
-    setLoading((prev) => ({ ...prev, api: true }));
-    setApiStatus('idle');
-    try {
-      const response = await axios.get('/api/hello');
-      console.log('API Response:', response.data);
-      console.log('API Response Full:', JSON.stringify(response, null, 2));
-      
-      // Store the successful connection message and the API response message
-      if (response.data && response.data.message) {
-        setApiMessage(`API connection successful\nServer says: "${response.data.message}"`);
-      } else {
-        setApiMessage('API connection successful, but no message returned');
-      }
-      setApiStatus('success');
-    } catch (error) {
-      console.error('API connection error:', error);
-      console.error('API connection error details:', JSON.stringify(error, null, 2));
-      setApiMessage('Could not connect to API');
-      setApiStatus('error');
-    } finally {
-      setLoading((prev) => ({ ...prev, api: false }));
-    }
-  };
-
-  const testDbConnection = async () => {
-    setLoading((prev) => ({ ...prev, db: true }));
-    setDbStatus('idle');
-    let statusCount = 0;
-    let combinedMessage = '';
-    let sqlMessage = '';
-
-    // Start with the SQL connection success message
-    combinedMessage += 'SQL connection successful\n';
-
-    try {
-      // Second API call for status
-      const statusResponse = await axios.get('/api/db-status');
-      if (statusResponse.data.status === 'connected') {
-        combinedMessage += `Database status: ${statusResponse.data.status}\n`;
-        statusCount++;
-      }
-    } catch (error) {
-      console.error('Database status error:', error);
-      combinedMessage += 'Could not get database status\n';
-    }
-
-    try {
-      // First API call for the SQLite message
-      const sqlResponse = await axios.get('/api/sql-hello');
-      if (sqlResponse.data.message) {
-        combinedMessage += `SQLite message retrieved: "${sqlResponse.data.message}"`;
-        statusCount++;
-      }
-    } catch (error) {
-      console.error('SQL connection error:', error);
-      combinedMessage += 'Could not connect to SQL database';
-    }
-
-    // Set message and status based on results
-    setDbMessage(combinedMessage.trim());
-    if (statusCount === 2) {
-      setDbStatus('success');
-    } else if (statusCount === 1) {
-      setDbStatus('partial');
-    } else {
-      setDbStatus('error');
-    }
-
-    setLoading((prev) => ({ ...prev, db: false }));
-  };
-
-  const getApiButtonClass = () => {
-    const baseClass = "w-full px-4 py-2 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed";
-    if (apiStatus === 'success') return `${baseClass} bg-green-600 hover:bg-green-700`;
-    if (apiStatus === 'error') return `${baseClass} bg-red-600 hover:bg-red-700`;
-    return `${baseClass} bg-blue-600 hover:bg-blue-700`;
-  };
-
-  const getDbButtonClass = () => {
-    const baseClass = "w-full px-4 py-2 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed";
-    if (dbStatus === 'success') return `${baseClass} bg-green-600 hover:bg-green-700`;
-    if (dbStatus === 'partial') return `${baseClass} bg-yellow-600 hover:bg-yellow-700`;
-    if (dbStatus === 'error') return `${baseClass} bg-red-600 hover:bg-red-700`;
-    return `${baseClass} bg-blue-600 hover:bg-blue-700`;
-  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -109,45 +13,342 @@ export default function TestPage() {
           Now testing in {environment.toUpperCase()}
         </h1>
         
-        <div className="space-y-6">
-          {/* API Connection Test */}
-          <div className="bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">API Connection Test</h2>
-            <button
-              onClick={testApiConnection}
-              disabled={loading.api}
-              className={getApiButtonClass()}
-              data-testid="test-api-button"
-            >
-              {loading.api ? 'Testing...' : 'Test API Message'}
-            </button>
-            
-            {apiMessage && (
-              <div className="mt-4 p-4 bg-gray-700 rounded-md" data-testid="api-message">
-                <p className="whitespace-pre-line">{apiMessage}</p>
-              </div>
-            )}
-          </div>
-          
-          {/* SQLite Connection Test */}
-          <div className="bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">SQLite Connection Test</h2>
-            <button
-              onClick={testDbConnection}
-              disabled={loading.db}
-              className={getDbButtonClass()}
-              data-testid="test-db-button"
-            >
-              {loading.db ? 'Testing...' : 'Test SQLite Connection'}
-            </button>
-            
-            {dbMessage && (
-              <div className="mt-4 p-4 bg-gray-700 rounded-md" data-testid="db-message">
-                <p className="whitespace-pre-line">{dbMessage}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Setup Endpoints */}
+        <EndpointTable title="Setup Endpoints">
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/setup/health/hello"
+            expectedOutput={{ message: "Hello World from Dottie API!" }}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/setup/database/status"
+            expectedOutput={{ status: "connected" }}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/setup/database/hello"
+            expectedOutput={{ 
+              message: "Hello World from SQLite!", 
+              dbType: "sqlite3", 
+              isConnected: true 
+            }}
+          />
+        </EndpointTable>
+        
+        {/* Authentication Endpoints */}
+        <EndpointTable title="Authentication Endpoints">
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/auth/signup"
+            expectedOutput={{ 
+              user: { 
+                id: "user-id", 
+                email: "user@example.com" 
+              }, 
+              token: "jwt-token" 
+            }}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "email",
+                label: "Email",
+                type: "email",
+                required: true,
+                placeholder: "user@example.com"
+              },
+              {
+                name: "password",
+                label: "Password",
+                type: "password",
+                required: true,
+                placeholder: "Min 6 characters"
+              },
+              {
+                name: "name",
+                label: "Name",
+                type: "text",
+                required: true,
+                placeholder: "Your name"
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/auth/login"
+            expectedOutput={{ 
+              token: "jwt-token", 
+              user: { 
+                id: "user-id", 
+                email: "user@example.com" 
+              } 
+            }}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "email",
+                label: "Email",
+                type: "email",
+                required: true,
+                placeholder: "user@example.com"
+              },
+              {
+                name: "password",
+                label: "Password",
+                type: "password",
+                required: true,
+                placeholder: "Your password"
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/auth/logout"
+            expectedOutput={{ message: "Logged out successfully" }}
+            requiresAuth={true}
+          />
+        </EndpointTable>
+        
+        {/* Assessment Endpoints */}
+        <EndpointTable title="Assessment Endpoints">
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/assessment/send"
+            expectedOutput={{ 
+              id: "assessment-id", 
+              message: "Assessment saved" 
+            }}
+            requiresAuth={true}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "assessmentData",
+                label: "Assessment Data",
+                type: "json",
+                required: true,
+                defaultValue: JSON.stringify({
+                  age: "18_24",
+                  cycleLength: "26_30",
+                  periodDuration: "4_5",
+                  flowHeaviness: "moderate",
+                  painLevel: "moderate",
+                  symptoms: {
+                    physical: ["Bloating", "Headaches"],
+                    emotional: ["Mood swings", "Irritability"]
+                  }
+                }, null, 2)
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/assessment/list"
+            expectedOutput={[
+              { id: "assessment-1", date: "2023-06-15" },
+              { id: "assessment-2", date: "2023-06-20" }
+            ]}
+            requiresAuth={true}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/assessment/:id"
+            expectedOutput={{ 
+              id: "assessment-id", 
+              data: { 
+                age: "18_24", 
+                symptoms: {
+                  physical: ["Bloating"],
+                  emotional: ["Mood swings"]
+                }
+              }
+            }}
+            requiresAuth={true}
+            pathParams={["id"]}
+          />
+          <EndpointRow 
+            method="PUT"
+            endpoint="/api/assessment/:id"
+            expectedOutput={{ message: "Assessment updated" }}
+            requiresAuth={true}
+            pathParams={["id"]}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "assessmentData",
+                label: "Updated Assessment Data",
+                type: "json",
+                required: true,
+                defaultValue: JSON.stringify({
+                  flowHeaviness: "heavy",
+                  painLevel: "severe"
+                }, null, 2)
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="DELETE"
+            endpoint="/api/assessment/:id"
+            expectedOutput={{ message: "Assessment deleted" }}
+            requiresAuth={true}
+            pathParams={["id"]}
+          />
+        </EndpointTable>
+        
+        {/* User Endpoints */}
+        <EndpointTable title="User Endpoints">
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/user/me"
+            expectedOutput={{ 
+              id: "user-id", 
+              email: "user@example.com", 
+              name: "User Name"
+            }}
+            requiresAuth={true}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/user/:id"
+            expectedOutput={{ 
+              id: "user-id", 
+              email: "user@example.com", 
+              name: "User Name"
+            }}
+            requiresAuth={true}
+            pathParams={["id"]}
+          />
+          <EndpointRow 
+            method="PUT"
+            endpoint="/api/user/:id"
+            expectedOutput={{ message: "User updated" }}
+            requiresAuth={true}
+            pathParams={["id"]}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "userData",
+                label: "User Data",
+                type: "json",
+                required: true,
+                defaultValue: JSON.stringify({
+                  name: "Updated Name",
+                  email: "updated@example.com"
+                }, null, 2)
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="DELETE"
+            endpoint="/api/user/:id"
+            expectedOutput={{ message: "User deleted" }}
+            requiresAuth={true}
+            pathParams={["id"]}
+          />
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/user/pw/reset"
+            expectedOutput={{ message: "Password reset email sent" }}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "email",
+                label: "Email",
+                type: "email",
+                required: true,
+                placeholder: "user@example.com"
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/user/pw/update"
+            expectedOutput={{ message: "Password updated successfully" }}
+            requiresAuth={true}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "currentPassword",
+                label: "Current Password",
+                type: "password",
+                required: true
+              },
+              {
+                name: "newPassword",
+                label: "New Password",
+                type: "password",
+                required: true
+              }
+            ]}
+          />
+        </EndpointTable>
+        
+        {/* AI Chat Endpoints */}
+        <EndpointTable title="AI Chat Endpoints">
+          <EndpointRow 
+            method="POST"
+            endpoint="/api/chat/send"
+            expectedOutput={{ 
+              message: "AI response message", 
+              conversationId: "conversation-id" 
+            }}
+            requiresAuth={true}
+            requiresParams={true}
+            inputFields={[
+              {
+                name: "message",
+                label: "Message",
+                type: "textarea",
+                required: true,
+                placeholder: "Enter your message to the AI"
+              },
+              {
+                name: "conversationId",
+                label: "Conversation ID (optional)",
+                type: "text",
+                placeholder: "Leave empty for a new conversation"
+              }
+            ]}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/chat/history"
+            expectedOutput={{ 
+              conversations: [
+                { 
+                  id: "conversation-1", 
+                  lastMessageDate: "2023-06-15T10:30:00Z", 
+                  preview: "Hello, can you help with..." 
+                },
+                { 
+                  id: "conversation-2", 
+                  lastMessageDate: "2023-06-16T14:20:00Z", 
+                  preview: "I'm having trouble with..." 
+                }
+              ] 
+            }}
+            requiresAuth={true}
+          />
+          <EndpointRow 
+            method="GET"
+            endpoint="/api/chat/history/:conversationId"
+            expectedOutput={{ 
+              id: "conversation-id", 
+              messages: [
+                { role: "user", content: "Hello, can you help with my period symptoms?" },
+                { role: "assistant", content: "I'd be happy to help with your period symptoms..." }
+              ] 
+            }}
+            requiresAuth={true}
+            pathParams={["conversationId"]}
+          />
+          <EndpointRow 
+            method="DELETE"
+            endpoint="/api/chat/history/:conversationId"
+            expectedOutput={{ message: "Conversation deleted" }}
+            requiresAuth={true}
+            pathParams={["conversationId"]}
+          />
+        </EndpointTable>
       </div>
     </div>
   );
