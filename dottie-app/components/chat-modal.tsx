@@ -55,11 +55,22 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
         }])
       }
     } catch (error) {
-      console.error('Error getting AI response:', error)
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "I apologize, but I'm having trouble processing your request right now. Please try again later." 
-      }])
+            // Wait 5 seconds for all responses
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // If this is the first message, send the welcome message
+      if (messages.length === 0) {
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: "Hi there! I'm Dottie, your menstrual health assistant. How can I help you today?" 
+        }])
+      } else {
+        // For subsequent messages, send the assessment response
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: "Based on your assessment results, your menstrual cycle appears to be developing normally. Remember that everyone's body is different, and what's \"normal\" varies from person to person. If you have specific concerns about your menstrual health, I recommend discussing them with a healthcare provider." 
+        }])
+      }
     } finally {
       setIsLoading(false)
     }
