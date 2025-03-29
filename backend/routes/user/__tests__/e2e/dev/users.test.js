@@ -54,8 +54,7 @@ describe('API Health Check (E2E)', () => {
   
   // Test that authentication is required
   it('should require authentication for user endpoints', async () => {
-    // Try to access the users endpoint without authentication
-    const response = await request.get('/api/users');
+    const response = await request.get('/api/user');
     
     expect(response.status).toBe(401);
   });
