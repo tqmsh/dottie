@@ -92,7 +92,7 @@ describe('Get User API - Success Cases', () => {
     }
     
     const response = await request
-      .get('/api/users/me')
+      .get('/api/user/me')
       .set('Authorization', `Bearer ${accessToken}`);
     
     console.log('Get user response:', response.status, response.body);
@@ -109,7 +109,7 @@ describe('Get User API - Success Cases', () => {
   it('should require authentication to access user data', async () => {
     // Try to access without auth token
     const response = await request
-      .get('/api/users/me');
+      .get('/api/user/me');
     
     console.log('Get user without auth response:', response.status);
     
