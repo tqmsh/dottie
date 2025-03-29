@@ -31,8 +31,8 @@
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/user/` | GET | Get list of all users |
-| `/api/user/:id` | GET | Get user by ID (to be phased out in next iteration for /api/user/me) |
 | `/api/user/me` | GET | Get current user |
+| `/api/user/:id` | GET | Get user by ID (todo: replace with /api/user/me) |
 | `/api/user/:id` | PUT | Update a user |
 | `/api/user/:id` | DELETE | Delete a user |
 | `/api/user/pw/reset` | POST | Reset forgotten password |
