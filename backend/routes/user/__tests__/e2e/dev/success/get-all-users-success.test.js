@@ -110,7 +110,7 @@ describe('Get All Users API - Success Cases', () => {
     }
     
     const response = await request
-      .get('/api/users')
+      .get('/api/user')
       .set('Authorization', `Bearer ${accessToken}`);
     
     console.log('Get all users response:', response.status);
@@ -144,7 +144,7 @@ describe('Get All Users API - Success Cases', () => {
     }
     
     const response = await request
-      .get('/api/users')
+      .get('/api/user')
       .set('Authorization', `Bearer ${accessToken}`);
     
     expect(response.status).toBe(200);

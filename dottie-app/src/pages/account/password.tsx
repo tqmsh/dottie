@@ -1,16 +1,16 @@
-import AccountLayout from '../../components/user/account-layout';
-import PasswordForm from '../../components/user/password-form';
+import React from 'react';
+import { PasswordForm } from '../../components/user/PasswordUpdateForm';
 
 export default function PasswordPage() {
   // In production, this would come from auth context
   const userId = 'test-user-123';
 
   return (
-    <AccountLayout
-      title="Change Password"
-      description="Update your password to keep your account secure."
-    >
-      <div className="max-w-md">
+    <div className="container mx-auto py-8">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-2xl font-bold mb-2">Change Password</h1>
+        <p className="text-gray-600 mb-6">Update your password to keep your account secure.</p>
+        
         <PasswordForm userId={userId} />
         
         <div className="mt-8 p-4 bg-gray-50 rounded-md border border-gray-200">
@@ -23,6 +23,6 @@ export default function PasswordPage() {
           </ul>
         </div>
       </div>
-    </AccountLayout>
+    </div>
   );
 } 

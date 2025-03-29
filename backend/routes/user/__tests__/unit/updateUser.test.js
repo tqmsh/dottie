@@ -27,9 +27,9 @@ import bcrypt from 'bcrypt';
 // Mock the authentication middleware
 vi.mock('../../../auth/middleware/index.js', () => ({
   authenticateToken: (req, res, next) => {
-    // Add a mock user to the request
+    // Add a mock user to the request with the ID that will be used in the tests
     req.user = {
-      id: 'test-user-id',
+      userId: req.headers['test-user-id'] || 'test-user-id',
       role: 'user'
     };
     next();
@@ -46,7 +46,7 @@ vi.mock('../../../auth/middleware/validators/userValidators.js', () => ({
   }
 }));
 
-describe('PUT /:id - Update User', () => {
+describe('PUT /me - Update User', () => {
   let app;
   let userRoutes;
   
@@ -57,7 +57,7 @@ describe('PUT /:id - Update User', () => {
     // Import the route to test using dynamic import
     const routeModule = await import('../../index.js');
     userRoutes = routeModule.default;
-    app.use('/users', userRoutes);
+    app.use('/', userRoutes);
     
     // Reset mock implementations
     vi.resetAllMocks();
@@ -79,9 +79,10 @@ describe('PUT /:id - Update User', () => {
       email: 'test123@example.com'
     };
     
-    // Execute request
+    // Execute request with test user ID in header
     const response = await request(app)
-      .put(`/users/${testId}`)
+      .put('/me')
+      .set('test-user-id', testId)
       .send(updatedData);
     
     // Assertions
@@ -100,9 +101,10 @@ describe('PUT /:id - Update User', () => {
     // Set up mock to return null (user not found)
     User.findById.mockResolvedValue(null);
     
-    // Execute request
+    // Execute request with user ID in header
     const response = await request(app)
-      .put(`/users/${userId}`)
+      .put('/me')
+      .set('test-user-id', userId)
       .send({ username: 'newname' });
     
     // Assertions

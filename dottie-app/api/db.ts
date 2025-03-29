@@ -11,13 +11,13 @@ export const checkDbConnection = async () => {
   }
 };
 
-// Example of fetching data from the database
-export const fetchUserData = async (userId: string) => {
+// Fetch current user data using the /me endpoint
+export const fetchUserData = async () => {
   try {
-    const response = await axios.get(`/api/user/${userId}`);
+    const response = await axios.get('/api/user/me');
     return response.data;
   } catch (error) {
-    console.error(`Error fetching user data for ID ${userId}:`, error);
+    console.error('Error fetching user data:', error);
     throw error;
   }
 }; 

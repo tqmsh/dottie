@@ -30,7 +30,7 @@ export default function AccountForm({ user }: AccountFormProps) {
     setIsLoading(true);
 
     try {
-      await api.put(`/api/auth/users/${user.id}`, formData);
+      await api.put('/api/user/me', formData);
       toast.success('Account updated successfully');
     } catch (error) {
       console.error('Error updating account:', error);

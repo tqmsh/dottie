@@ -12,6 +12,15 @@ const apiClient = axios.create({
   },
 });
 
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // API service methods
 export const apiService = {
   // Basic GET request
@@ -40,6 +49,11 @@ export const apiService = {
   async delete(url: string, config = {}) {
     return apiClient.delete(url, config);
   },
+  
+  // Method to check if a request was successful
+  isSuccess(status: number) {
+    return status >= 200 && status < 300;
+  }
 };
 
 export default apiService; 

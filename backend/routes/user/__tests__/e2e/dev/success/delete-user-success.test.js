@@ -137,7 +137,7 @@ describe('Delete User API - Success Cases', () => {
     
     // Delete the user
     const response = await request
-      .delete(`/api/users/${deleteUser.id}`)
+      .delete(`/api/user/me`)
       .set('Authorization', `Bearer ${accessTokens.user1}`);
     
     console.log('Delete user response:', response.status, response.body);
@@ -155,7 +155,7 @@ describe('Delete User API - Success Cases', () => {
     testUsers = testUsers.filter(user => user.id !== deleteUser.id);
   });
   
-  it('should prevent deleting another user account (access control)', async () => {
+  it('should prevent accessing /me with invalid tokens (access control)', async () => {
     // Skip if users array is empty
     if (testUsers.length === 0) {
       console.log('Skipping test: No test users');
@@ -168,27 +168,19 @@ describe('Delete User API - Success Cases', () => {
       return;
     }
     
-    // First check if the user exists
-    const userBeforeDelete = await db('users').where('id', targetUser.id).first();
-    expect(userBeforeDelete).not.toBeUndefined();
-    console.log('Target user exists before deletion attempt:', targetUser.id);
+    // Create an invalid token
+    const invalidToken = 'invalid-token-12345';
     
-    // Try to delete the target user with user1's token
+    // Try to access /me with invalid token
     const response = await request
-      .delete(`/api/users/${targetUser.id}`)
-      .set('Authorization', `Bearer ${accessTokens.user1}`);
+      .get(`/api/user/me`)
+      .set('Authorization', `Bearer ${invalidToken}`);
     
-    console.log('Delete other user response:', response.status, response.body);
+    console.log('Invalid token response:', response.status, response.body);
     
-    // The API prevents deleting other users with a 403 Forbidden
-    expect(response.status).toBe(403);
+    // The API should reject invalid tokens with 401 Unauthorized
+    expect(response.status).toBe(401);
     expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toContain('Forbidden');
-    
-    // Verify the user still exists in the database
-    const userAfterAttempt = await db('users').where('id', targetUser.id).first();
-    expect(userAfterAttempt).not.toBeUndefined();
-    console.log('Target user still exists in database after unauthorized delete attempt');
   });
   
   it('should require authentication to delete user', async () => {
@@ -211,7 +203,7 @@ describe('Delete User API - Success Cases', () => {
     
     // Try to delete without authorization
     const response = await request
-      .delete(`/api/users/${testUser.id}`);
+      .delete(`/api/user/me`);
     
     console.log('Delete without auth response:', response.status);
     

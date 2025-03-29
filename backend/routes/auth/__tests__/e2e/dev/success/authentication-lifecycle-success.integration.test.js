@@ -111,28 +111,24 @@ describe("Authentication Success Integration Tests", () => {
   });
   
   test("Should successfully get user details", async () => {
-    // Special handling for test user ID format
-    // Since signup generates a test ID starting with 'test-', but user routes expect 'test-user-' prefix
-    const testUserId = `test-user-${Date.now()}`;
-    
     const response = await request
-      .get(`/api/auth/users/${testUserId}`)
+      .get(`/api/user/me`)
       .set("Authorization", `Bearer ${authToken}`);
     
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("id", testUserId);
-    // Don't check email match since it's dynamically generated for test users
+    // Instead of checking for a specific ID, just verify we received an ID property
+    expect(response.body).toHaveProperty("id");
+    // Don't check email match since it could be normalized or transformed during registration
+    expect(response.body).toHaveProperty("email");
   });
 
   test("Should successfully update user profile", async () => {
-    // Special handling for test user ID format
-    const testUserId = `test-user-${Date.now()}`;
     const updateData = {
       username: `updated_user_${Date.now()}`
     };
     
     const response = await request
-      .put(`/api/auth/users/${testUserId}`)
+      .put(`/api/user/me`)
       .set("Authorization", `Bearer ${authToken}`)
       .send(updateData);
     
@@ -192,11 +188,8 @@ describe("Authentication Success Integration Tests", () => {
     expect(loginResponse.status).toBe(200);
     const cleanupToken = loginResponse.body.token;
     
-    // Special handling for test user ID format
-    const testUserId = `test-user-${Date.now()}`;
-    
     const response = await request
-      .delete(`/api/auth/users/${testUserId}`)
+      .delete(`/api/user/me`)
       .set("Authorization", `Bearer ${cleanupToken}`);
     
     expect(response.status).toBe(200);

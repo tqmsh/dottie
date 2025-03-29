@@ -24,7 +24,7 @@ export const SignupSchema = z
         path: ["confirmPassword"],
       });
     }
-});
+  });
 
 export const UserSchema = z.object({
   id: z.string().uuid(),
@@ -45,11 +45,53 @@ export const ErrorResponseSchema = z.object({
   error: z.string(),
 });
 
+// Password update schema
+export const PasswordUpdateSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Current password must be at least 6 characters"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+  })
+  .superRefine(({ confirmNewPassword, newPassword }, ctx) => {
+    if (confirmNewPassword !== newPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords did not match",
+        path: ["confirmNewPassword"],
+      });
+    }
+  });
+
+// Password reset request schema
+export const PasswordResetRequestSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+// Password reset completion schema
+export const PasswordResetCompletionSchema = z
+  .object({
+    token: z.string().min(1, "Reset token is required"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+  })
+  .superRefine(({ confirmNewPassword, newPassword }, ctx) => {
+    if (confirmNewPassword !== newPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords did not match",
+        path: ["confirmNewPassword"],
+      });
+    }
+  });
+
 // Types
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SignupInput = z.infer<typeof SignupSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type PasswordUpdateInput = z.infer<typeof PasswordUpdateSchema>;
+export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestSchema>;
+export type PasswordResetCompletionInput = z.infer<typeof PasswordResetCompletionSchema>;
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -118,14 +160,7 @@ export const authApi = {
   // Get current user
   getCurrentUser: async (): Promise<User> => {
     try {
-      const storedUser = localStorage.getItem('auth_user');
-      const user = storedUser ? JSON.parse(storedUser) : null;
-      
-      if (!user?.id) {
-        throw new Error('No user ID found');
-      }
-
-      const response = await api.get<User>(`/api/auth/users/${user.id}`);
+      const response = await api.get<User>('/api/user/me');
       const validatedData = UserSchema.parse(response.data);
       return validatedData;
     } catch (error) {
@@ -147,6 +182,62 @@ export const authApi = {
       if (axios.isAxiosError(error)) {
         throw new Error(
           error.response?.data?.error || "Token refresh failed"
+        );
+      }
+      throw error;
+    }
+  },
+
+  // Update password
+  updatePassword: async (userId: string, passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
+    try {
+      const { currentPassword, newPassword } = passwordData;
+      const response = await api.post<{ message: string }>(
+        `/api/user/pw/update/${userId}`,
+        { currentPassword, newPassword }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error || "Password update failed, please try again later"
+        );
+      }
+      throw error;
+    }
+  },
+
+  // Request password reset (forgot password)
+  requestPasswordReset: async (emailData: PasswordResetRequestInput): Promise<{ message: string }> => {
+    try {
+      const response = await api.post<{ message: string }>(
+        `/api/user/pw/reset`,
+        emailData
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error || "Password reset request failed, please try again later"
+        );
+      }
+      throw error;
+    }
+  },
+
+  // Complete password reset with token
+  completePasswordReset: async (resetData: PasswordResetCompletionInput): Promise<{ message: string }> => {
+    try {
+      const { token, newPassword } = resetData;
+      const response = await api.post<{ message: string }>(
+        `/api/user/pw/reset-complete`,
+        { token, newPassword }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error || "Password reset failed, please try again later"
         );
       }
       throw error;
