@@ -5,8 +5,8 @@
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/setup/health/hello` | GET | Test endpoint that returns "Hello World from Dottie API!" |
-| `/api/setup/database/hello` | GET | Test endpoint that returns a hello message from the database (SQLite or Azure SQL) |
 | `/api/setup/database/status` | GET | Check database connection status |
+| `/api/setup/database/hello` | GET | Test endpoint that returns a hello message from the database (SQLite or Azure SQL) |
 
 ## Authentication Endpoints
 
@@ -38,7 +38,7 @@
 | `/api/user/pw/reset` | POST | Reset forgotten password |
 | `/api/user/pw/update` | POST | Update current user's password |
 
-(There is also a ``| `/api/user/` | GET | Get list of all users |`` endpoint, but it is not needed in the frontend yet.)
+- *There is also a ``| `/api/user/` | GET | Get list of all users |`` endpoint, but it is not needed in the frontend.*
 
 ## Request Examples
 
