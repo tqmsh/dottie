@@ -4,6 +4,7 @@ import JsonDisplay from './JsonDisplay';
 import ApiResponse from './ApiResponse';
 import InputForm from './InputForm';
 import { apiService } from '../../../../api/apiService';
+import { authService } from '../../../../api/auth';
 
 interface InputField {
   name: string;
@@ -41,6 +42,7 @@ export default function EndpointRow({
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'partial'>('idle');
   const [showInputForm, setShowInputForm] = useState(false);
   const [pathParamValues, setPathParamValues] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState<boolean>(false);
 
   // Prepare path parameters input fields
   const pathParamFields: InputField[] = pathParams.map(param => ({
@@ -65,24 +67,34 @@ export default function EndpointRow({
   const handleApiCall = async (formData?: Record<string, any>) => {
     setIsLoading(true);
     setStatus('idle');
+    setAuthError(false);
     
     try {
       let result;
       const processedEndpoint = getProcessedEndpoint();
       
+      // Check authentication if required
+      if (requiresAuth && !authService.isAuthenticated()) {
+        setAuthError(true);
+        throw new Error('Authentication required. Please login first.');
+      }
+      
+      // Prepare request config with auth header if needed
+      const config = requiresAuth ? authService.addAuthHeader() : {};
+      
       // Make appropriate API call based on method
       switch (method) {
         case 'GET':
-          result = await apiService.get(processedEndpoint);
+          result = await apiService.get(processedEndpoint, config);
           break;
         case 'POST':
-          result = await apiService.post(processedEndpoint, formData || {});
+          result = await apiService.post(processedEndpoint, formData || {}, config);
           break;
         case 'PUT':
-          result = await apiService.put(processedEndpoint, formData || {});
+          result = await apiService.put(processedEndpoint, formData || {}, config);
           break;
         case 'DELETE':
-          result = await apiService.delete(processedEndpoint);
+          result = await apiService.delete(processedEndpoint, config);
           break;
       }
       
@@ -152,8 +164,10 @@ export default function EndpointRow({
           />
           
           {requiresAuth && (
-            <div className="text-xs text-yellow-400 mt-1">
-              Requires authentication
+            <div className={`text-xs ${authError ? 'text-red-400' : 'text-yellow-400'} mt-1`}>
+              {authError 
+                ? 'Authentication required. Please login first.' 
+                : 'Requires authentication'}
             </div>
           )}
           

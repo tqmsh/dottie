@@ -4,4 +4,5 @@ export { default as EndpointButton } from './EndpointButton';
 export { default as JsonDisplay } from './JsonDisplay';
 export { default as ApiResponse } from './ApiResponse';
 export { default as InputForm } from './InputForm';
-export { default as EndpointRow } from './EndpointRow'; 
+export { default as EndpointRow } from './EndpointRow';
+export { default as AuthStatus } from './AuthStatus'; 
