@@ -14,10 +14,6 @@
 | `/api/auth/signup` | POST | Register a new user account |
 | `/api/auth/login` | POST | Authenticate user and get access token |
 | `/api/auth/logout` | POST | Logout user and invalidate token |
-| `/api/auth/users` | GET | Get list of all users |
-| `/api/auth/users/:id` | GET | Get user by ID |
-| `/api/auth/users/:id` | PUT | Update a user |
-| `/api/auth/users/:id` | DELETE | Delete a user |
 
 ## Assessment Endpoints
 
@@ -35,9 +31,12 @@
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/user/` | GET | Get list of all users |
-| `/api/user/:id` | GET | Get user by ID |
+| `/api/user/:id` | GET | Get user by ID (to be phased out in next iteration for /api/user/me) |
+| `/api/user/me` | GET | Get current user |
 | `/api/user/:id` | PUT | Update a user |
 | `/api/user/:id` | DELETE | Delete a user |
+| `/api/user/pw/reset` | POST | Reset forgotten password |
+| `/api/user/pw/update` | POST | Update current user's password |
 
 ## Request Examples
 
@@ -104,5 +103,22 @@ fetch("/api/assessment/assessment-123", {
   headers: {
     "Authorization": "Bearer your-access-token"
   }
+});
+```
+
+### User
+
+```javascript
+// Update password
+fetch("/api/user/pw/update", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer your-access-token"
+  },
+  body: JSON.stringify({
+    currentPassword: "oldPassword123",
+    newPassword: "newSecurePassword456"
+  })
 });
 ``` 
