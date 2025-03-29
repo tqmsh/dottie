@@ -2,11 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-interface PasswordFormProps {
-  userId: string;
-}
-
-export default function PasswordForm({ userId }: PasswordFormProps) {
+export default function PasswordForm() {
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -63,7 +59,7 @@ export default function PasswordForm({ userId }: PasswordFormProps) {
     setIsLoading(true);
 
     try {
-      await axios.put(`/api/user/${userId}/password`, {
+      await axios.post('/api/user/pw/update', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });
