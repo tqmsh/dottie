@@ -117,7 +117,7 @@ describe('User Authentication Flow (E2E)', () => {
     
     // Verify the token works by accessing a protected resource
     const response = await request
-      .get('/api/users')
+      .get('/api/user')
       .set('Authorization', `Bearer ${accessToken}`);
     
     console.log('Authentication test response:', response.status, response.body);
@@ -135,7 +135,7 @@ describe('User Authentication Flow (E2E)', () => {
     }
     
     const response = await request
-      .put(`/api/users/${testUser.id}`)
+      .put(`/api/user/me`)
       .set('Authorization', `Bearer ${accessToken || 'invalid-token'}`)
       .send({ username: 'updated-test-user!@#', age: '35_44' });
     
