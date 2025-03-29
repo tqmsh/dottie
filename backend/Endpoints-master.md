@@ -40,6 +40,15 @@
 
 - *There is also a ``| `/api/user/` | GET | Get list of all users |`` endpoint, but it is not needed in the frontend.*
 
+## AI Chat Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/chat/send` | POST | Send a message to the AI (Gemini API) and get a response |
+| `/api/chat/history` | GET | Get chat history for the authenticated user |
+| `/api/chat/history/:conversationId` | GET | Get a specific conversation by ID |
+| `/api/chat/history/:conversationId` | DELETE | Delete a specific conversation |
+
 ## Request Examples
 
 ### Setup
@@ -145,4 +154,38 @@ fetch("/api/user/pw/update", {
     newPassword: "newSecurePassword456"
   })
 });
+```
+
+### AI Chat
+
+```javascript
+// Send message to AI
+fetch("/api/chat/send", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer your-access-token"
+  },
+  body: JSON.stringify({
+    message: "Hello, can you help with my period symptoms?",
+    conversationId: "conversation-123" // Optional, for continuing a conversation
+  })
+});
+// Response: { "message": "I'd be happy to help with your period symptoms...", "conversationId": "conversation-123" }
+
+// Get chat history
+fetch("/api/chat/history", {
+  headers: {
+    "Authorization": "Bearer your-access-token"
+  }
+});
+// Response: { "conversations": [{ "id": "conversation-123", "lastMessageDate": "2023-06-15T10:30:00Z", "preview": "Hello, can you help with..." }] }
+
+// Get specific conversation
+fetch("/api/chat/history/conversation-123", {
+  headers: {
+    "Authorization": "Bearer your-access-token"
+  }
+});
+// Response: { "id": "conversation-123", "messages": [{ "role": "user", "content": "Hello, can you help with my period symptoms?" }, { "role": "assistant", "content": "I'd be happy to help with your period symptoms..." }] }
 ``` 
