@@ -6,10 +6,10 @@ This branch handles all interactions with the Gemini AI chat functionality of th
 
 | Endpoint | Method | Description | Implementation Status |
 |----------|--------|-------------|----------------------|
-| `/api/chat/send` | POST | Send a message to the AI (Gemini API) and get a response | TODO |
-| `/api/chat/history` | GET | Get chat history for the authenticated user | TODO |
-| `/api/chat/history/:conversationId` | GET | Get a specific conversation by ID | TODO |
-| `/api/chat/history/:conversationId` | DELETE | Delete a specific conversation | TODO |
+| `/api/chat/send` | POST | Send a message to the AI (Gemini API) and get a response | Implemented |
+| `/api/chat/history` | GET | Get chat history for the authenticated user | Implemented |
+| `/api/chat/history/:conversationId` | GET | Get a specific conversation by ID | Implemented |
+| `/api/chat/history/:conversationId` | DELETE | Delete a specific conversation | Implemented |
 
 ## Implementation Details
 
