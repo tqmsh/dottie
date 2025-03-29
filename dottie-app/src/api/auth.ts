@@ -160,14 +160,7 @@ export const authApi = {
   // Get current user
   getCurrentUser: async (): Promise<User> => {
     try {
-      const storedUser = localStorage.getItem('auth_user');
-      const user = storedUser ? JSON.parse(storedUser) : null;
-      
-      if (!user?.id) {
-        throw new Error('No user ID found');
-      }
-
-      const response = await api.get<User>(`/api/auth/users/${user.id}`);
+      const response = await api.get<User>('/api/user/me');
       const validatedData = UserSchema.parse(response.data);
       return validatedData;
     } catch (error) {
@@ -196,11 +189,11 @@ export const authApi = {
   },
 
   // Update password
-  updatePassword: async (userId: string, passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
+  updatePassword: async (passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
     try {
       const { currentPassword, newPassword } = passwordData;
       const response = await api.post<{ message: string }>(
-        `/api/user/pw/update/${userId}`,
+        '/api/user/pw/update',
         { currentPassword, newPassword }
       );
       return response.data;
