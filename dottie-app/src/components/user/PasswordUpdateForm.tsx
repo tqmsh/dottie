@@ -1,77 +1,112 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PasswordUpdateSchema, PasswordUpdateInput, authApi } from '../../api/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import * as z from 'zod';
+import { Button } from '../ui/button';
+import {
+  Card,
+  CardHeader,
   CardTitle,
   CardDescription,
+  CardContent,
   CardFooter
 } from '../ui/card';
-import { 
-  Form, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { useToast } from '../ui/use-toast';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '../../hooks/useAuth';
 
-const PasswordUpdateForm: React.FC = () => {
-  const { user } = useAuth();
+const passwordUpdateSchema = z.object({
+  currentPassword: z.string().min(8, {
+    message: "Current password must be at least 8 characters.",
+  }),
+  newPassword: z.string().min(8, {
+    message: "New password must be at least 8 characters.",
+  }),
+  confirmNewPassword: z.string().min(8, {
+    message: "Confirmation password must be at least 8 characters.",
+  }),
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+  message: "New passwords don't match",
+  path: ["confirmNewPassword"],
+}).refine((data) => data.currentPassword !== data.newPassword, {
+  message: "New password must be different from current password",
+  path: ["newPassword"],
+});
+
+type PasswordUpdateFormValues = z.infer<typeof passwordUpdateSchema>;
+
+interface PasswordFormProps {
+  userId: string;
+}
+
+export function PasswordForm({ userId }: PasswordFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const { toast } = useToast();
+  const { updatePassword } = useAuth();
   
-  const form = useForm<PasswordUpdateInput>({
-    resolver: zodResolver(PasswordUpdateSchema),
+  const form = useForm<PasswordUpdateFormValues>({
+    resolver: zodResolver(passwordUpdateSchema),
     defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmNewPassword: ''
-    }
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    },
   });
-  
-  const onSubmit = async (data: PasswordUpdateInput) => {
-    if (!user?.id) {
-      setError('You must be logged in to update your password');
-      return;
-    }
-    
+
+  async function onSubmit(data: PasswordUpdateFormValues) {
     setIsLoading(true);
-    setError(null);
-    setSuccess(null);
+    setIsSuccess(false);
     
     try {
-      await authApi.updatePassword(user.id, data);
-      setSuccess('Password updated successfully');
-      form.reset({
-        currentPassword: '',
-        newPassword: '',
-        confirmNewPassword: ''
+      await updatePassword(data.currentPassword, data.newPassword);
+      
+      setIsSuccess(true);
+      form.reset();
+      
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully.",
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to update password. Please check your current password and try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-  
+  }
+
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card>
       <CardHeader>
         <CardTitle>Update Password</CardTitle>
         <CardDescription>
-          Change your account password
+          Change your account password. After saving, you'll need to use the new password to log in.
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {isSuccess && (
+          <Alert className="mb-4">
+            <AlertDescription>
+              Your password has been updated successfully.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -81,11 +116,7 @@ const PasswordUpdateForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Current Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Enter your current password" 
-                      {...field} 
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,12 +130,11 @@ const PasswordUpdateForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Enter your new password" 
-                      {...field} 
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Password must be at least 8 characters.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -117,37 +147,19 @@ const PasswordUpdateForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Confirm New Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="Confirm your new password" 
-                      {...field} 
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            {success && (
-              <Alert>
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
-            )}
-            
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update Password'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Updating..." : "Update Password"}
             </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
   );
-};
-
-export default PasswordUpdateForm; 
+} 
