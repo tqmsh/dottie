@@ -15,10 +15,16 @@ export default defineConfig({
     port: 3000,
     proxy: {
       // Proxy API requests to the backend server
-      '/api': {
+      '^/api/(?!.*\\.ts$).*': {  // Exclude .ts files from being proxied
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Proxy error:', err);
+          });
+        }
       }
     }
   },
