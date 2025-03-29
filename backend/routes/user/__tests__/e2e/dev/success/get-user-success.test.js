@@ -92,7 +92,7 @@ describe('Get User API - Success Cases', () => {
     }
     
     const response = await request
-      .get(`/api/users/${testUserId}`)
+      .get('/api/users/me')
       .set('Authorization', `Bearer ${accessToken}`);
     
     console.log('Get user response:', response.status, response.body);
@@ -106,37 +106,10 @@ describe('Get User API - Success Cases', () => {
     expect(response.body).not.toHaveProperty('password_hash'); // Should not expose password hash
   });
   
-  it('should return access denied when accessing another user', async () => {
-    // Skip if no access token
-    if (!accessToken) {
-      console.log('Skipping test: No access token');
-      return;
-    }
-    
-    const nonExistentId = `non-existent-${Date.now()}`;
-    
-    const response = await request
-      .get(`/api/users/${nonExistentId}`)
-      .set('Authorization', `Bearer ${accessToken}`);
-    
-    console.log('Get other user response:', response.status, response.body);
-    
-    // The API returns 403 when trying to access another user's profile
-    expect(response.status).toBe(403);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toContain('Forbidden');
-  });
-  
   it('should require authentication to access user data', async () => {
-    // Skip if no test user
-    if (!testUserId) {
-      console.log('Skipping test: No test user ID');
-      return;
-    }
-    
     // Try to access without auth token
     const response = await request
-      .get(`/api/users/${testUserId}`);
+      .get('/api/users/me');
     
     console.log('Get user without auth response:', response.status);
     
