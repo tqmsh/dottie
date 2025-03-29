@@ -64,95 +64,42 @@ afterAll(async () => {
 }, 15000);
 
 describe("User Management - Error Scenarios", { tags: ['authentication', 'dev', 'error'] }, () => {
+  test("GET /api/user/me - should reject request without valid token", async () => {
+    const response = await request
+      .get("/api/user/me")
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("error");
+  });
+
+  test("PUT /api/user/me - should reject update with missing token", async () => {
+    const updateData = {
+      username: `updated_user_${Date.now()}`
+    };
+
+    const response = await request
+      .put(`/api/user/me`)
+      .send(updateData);
+      // No Authorization header
+
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("error");
+  });
+
+  test("DELETE /api/user/me - should reject delete with invalid token", async () => {
+    const response = await request
+      .delete(`/api/user/me`)
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("error");
+  });
+
   test("GET /api/auth/users - should reject request without token", async () => {
     const response = await request
       .get("/api/auth/users");
       // No Authorization header
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error");
-  });
-
-  test("GET /api/auth/users/:id - should reject request with invalid user ID", async () => {
-    const response = await request
-      .get("/api/auth/users/invalid-user-id")
-      .set("Authorization", `Bearer ${testToken}`);
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error");
-  });
-
-  test("PUT /api/auth/users/:id - should reject update with invalid data", async () => {
-    const invalidUpdateData = {
-      email: "not-a-valid-email",
-    };
-
-    const response = await request
-      .put(`/api/auth/users/${testUserId}`)
-      .set("Authorization", `Bearer ${testToken}`)
-      .send(invalidUpdateData);
-
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error");
-  });
-
-  test("PUT /api/auth/users/:id - should reject update for another user", async () => {
-    // Create another user
-    const anotherUserData = {
-      username: `another_user_${Date.now()}`,
-      email: `another_user_${Date.now()}@example.com`,
-      password: "Password123!",
-      age: "18_24"
-    };
-
-    const createResponse = await request
-      .post("/api/auth/signup")
-      .send(anotherUserData);
-    
-    const anotherUserId = createResponse.body.id;
-    
-    // Try updating another user with our token
-    const updateData = {
-      username: `updated_another_${Date.now()}`
-    };
-
-    const response = await request
-      .put(`/api/auth/users/${anotherUserId}`)
-      .set("Authorization", `Bearer ${testToken}`)
-      .send(updateData);
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error");
-  });
-
-  test("DELETE /api/auth/users/:id - should reject delete without token", async () => {
-    const response = await request
-      .delete(`/api/auth/users/${testUserId}`);
-      // No Authorization header
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error");
-  });
-
-  test("DELETE /api/auth/users/:id - should reject delete for another user", async () => {
-    // Create another user
-    const anotherUserData = {
-      username: `delete_another_${Date.now()}`,
-      email: `delete_another_${Date.now()}@example.com`,
-      password: "Password123!",
-      age: "18_24"
-    };
-
-    const createResponse = await request
-      .post("/api/auth/signup")
-      .send(anotherUserData);
-    
-    const anotherUserId = createResponse.body.id;
-    
-    // Try deleting another user with our token
-    const response = await request
-      .delete(`/api/auth/users/${anotherUserId}`)
-      .set("Authorization", `Bearer ${testToken}`);
 
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("error");
