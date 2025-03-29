@@ -55,6 +55,13 @@ export default function SignInPage() {
             error={errors.password?.message}
           />
         </div>
+        
+        <div className="flex items-center justify-end">
+          <Link to="/auth/forgot-password" className="text-sm text-pink-500 hover:text-pink-600">
+            Forgot your password?
+          </Link>
+        </div>
+        
         <div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Signing in..." : "Sign in"}
