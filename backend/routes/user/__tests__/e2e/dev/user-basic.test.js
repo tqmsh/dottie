@@ -53,21 +53,21 @@ describe('User API Basic Tests (E2E)', () => {
   
   it('should require authentication for user endpoints', async () => {
     // Try to access user list without authentication
-    const getAllResponse = await request.get('/api/users');
+    const getAllResponse = await request.get('/api/user');
     expect(getAllResponse.status).toBe(401);
     
     // Try to get a specific user without authentication
-    const getUserResponse = await request.get('/api/users/test-id');
+    const getUserResponse = await request.get('/api/user/me');
     expect(getUserResponse.status).toBe(401);
     
     // Try to update a user without authentication
     const updateResponse = await request
-      .put('/api/users/test-id')
+      .put('/api/user/me')
       .send({ username: 'newname' });
     expect(updateResponse.status).toBe(401);
     
     // Try to delete a user without authentication
-    const deleteResponse = await request.delete('/api/users/test-id');
+    const deleteResponse = await request.delete('/api/user/me');
     expect(deleteResponse.status).toBe(401);
   });
   
@@ -80,7 +80,7 @@ describe('User API Basic Tests (E2E)', () => {
     };
     
     const response = await request
-      .put('/api/users/test-id')
+      .put('/api/user/me')
       .send(invalidData);
     
     // API validates input before checking auth, returning 400 Bad Request
