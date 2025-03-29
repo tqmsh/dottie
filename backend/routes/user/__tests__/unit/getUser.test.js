@@ -32,7 +32,7 @@ vi.mock('../../../auth/middleware/validators/userValidators.js', () => ({
   }
 }));
 
-describe('GET /:id - Get User By Id', () => {
+describe('GET /me - Get Current User', () => {
   let app;
   let userRoutes;
 
@@ -53,23 +53,8 @@ describe('GET /:id - Get User By Id', () => {
     vi.clearAllMocks();
   });
 
-  it('should return test user data when test user ID is requested', async () => {
-    const testUserId = 'test-user-123';
-    
-    // Execute request
-    const response = await request(app).get(`/users/${testUserId}`);
-    
-    // Assertions
-    expect(response.status).toBe(200);
-    expect(User.findById).not.toHaveBeenCalled(); // Should not call findById for test users
-    expect(response.body).toHaveProperty('id', testUserId);
-    expect(response.body).toHaveProperty('username');
-    expect(response.body).toHaveProperty('email');
-    expect(response.body).toHaveProperty('age', '18_24');
-  });
-
-  it('should return user data when non-test user exists', async () => {
-    const userId = 'regular-user-id';
+  it('should return current user data', async () => {
+    const userId = 'mock-user-id';
     const mockUser = {
       id: userId,
       username: 'testuser',
@@ -82,7 +67,7 @@ describe('GET /:id - Get User By Id', () => {
     User.findById.mockResolvedValue(mockUser);
     
     // Execute request
-    const response = await request(app).get(`/users/${userId}`);
+    const response = await request(app).get('/users/me');
     
     // Assertions
     expect(response.status).toBe(200);
@@ -97,13 +82,13 @@ describe('GET /:id - Get User By Id', () => {
   });
 
   it('should return 404 when user does not exist', async () => {
-    const userId = 'non-existent-id';
+    const userId = 'mock-user-id';
     
     // Set up mock to return null (user not found)
     User.findById.mockResolvedValue(null);
     
     // Execute request
-    const response = await request(app).get(`/users/${userId}`);
+    const response = await request(app).get('/users/me');
     
     // Assertions
     expect(response.status).toBe(404);
@@ -112,13 +97,13 @@ describe('GET /:id - Get User By Id', () => {
   });
 
   it('should handle database errors', async () => {
-    const userId = 'error-user-id';
+    const userId = 'mock-user-id';
     
     // Set up mock to throw an error
     User.findById.mockRejectedValue(new Error('Database error'));
     
     // Execute request
-    const response = await request(app).get(`/users/${userId}`);
+    const response = await request(app).get('/users/me');
     
     // Assertions
     expect(response.status).toBe(500);
