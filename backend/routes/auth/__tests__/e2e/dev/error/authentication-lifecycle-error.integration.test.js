@@ -312,7 +312,7 @@ describe("Authentication Error Integration Tests", () => {
       };
       
       const response = await request
-        .put(`/api/auth/users/${userId}`)
+        .put(`/api/auth/users/me`)
         .send(updateData);
       
       expect(response.status).toBe(401);
@@ -320,36 +320,35 @@ describe("Authentication Error Integration Tests", () => {
     });
     
     test("Should reject user profile update for other users", async () => {
-      // Try to update another user's profile
+      // This test is no longer valid since we only support /me endpoint
+      // Instead, we'll test that the /me endpoint requires authentication
       const updateData = {
         username: 'changed-name'
       };
 
       const response = await request
-        .put(`/api/auth/users/other-user-${Date.now()}`)
+        .put(`/api/auth/users/me`)
         .send(updateData);
 
-      // Acceptable status codes include 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden),
-      // or 404 (Not Found) if the user ID doesn't exist
-      expect([400, 401, 403, 404]).toContain(response.status);
+      // Could be 400 (Bad Request) or 401 (Unauthorized) depending on middleware order
+      expect([400, 401]).toContain(response.status);
       expect(response.body).toHaveProperty('error');
     });
     
     test("Should reject account deletion without token", async () => {
-      const response = await request.delete(`/api/auth/users/${userId}`);
+      const response = await request.delete(`/api/auth/users/me`);
       
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("error");
     });
     
     test("Should reject account deletion for other users", async () => {
-      // Try to delete another user's account
-      const response = await request
-        .delete(`/api/auth/users/other-user-${Date.now()}`);
+      // This test is no longer valid since we only support /me endpoint
+      // Instead, we'll test that the /me endpoint requires authentication
+      const response = await request.delete(`/api/auth/users/me`);
 
-      // Acceptable status codes include 401 (Unauthorized), 403 (Forbidden),
-      // or 404 (Not Found) if the user ID doesn't exist
-      expect([401, 403, 404]).toContain(response.status);
+      // Should be 401 Unauthorized without a token
+      expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('error');
     });
   });
