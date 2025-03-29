@@ -24,7 +24,7 @@ export const SignupSchema = z
         path: ["confirmPassword"],
       });
     }
-});
+  });
 
 export const UserSchema = z.object({
   id: z.string().uuid(),
@@ -45,11 +45,29 @@ export const ErrorResponseSchema = z.object({
   error: z.string(),
 });
 
+// Password update schema
+export const PasswordUpdateSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Current password must be at least 6 characters"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+  })
+  .superRefine(({ confirmNewPassword, newPassword }, ctx) => {
+    if (confirmNewPassword !== newPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords did not match",
+        path: ["confirmNewPassword"],
+      });
+    }
+  });
+
 // Types
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SignupInput = z.infer<typeof SignupSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type PasswordUpdateInput = z.infer<typeof PasswordUpdateSchema>;
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -147,6 +165,25 @@ export const authApi = {
       if (axios.isAxiosError(error)) {
         throw new Error(
           error.response?.data?.error || "Token refresh failed"
+        );
+      }
+      throw error;
+    }
+  },
+
+  // Update password
+  updatePassword: async (userId: string, passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
+    try {
+      const { currentPassword, newPassword } = passwordData;
+      const response = await api.post<{ message: string }>(
+        `/api/user/pw/update/${userId}`,
+        { currentPassword, newPassword }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.error || "Password update failed, please try again later"
         );
       }
       throw error;
