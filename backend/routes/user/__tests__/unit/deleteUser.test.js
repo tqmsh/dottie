@@ -14,9 +14,9 @@ vi.mock('../../../../models/User.js', () => ({
 // Mock the authentication middleware
 vi.mock('../../../auth/middleware/index.js', () => ({
   authenticateToken: (req, res, next) => {
-    // Add a mock user to the request
+    // Add a mock user to the request with the ID that will be used in the tests
     req.user = {
-      id: 'mock-user-id',
+      userId: req.headers['test-user-id'] || 'mock-user-id',
       role: 'user'
     };
     next();
@@ -33,7 +33,7 @@ vi.mock('../../../auth/middleware/validators/userValidators.js', () => ({
   }
 }));
 
-describe('DELETE /:id - Delete User', () => {
+describe('DELETE /me - Delete User', () => {
   let app;
   let userRoutes;
   
@@ -44,7 +44,7 @@ describe('DELETE /:id - Delete User', () => {
     // Import the route to test using dynamic import
     const routeModule = await import('../../index.js');
     userRoutes = routeModule.default;
-    app.use('/users', userRoutes);
+    app.use('/', userRoutes);
     
     // Reset mock implementations
     vi.resetAllMocks();
@@ -57,8 +57,10 @@ describe('DELETE /:id - Delete User', () => {
   it('should delete a test user successfully using special handling', async () => {
     const testUserId = 'test-user-123';
     
-    // Execute request
-    const response = await request(app).delete(`/users/${testUserId}`);
+    // Execute request with test user ID in header to be picked up by mock middleware
+    const response = await request(app)
+      .delete('/me')
+      .set('test-user-id', testUserId);
     
     // Assertions
     expect(response.status).toBe(200);
@@ -75,8 +77,10 @@ describe('DELETE /:id - Delete User', () => {
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
     User.delete.mockResolvedValue(true);
     
-    // Execute request
-    const response = await request(app).delete(`/users/${userId}`);
+    // Execute request with user ID in header
+    const response = await request(app)
+      .delete('/me')
+      .set('test-user-id', userId);
     
     // Assertions
     expect(response.status).toBe(200);
@@ -92,8 +96,10 @@ describe('DELETE /:id - Delete User', () => {
     // Set up mock to return null (user not found)
     User.findById.mockResolvedValue(null);
     
-    // Execute request
-    const response = await request(app).delete(`/users/${userId}`);
+    // Execute request with user ID in header
+    const response = await request(app)
+      .delete('/me')
+      .set('test-user-id', userId);
     
     // Assertions
     expect(response.status).toBe(404);
@@ -109,8 +115,10 @@ describe('DELETE /:id - Delete User', () => {
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
     User.delete.mockResolvedValue(false);
     
-    // Execute request
-    const response = await request(app).delete(`/users/${userId}`);
+    // Execute request with user ID in header
+    const response = await request(app)
+      .delete('/me')
+      .set('test-user-id', userId);
     
     // Assertions
     expect(response.status).toBe(500);
@@ -126,8 +134,10 @@ describe('DELETE /:id - Delete User', () => {
     User.findById.mockResolvedValue({ id: userId, username: 'testuser' });
     User.delete.mockRejectedValue(new Error('Database error'));
     
-    // Execute request
-    const response = await request(app).delete(`/users/${userId}`);
+    // Execute request with user ID in header
+    const response = await request(app)
+      .delete('/me')
+      .set('test-user-id', userId);
     
     // Assertions
     expect(response.status).toBe(500);
