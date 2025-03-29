@@ -45,7 +45,7 @@
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/chat/send` | POST | Send a message to the AI (Gemini API) and get a response |
-| `/api/chat/history` | GET | Get chat history for the authenticated user |
+| `/api/chat/history` | GET | Get chat history for the authenticated user, returns all conversations as a list |
 | `/api/chat/history/:conversationId` | GET | Get a specific conversation by ID |
 | `/api/chat/history/:conversationId` | DELETE | Delete a specific conversation |
 
