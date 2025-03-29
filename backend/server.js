@@ -50,7 +50,7 @@ app.get('/api/hello', (req, res) => {
 // Mount route modules
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/setup", setupRoutes);
 
 // For local development
