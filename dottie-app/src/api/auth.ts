@@ -189,11 +189,11 @@ export const authApi = {
   },
 
   // Update password
-  updatePassword: async (passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
+  updatePassword: async (userId: string, passwordData: PasswordUpdateInput): Promise<{ message: string }> => {
     try {
       const { currentPassword, newPassword } = passwordData;
       const response = await api.post<{ message: string }>(
-        '/api/user/pw/update',
+        `/api/user/pw/update/${userId}`,
         { currentPassword, newPassword }
       );
       return response.data;
