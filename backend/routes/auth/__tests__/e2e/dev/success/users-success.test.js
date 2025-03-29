@@ -74,22 +74,22 @@ describe("User Management - Success Scenarios", () => {
     expect(response.body.length).toBeGreaterThan(0);
   });
 
-  test("GET /api/auth/users/:id - should return user by ID", async () => {
+  test("GET /api/user/me - should return current user", async () => {
     const response = await request
-      .get(`/api/auth/users/${testUserId}`)
+      .get(`/api/user/me`)
       .set("Authorization", `Bearer ${testToken}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("id", testUserId);
   });
 
-  test("PUT /api/auth/users/:id - should update user", async () => {
+  test("PUT /api/user/me - should update user", async () => {
     const updateData = {
       username: `updated_user_${Date.now()}`
     };
 
     const response = await request
-      .put(`/api/auth/users/${testUserId}`)
+      .put(`/api/user/me`)
       .set("Authorization", `Bearer ${testToken}`)
       .send(updateData);
 
@@ -97,7 +97,7 @@ describe("User Management - Success Scenarios", () => {
     expect(response.body).toHaveProperty("username", updateData.username);
   });
 
-  test("DELETE /api/auth/users/:id - should delete user", async () => {
+  test("DELETE /api/user/me - should delete user", async () => {
     // Create a user to delete
     const deleteUserData = {
       username: `delete_user_${Date.now()}`,
@@ -115,7 +115,7 @@ describe("User Management - Success Scenarios", () => {
 
     // Delete the user
     const response = await request
-      .delete(`/api/auth/users/${userIdToDelete}`)
+      .delete(`/api/user/me`)
       .set("Authorization", `Bearer ${deleteToken}`);
 
     expect(response.status).toBe(200);
