@@ -7,7 +7,11 @@ import User from '../../../../models/User.js';
 vi.mock('../../../../models/User.js', () => ({
   default: {
     findById: vi.fn(),
-    updatePassword: vi.fn()
+    updatePassword: vi.fn().mockResolvedValue({
+      id: 'valid-user-id',
+      username: 'testuser',
+      updated_at: new Date().toISOString()
+    })
   }
 }));
 
@@ -15,10 +19,10 @@ vi.mock('../../../../models/User.js', () => ({
 vi.mock('bcrypt', () => {
   return {
     default: {
-      hash: vi.fn().mockResolvedValue('hashed_password'),
+      hash: vi.fn().mockResolvedValue('new_hashed_password'),
       compare: vi.fn()
     },
-    hash: vi.fn().mockResolvedValue('hashed_password'),
+    hash: vi.fn().mockResolvedValue('new_hashed_password'),
     compare: vi.fn()
   };
 });
@@ -27,7 +31,7 @@ vi.mock('bcrypt', () => {
 import bcrypt from 'bcrypt';
 
 // Mock the authentication middleware
-vi.mock('../../../auth/middleware/index.js', () => ({
+vi.mock('../../../../routes/auth/middleware/index.js', () => ({
   authenticateToken: (req, res, next) => {
     // Add a mock user to the request
     req.user = {
@@ -39,13 +43,16 @@ vi.mock('../../../auth/middleware/index.js', () => ({
 }));
 
 // Mock the validators
-vi.mock('../../../auth/middleware/validators/userValidators.js', () => ({
+vi.mock('../../../../routes/auth/middleware/validators/userValidators.js', () => ({
   validateUserAccess: (req, res, next) => {
+    next();
+  },
+  validateUserUpdate: (req, res, next) => {
     next();
   }
 }));
 
-vi.mock('../../../auth/middleware/validators/passwordValidators.js', () => ({
+vi.mock('../../../../routes/auth/middleware/validators/passwordValidators.js', () => ({
   validatePasswordUpdate: (req, res, next) => {
     next();
   }
@@ -139,6 +146,7 @@ describe('POST /pw/update/:id - Update Password', () => {
   
   it('should update password successfully', async () => {
     const userId = 'valid-user-id';
+    const newHashedPassword = 'new_hashed_password';
     
     // Set up mock to return a user
     User.findById.mockResolvedValue({
@@ -150,12 +158,8 @@ describe('POST /pw/update/:id - Update Password', () => {
     // Set up bcrypt to return true (password matches)
     bcrypt.compare.mockResolvedValue(true);
     
-    // Set up User.updatePassword to return success
-    User.updatePassword.mockResolvedValue({
-      id: userId,
-      username: 'testuser',
-      updated_at: new Date().toISOString()
-    });
+    // Set up bcrypt hash to return new hashed password
+    bcrypt.hash.mockResolvedValue(newHashedPassword);
     
     // Execute request
     const response = await request(app)
@@ -173,6 +177,6 @@ describe('POST /pw/update/:id - Update Password', () => {
     // Verify bcrypt and User.updatePassword were called with correct parameters
     expect(bcrypt.compare).toHaveBeenCalledWith('CurrentPassword123!', 'hashed_password');
     expect(bcrypt.hash).toHaveBeenCalledWith('NewPassword456!', 10);
-    expect(User.updatePassword).toHaveBeenCalledWith(userId, 'hashed_password');
+    expect(User.updatePassword).toHaveBeenCalledWith(userId, newHashedPassword);
   });
 }); 
