@@ -97,7 +97,7 @@ describe('User Update API - Success Cases', () => {
     };
     
     const response = await request
-      .put(`/api/users/${testUserId}`)
+      .put(`/api/user/me`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send(updatedData);
     
@@ -131,7 +131,7 @@ describe('User Update API - Success Cases', () => {
     };
     
     const response = await request
-      .put(`/api/users/${testUserId}`)
+      .put(`/api/user/me`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send(updateAttempt);
     
@@ -165,7 +165,7 @@ describe('User Update API - Success Cases', () => {
     
     // Empty update
     const response = await request
-      .put(`/api/users/${testUserId}`)
+      .put(`/api/user/me`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({});
     
