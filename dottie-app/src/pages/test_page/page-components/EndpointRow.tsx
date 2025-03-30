@@ -3,8 +3,8 @@ import EndpointButton from './EndpointButton';
 import JsonDisplay from './JsonDisplay';
 import ApiResponse from './ApiResponse';
 import InputForm from './InputForm';
-import { apiService } from '../../../../api/apiService';
-import { authService } from '../../../../api/auth';
+import { apiClient } from '../../../api';
+import { authApi } from '../../../api/auth';
 
 interface InputField {
   name: string;
@@ -74,27 +74,26 @@ export default function EndpointRow({
       const processedEndpoint = getProcessedEndpoint();
       
       // Check authentication if required
-      if (requiresAuth && !authService.isAuthenticated()) {
+      if (requiresAuth && !localStorage.getItem('auth_token')) {
         setAuthError(true);
         throw new Error('Authentication required. Please login first.');
       }
       
-      // Prepare request config with auth header if needed
-      const config = requiresAuth ? authService.addAuthHeader() : {};
+      // API client already handles auth headers through interceptors
       
       // Make appropriate API call based on method
       switch (method) {
         case 'GET':
-          result = await apiService.get(processedEndpoint, config);
+          result = await apiClient.get(processedEndpoint);
           break;
         case 'POST':
-          result = await apiService.post(processedEndpoint, formData || {}, config);
+          result = await apiClient.post(processedEndpoint, formData || {});
           break;
         case 'PUT':
-          result = await apiService.put(processedEndpoint, formData || {}, config);
+          result = await apiClient.put(processedEndpoint, formData || {});
           break;
         case 'DELETE':
-          result = await apiService.delete(processedEndpoint, config);
+          result = await apiClient.delete(processedEndpoint);
           break;
       }
       

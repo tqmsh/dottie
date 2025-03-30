@@ -7,19 +7,25 @@ import {
   AssessmentEndpoints,
   UserEndpoints,
   ChatEndpoints
-} from './tables';
+} from './test-endpoint-table';
 import { AuthStatus } from './page-components';
-import { authService } from '../../api/auth';
+import { authApi } from '../../api/auth';
+import { LoginInput } from '../../api/auth/types';
 
 export default function TestPage() {
   const environment = process.env.NODE_ENV || 'development';
   
-  const handleLogin = async (credentials: { email: string; password: string }) => {
-    return authService.login(credentials);
+  const handleLogin = async (credentials: LoginInput) => {
+    try {
+      await authApi.login(credentials);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const handleLogout = () => {
-    authService.logout();
+    authApi.logout();
   };
 
   return (
