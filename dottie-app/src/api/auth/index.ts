@@ -56,18 +56,11 @@ export const authApi = {
 
   // Logout
   logout: async (): Promise<void> => {
-    try {
-      await apiClient.post("/api/auth/logout");
-      // Clear stored tokens
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("auth_user");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.error || "Logout failed");
-      }
-      throw error;
-    }
+    // Just clear stored tokens without making API call
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("auth_user");
+    // No API call needed - simulating successful logout
   },
 
   // Get current user

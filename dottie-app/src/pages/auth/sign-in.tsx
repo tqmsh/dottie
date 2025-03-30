@@ -7,6 +7,7 @@ import { FormInput } from "@/src/components/ui/!to-migrate/form-input";
 import { Button } from "@/src/components/ui/!to-migrate/button";
 import { toast } from "sonner";
 import AuthLayout from "@/src/components/AuthLayout";
+import { useEffect } from "react";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -14,10 +15,33 @@ export default function SignInPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
   });
+
+  // Auto-fill login credentials from successful signup
+  useEffect(() => {
+    const email = localStorage.getItem("login_email");
+    const password = localStorage.getItem("login_password");
+    
+    if (email) {
+      // Set with a slight delay to ensure form is ready
+      setTimeout(() => {
+        setValue("email", email);
+        localStorage.removeItem("login_email");
+      }, 100);
+    }
+    
+    if (password) {
+      // Set with a slight delay to ensure form is ready
+      setTimeout(() => {
+        setValue("password", password);
+        localStorage.removeItem("login_password");
+      }, 100);
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: SignInFormData) => {
     try {

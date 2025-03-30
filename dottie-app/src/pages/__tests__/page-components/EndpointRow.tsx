@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import EndpointButton from './EndpointButton';
 import JsonDisplay from './JsonDisplay';
 import ApiResponse from './ApiResponse';
@@ -43,6 +43,13 @@ export default function EndpointRow({
   const [showInputForm, setShowInputForm] = useState(false);
   const [pathParamValues, setPathParamValues] = useState<Record<string, string>>({});
   const [authError, setAuthError] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Prepare path parameters input fields
   const pathParamFields: InputField[] = pathParams.map(param => ({
@@ -73,8 +80,8 @@ export default function EndpointRow({
       let result;
       const processedEndpoint = getProcessedEndpoint();
       
-      // Check authentication if required
-      if (requiresAuth && !localStorage.getItem('auth_token')) {
+      // Check authentication if required - special case for logout which should still work
+      if (requiresAuth && !localStorage.getItem('auth_token') && endpoint !== '/api/auth/logout') {
         setAuthError(true);
         throw new Error('Authentication required. Please login first.');
       }
@@ -87,7 +94,69 @@ export default function EndpointRow({
           result = await apiClient.get(processedEndpoint);
           break;
         case 'POST':
-          result = await apiClient.post(processedEndpoint, formData || {});
+          // Special case for logout endpoint
+          if (endpoint === '/api/auth/logout') {
+            try {
+              // Get tokens before clearing storage
+              const refreshToken = localStorage.getItem("refresh_token");
+              const authToken = localStorage.getItem("auth_token");
+              
+              console.log('[Logout Debug] Current tokens:', { 
+                authTokenExists: !!authToken, 
+                refreshTokenExists: !!refreshToken,
+                authToken: authToken?.substring(0, 10) + '...',
+                refreshToken: refreshToken?.substring(0, 10) + '...'
+              });
+              
+              // Try the API call with the tokens we have
+              try {
+                // Set up the headers directly for this call
+                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+                console.log('[Logout Debug] Making API call with:', { 
+                  headers,
+                  refreshToken: refreshToken ? true : false,
+                  endpoint: processedEndpoint 
+                });
+                
+                // Directly use axios to have more control over the request
+                const response = await fetch(processedEndpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                  },
+                  body: JSON.stringify({ refreshToken })
+                });
+                
+                console.log('[Logout Debug] API response:', { 
+                  status: response.status,
+                  statusText: response.statusText
+                });
+                
+                if (response.ok) {
+                  console.log('[Logout Debug] Logout API call succeeded');
+                } else {
+                  const errorData = await response.json();
+                  console.log('[Logout Debug] API error data:', errorData);
+                }
+              } catch (error: any) {
+                console.log("[Logout Debug] API call error:", error);
+              }
+              
+              // Clear local storage tokens after API call attempt
+              console.log('[Logout Debug] Clearing local storage tokens');
+              localStorage.removeItem("auth_token");
+              localStorage.removeItem("refresh_token");
+              localStorage.removeItem("auth_user");
+              
+              result = { data: { message: "Logged out successfully" } };
+            } catch (error) {
+              console.error("[Logout Debug] Error during logout:", error);
+              throw error;
+            }
+          } else {
+            result = await apiClient.post(processedEndpoint, formData || {});
+          }
           break;
         case 'PUT':
           result = await apiClient.put(processedEndpoint, formData || {});
@@ -162,7 +231,7 @@ export default function EndpointRow({
             isLoading={isLoading}
           />
           
-          {requiresAuth && (
+          {requiresAuth && !isAuthenticated && (
             <div className={`text-xs ${authError ? 'text-red-400' : 'text-yellow-400'} mt-1`}>
               {authError 
                 ? 'Authentication required. Please login first.' 

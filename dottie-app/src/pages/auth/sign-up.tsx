@@ -22,8 +22,13 @@ export default function SignUpPage() {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       await signup(data);
+      
+      // Store signup credentials for autofill in the login form
+      localStorage.setItem("login_email", data.email);
+      localStorage.setItem("login_password", data.password);
+      
       toast.success("Account created successfully!");
-      navigate("/auth/signin");
+      navigate("/auth/sign-in");
     } catch (error) {
       if (error instanceof Error) {
         toast.error(
