@@ -73,8 +73,8 @@ export default function EndpointRow({
       let result;
       const processedEndpoint = getProcessedEndpoint();
       
-      // Check authentication if required
-      if (requiresAuth && !localStorage.getItem('auth_token')) {
+      // Check authentication if required - special case for logout which should still work
+      if (requiresAuth && !localStorage.getItem('auth_token') && endpoint !== '/api/auth/logout') {
         setAuthError(true);
         throw new Error('Authentication required. Please login first.');
       }
@@ -87,7 +87,13 @@ export default function EndpointRow({
           result = await apiClient.get(processedEndpoint);
           break;
         case 'POST':
-          result = await apiClient.post(processedEndpoint, formData || {});
+          // Special case for logout endpoint
+          if (endpoint === '/api/auth/logout') {
+            await authApi.logout();
+            result = { data: { message: "Logged out successfully" } };
+          } else {
+            result = await apiClient.post(processedEndpoint, formData || {});
+          }
           break;
         case 'PUT':
           result = await apiClient.put(processedEndpoint, formData || {});

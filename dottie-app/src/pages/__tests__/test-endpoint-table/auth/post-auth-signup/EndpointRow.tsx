@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EndpointRow as BaseEndpointRow } from '../../../page-components';
+import { EndpointRow as BaseEndpointRow, testCredentialsManager } from '../../../page-components';
 
 export default function EndpointRow() {
   const [randomCredentials, setRandomCredentials] = useState<{ email: string, password: string, username: string } | null>(null);
@@ -16,8 +16,13 @@ export default function EndpointRow() {
     // Create a proper name
     const username = `TestUser${randomString.slice(0,3).toUpperCase()}`;
     
-    setRandomCredentials({ email, password, username });
-    return { email, password, username };
+    const credentials = { email, password, username };
+    
+    // Store credentials using the credential manager
+    testCredentialsManager.storeCredentials(credentials);
+    
+    setRandomCredentials(credentials);
+    return credentials;
   };
 
   return (
