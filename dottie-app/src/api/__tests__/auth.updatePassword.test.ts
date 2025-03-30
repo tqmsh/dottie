@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PasswordUpdateSchema } from "../auth";
+import { PasswordUpdateSchema } from "../../../api/auth";
 
 describe("Password Update Schema", () => {
   it("validates password update input correctly", () => {

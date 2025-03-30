@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PasswordResetRequestForm from "../../components/user/PasswordResetRequestForm";
+import PasswordResetRequestForm from "../../pages/user/PasswordResetRequestForm";
 import AuthLayout from "../../components/AuthLayout";
 
 export default function ForgotPasswordPage() {
