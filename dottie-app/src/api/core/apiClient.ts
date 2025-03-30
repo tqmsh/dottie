@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Define base URL for API requests
-// Uses environment variable first, then fallback to production URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://dottie-api-zeta.vercel.app';
+// Define base URL for API requests - use empty string for relative URLs
+// This allows the Vite proxy to handle the requests
+const API_BASE_URL = '';
 
 // Create axios instance with default config
 export const apiClient = axios.create({
@@ -10,6 +10,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Include credentials for CORS requests
 });
 
 // Add request interceptor to include auth token
