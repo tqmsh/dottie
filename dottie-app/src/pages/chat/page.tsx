@@ -107,3 +107,5 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
     </Dialog>
   )
 }
+
+export default ChatModal; 

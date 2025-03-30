@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserSchema } from "../user/schemas";
 
 // Zod schemas for validation
 export const LoginSchema = z.object({
@@ -25,23 +26,10 @@ export const SignupSchema = z
     }
   });
 
-export const UserSchema = z.object({
-  id: z.string().uuid(),
-  username: z.string(),
-  email: z.string().email(),
-  age: z.nullable(z.number()),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
-
 export const AuthResponseSchema = z.object({
   token: z.string(),
   refreshToken: z.string(),
   user: UserSchema,
-});
-
-export const ErrorResponseSchema = z.object({
-  error: z.string(),
 });
 
 // Password update schema

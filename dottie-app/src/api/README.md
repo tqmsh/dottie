@@ -1,6 +1,6 @@
 # Dottie API Structure
 
-This directory contains all API-related code organized by domain.
+This directory contains all API-related code organized by domain. They should be access the endpoints of the backend as described in the `backend/Endpoints-master.md` file.
 
 ## Structure
 
