@@ -3,19 +3,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AuthEndpoints from '../../AuthEndpoints';
 
-// Mock apiClient instead of axios directly
-vi.mock('../../../../../../api/core/apiClient', () => ({
-  default: {
-    post: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() }
-    }
+// Create a mock apiClient directly instead of importing
+const apiClient = {
+  post: vi.fn(),
+  interceptors: {
+    request: { use: vi.fn() },
+    response: { use: vi.fn() }
   }
-}));
+};
 
-// Import the mocked module
-import apiClient from '../../../../../../api/core/apiClient';
+// No need to import the mocked module
 
 describe('AuthEndpoint Trigger Tests', () => {
   beforeEach(() => {

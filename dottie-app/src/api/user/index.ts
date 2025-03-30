@@ -1,12 +1,15 @@
-import getById from "./requests/getById";
-import getCurrentUser from "./requests/getCurrentUser";
-import putUpdate from "./requests/putUpdate";
-import deleteUser from "./requests/delete";
-import postPasswordUpdate from "./requests/postPasswordUpdate";
-import { requestPasswordReset, completePasswordReset } from "./requests/passwordReset";
+import {
+  getById,
+  getCurrentUser,
+  putUpdate,
+  deleteUser,
+  postPasswordUpdate,
+  requestPasswordReset,
+  completePasswordReset
+} from "./requests";
 
 // Export types
-export * from "./utils/types";
+export * from "./types";
 
 // Export individual endpoints
 export {

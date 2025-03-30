@@ -1,10 +1,12 @@
-import sendMessage from "./requests/send";
-import getHistory from "./requests/getHistory";
-import getConversation from "./requests/getConversation";
-import deleteConversation from "./requests/deleteConversation";
+import {
+  sendMessage,
+  getHistory,
+  getConversation,
+  deleteConversation
+} from "./requests";
 
 // Export types
-export * from "./utils/types";
+export * from "./types";
 
 // Export individual endpoints
 export {
