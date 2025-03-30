@@ -97,22 +97,61 @@ export default function EndpointRow({
           // Special case for logout endpoint
           if (endpoint === '/api/auth/logout') {
             try {
-              // Clear local storage tokens first
+              // Get tokens before clearing storage
+              const refreshToken = localStorage.getItem("refresh_token");
+              const authToken = localStorage.getItem("auth_token");
+              
+              console.log('[Logout Debug] Current tokens:', { 
+                authTokenExists: !!authToken, 
+                refreshTokenExists: !!refreshToken,
+                authToken: authToken?.substring(0, 10) + '...',
+                refreshToken: refreshToken?.substring(0, 10) + '...'
+              });
+              
+              // Try the API call with the tokens we have
+              try {
+                // Set up the headers directly for this call
+                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+                console.log('[Logout Debug] Making API call with:', { 
+                  headers,
+                  refreshToken: refreshToken ? true : false,
+                  endpoint: processedEndpoint 
+                });
+                
+                // Directly use axios to have more control over the request
+                const response = await fetch(processedEndpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                  },
+                  body: JSON.stringify({ refreshToken })
+                });
+                
+                console.log('[Logout Debug] API response:', { 
+                  status: response.status,
+                  statusText: response.statusText
+                });
+                
+                if (response.ok) {
+                  console.log('[Logout Debug] Logout API call succeeded');
+                } else {
+                  const errorData = await response.json();
+                  console.log('[Logout Debug] API error data:', errorData);
+                }
+              } catch (error: any) {
+                console.log("[Logout Debug] API call error:", error);
+              }
+              
+              // Clear local storage tokens after API call attempt
+              console.log('[Logout Debug] Clearing local storage tokens');
               localStorage.removeItem("auth_token");
               localStorage.removeItem("refresh_token");
               localStorage.removeItem("auth_user");
               
-              // Try the API call but don't fail if it returns 401
-              try {
-                await apiClient.post(processedEndpoint);
-              } catch (error) {
-                // Ignore 401 errors during logout
-                console.log("Logout API call failed, but local tokens were cleared");
-              }
-              
               result = { data: { message: "Logged out successfully" } };
             } catch (error) {
-              console.error("Error during logout:", error);
+              console.error("[Logout Debug] Error during logout:", error);
               throw error;
             }
           } else {
