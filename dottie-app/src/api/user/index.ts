@@ -1,56 +1,33 @@
-import apiClient from "../core/apiClient";
-import { User } from "../auth/types";
+import { apiClient } from "../core/apiClient";
+import getCurrentUser from "./getCurrentUser";
+import getUserById from "./getById";
+import putUpdate from "./putUpdate";
+import deleteUser from "./delete";
+import postPasswordUpdate from "./postPasswordUpdate";
+import { requestPasswordReset, completePasswordReset } from "./passwordReset";
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  age?: number;
-  bio?: string;
-  preferences?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
+// Export types
+export * from "./types";
 
+// Export individual endpoints
+export {
+  getCurrentUser,
+  getUserById,
+  putUpdate as updateUser,
+  deleteUser,
+  postPasswordUpdate as updatePassword,
+  requestPasswordReset,
+  completePasswordReset
+};
+
+// User API object for backward compatibility
 export const userApi = {
-  /**
-   * Get current user profile
-   */
-  getProfile: async (): Promise<UserProfile> => {
-    try {
-      const response = await apiClient.get('/api/user/profile');
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch user profile:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Update user profile
-   */
-  updateProfile: async (userId: string, profileData: Partial<UserProfile>): Promise<UserProfile> => {
-    try {
-      const response = await apiClient.put(`/api/user/${userId}`, profileData);
-      return response.data;
-    } catch (error) {
-      console.error('Failed to update user profile:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Get user by ID (admin only)
-   */
-  getUserById: async (userId: string): Promise<User> => {
-    try {
-      const response = await apiClient.get(`/api/user/${userId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to fetch user with ID ${userId}:`, error);
-      throw error;
-    }
-  },
+  getProfile: getCurrentUser,
+  getUserById,
+  updateUser: putUpdate,
+  deleteUser,
+  resetPassword: requestPasswordReset,
+  updatePassword: postPasswordUpdate
 };
 
 export default userApi; 
