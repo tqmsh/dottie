@@ -1,10 +1,10 @@
-import { apiClient } from "../../core/apiClient";
+import { apiClient } from "../../../core/apiClient";
 
 /**
  * Delete assessment by ID
  * @endpoint /api/assessment/:id (DELETE)
  */
-export const deleteAssessment = async (id: string): Promise<void> => {
+export const deleteById = async (id: string): Promise<void> => {
   try {
     await apiClient.delete(`/api/assessment/${id}`);
   } catch (error) {
@@ -13,4 +13,4 @@ export const deleteAssessment = async (id: string): Promise<void> => {
   }
 };
 
-export default deleteAssessment; 
+export default deleteById; 

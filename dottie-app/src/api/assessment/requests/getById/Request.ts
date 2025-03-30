@@ -1,5 +1,5 @@
-import { apiClient } from "../../core/apiClient";
-import { Assessment } from "../utils/types";
+import { apiClient } from "../../../core/apiClient";
+import { Assessment } from "../../types";
 
 /**
  * Get assessment by ID
