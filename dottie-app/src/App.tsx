@@ -22,7 +22,7 @@ import ResourcesPage from "./pages/assessment/resources/page";
 import HistoryPage from "./pages/assessment/history/page";
 import DetailsPage from "./pages/assessment/history/[id]/page";
 // Import TestPage component
-import TestPage from "./pages/test_page/page";
+import TestPage from "./pages/__tests__/page";
 import ScrollToTop from "./components/scroll-to-top";
 import LandingPage from "./pages/landing-page/page";
 
