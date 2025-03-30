@@ -5,7 +5,9 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { authApi, User, LoginInput, SignupInput } from "@/src/api/auth";
+import { authApi } from "@/src/api/auth/index";
+import { User, LoginInput, SignupInput } from "@/src/api/auth/utils/types";
+import { userApi } from "@/src/api/user/index";
 
 interface AuthState {
   user: User | null;
@@ -49,13 +51,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (user && token) {
         // Verify token validity by fetching current user
-        const currentUser = await authApi.getCurrentUser();
-        setState({
-          user: currentUser,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        });
+        try {
+          const currentUser = await userApi.current();
+          setState({
+            user: currentUser,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error) {
+          setState((prev) => ({ ...prev, isLoading: false }));
+        }
       } else {
         setState((prev) => ({ ...prev, isLoading: false }));
       }
@@ -94,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { user, token } = await authApi.login(credentials);
 
       localStorage.setItem("auth_user", JSON.stringify(user));
-      localStorage.setItem("auth_token", token);
+      localStorage.setItem("auth_token", token as string);
 
       setState({
         user,
@@ -112,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (userData: SignupInput) => {
+  const signup = async (userData: SignupInput): Promise<any> => {
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
       const response = await authApi.signup(userData);
@@ -123,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error: null,
       }));
 
-      return response;
+      return response.user;
     } catch (error) {
       setState((prev) => ({
         ...prev,

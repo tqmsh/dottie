@@ -1,11 +1,11 @@
-import getList from "./requests/getList";
-import getById from "./requests/getById";
-import postSend from "./requests/postSend";
-import putUpdate from "./requests/putUpdate";
-import deleteAssessment from "./requests/delete";
+import getList from "./getList";
+import getById from "./getById";
+import postSend from "./postSend";
+import putUpdate from "./putUpdate";
+import deleteAssessment from "./delete";
 
 // Export types
-export * from "./utils/types";
+export * from "./types";
 
 // Export individual endpoints
 export {

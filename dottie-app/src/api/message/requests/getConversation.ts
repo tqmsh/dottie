@@ -1,5 +1,5 @@
-import { apiClient } from "../core/apiClient";
-import { Conversation } from "./types";
+import { apiClient } from "../../core/apiClient";
+import { Conversation } from "../utils/types";
 
 /**
  * Get a specific conversation by ID

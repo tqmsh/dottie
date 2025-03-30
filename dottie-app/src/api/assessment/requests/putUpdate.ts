@@ -1,8 +1,8 @@
-import { apiClient } from "../core/apiClient";
-import { Assessment } from "./types";
+import { apiClient } from "../../core/apiClient";
+import { Assessment } from "../utils/types";
 
 /**
- * Update a specific assessment by ID
+ * Update existing assessment
  * @endpoint /api/assessment/:id (PUT)
  */
 export const putUpdate = async (id: string, assessmentData: Partial<Assessment>): Promise<Assessment> => {
@@ -10,7 +10,7 @@ export const putUpdate = async (id: string, assessmentData: Partial<Assessment>)
     const response = await apiClient.put(`/api/assessment/${id}`, assessmentData);
     return response.data;
   } catch (error) {
-    console.error(`Failed to update assessment with ID ${id}:`, error);
+    console.error('Failed to update assessment:', error);
     throw error;
   }
 };

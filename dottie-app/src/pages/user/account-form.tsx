@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { api } from '@/src/api/auth';
+import { authApi } from '@/src/api/auth';
 
 interface AccountFormProps {
   user: {
@@ -30,7 +30,7 @@ export default function AccountForm({ user }: AccountFormProps) {
     setIsLoading(true);
 
     try {
-      await api.put('/api/user/me', formData);
+      await authApi.put('/api/user/me', formData);
       toast.success('Account updated successfully');
     } catch (error) {
       console.error('Error updating account:', error);
