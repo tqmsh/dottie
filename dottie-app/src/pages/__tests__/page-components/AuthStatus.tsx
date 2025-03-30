@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { InputForm } from './index';
 import { LoginInput } from '../../../api/auth/types';
+import { testCredentialsManager } from './index';
 
 interface AuthStatusProps {
   onLogin: (credentials: LoginInput) => Promise<void>;
@@ -12,6 +13,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showLoginForm, setShowLoginForm] = useState<boolean>(false);
+  const [isFlowRunning, setIsFlowRunning] = useState<boolean>(false);
 
   // Check if token exists on mount
   useEffect(() => {
@@ -55,6 +57,184 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
     setUser(null);
   };
 
+  // Auth-Flow utility function
+  const runAuthFlow = async () => {
+    if (isFlowRunning) return;
+    
+    setIsFlowRunning(true);
+    try {
+      // Helper function to scroll element into view
+      const scrollToElement = (element: HTMLElement) => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      
+      // Helper function to wait with a message
+      const wait = async (ms: number, message: string) => {
+        console.log(`Waiting ${ms}ms: ${message}`);
+        await new Promise(resolve => setTimeout(resolve, ms));
+      };
+      
+      console.log('Starting auth flow...');
+      
+      // Step 1: Find and click the "Generate Random User" button
+      const generateButton = Array.from(document.querySelectorAll('button'))
+        .find(button => button.textContent?.includes('Generate Random User'));
+      
+      if (generateButton) {
+        scrollToElement(generateButton as HTMLElement);
+        await wait(300, 'Scrolling to Generate Random User button');
+        
+        console.log('Clicking Generate Random User button...');
+        (generateButton as HTMLButtonElement).click();
+        
+        // Wait for the credentials to be generated
+        await wait(800, 'Waiting for user credentials to be generated');
+        
+        // Step 2: Find and click the signup button
+        const signupButton = document.querySelector('button[data-testid="test-post -api-auth-signup-button"]') as HTMLButtonElement;
+        if (signupButton) {
+          scrollToElement(signupButton as HTMLElement);
+          await wait(300, 'Scrolling to Signup button');
+          
+          console.log('Clicking Signup button...');
+          signupButton.click();
+          
+          // Wait for the form to appear
+          await wait(800, 'Waiting for signup form to appear');
+          
+          // Step 3: Find and click the "Send POST Request" button for signup
+          // Look for the Send POST Request button within the signup section
+          const signupForms = document.querySelectorAll('form');
+          let sendSignupButton: HTMLButtonElement | null = null;
+          
+          // Search through all forms for the one with email and password and username fields
+          for (const form of Array.from(signupForms)) {
+            const hasEmailField = form.querySelector('input[name="email"]');
+            const hasPasswordField = form.querySelector('input[name="password"]');
+            const hasUsernameField = form.querySelector('input[name="username"]');
+            
+            if (hasEmailField && hasPasswordField && hasUsernameField) {
+              // This is likely the signup form
+              sendSignupButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+              break;
+            }
+          }
+          
+          if (sendSignupButton) {
+            scrollToElement(sendSignupButton as HTMLElement);
+            await wait(300, 'Scrolling to Send POST Request button');
+            
+            console.log('Clicking Send POST Request for signup...');
+            sendSignupButton.click();
+            
+            // Wait for signup to complete
+            await wait(1500, 'Waiting for signup to complete');
+            
+            // Step 4: Find and click the login button
+            const loginButton = document.querySelector('button[data-testid="test-post -api-auth-login-button"]') as HTMLButtonElement;
+            if (loginButton) {
+              scrollToElement(loginButton as HTMLElement);
+              await wait(300, 'Scrolling to Login button');
+              
+              console.log('Clicking Login button...');
+              loginButton.click();
+              
+              // Wait for the form to appear
+              await wait(800, 'Waiting for login form to appear');
+              
+              // Step 5: Find and click "Use Latest Signup Credentials" button
+              const useCredentialsButton = Array.from(document.querySelectorAll('button'))
+                .find(button => button.textContent?.includes('Use Latest Signup Credentials'));
+              
+              if (useCredentialsButton) {
+                scrollToElement(useCredentialsButton as HTMLElement);
+                await wait(300, 'Scrolling to Use Latest Signup Credentials button');
+                
+                console.log('Clicking Use Latest Signup Credentials button...');
+                (useCredentialsButton as HTMLButtonElement).click();
+                
+                // Wait for credentials to be populated
+                await wait(800, 'Waiting for credentials to be populated');
+                
+                // Step 6: Find and click the "Send POST Request" button for login
+                // Look for the Send POST Request button within the login section
+                const loginForms = document.querySelectorAll('form');
+                let sendLoginButton: HTMLButtonElement | null = null;
+                
+                // Search through all forms for the one with email and password fields but no username
+                for (const form of Array.from(loginForms)) {
+                  const hasEmailField = form.querySelector('input[name="email"]');
+                  const hasPasswordField = form.querySelector('input[name="password"]');
+                  const hasUsernameField = form.querySelector('input[name="username"]');
+                  
+                  if (hasEmailField && hasPasswordField && !hasUsernameField) {
+                    // This is likely the login form
+                    sendLoginButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+                    break;
+                  }
+                }
+                
+                if (sendLoginButton) {
+                  scrollToElement(sendLoginButton as HTMLElement);
+                  await wait(300, 'Scrolling to Send POST Request button for login');
+                  
+                  console.log('Clicking Send POST Request for login...');
+                  sendLoginButton.click();
+                  
+                  // Wait for login to complete
+                  await wait(1500, 'Waiting for login to complete');
+                  
+                  // Check if authentication worked
+                  const authToken = localStorage.getItem('auth_token');
+                  if (authToken) {
+                    console.log('Auth flow completed successfully!');
+                    
+                    // Update auth status
+                    const userString = localStorage.getItem('auth_user');
+                    if (userString) {
+                      try {
+                        const userData = JSON.parse(userString);
+                        setIsAuthenticated(true);
+                        setUser({ email: userData.email });
+                        
+                        // Scroll back to the top to show the authentication status
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        
+                        // Display success message
+                        alert('Auth flow completed successfully! You are now logged in as: ' + userData.email);
+                      } catch (error) {
+                        console.error('Error parsing user data:', error);
+                      }
+                    }
+                  } else {
+                    console.error('Auth flow failed: No auth token found after login');
+                    alert('Auth flow failed: Please check the console for details.');
+                  }
+                } else {
+                  console.error('Could not find Send POST Request button for login');
+                }
+              } else {
+                console.error('Could not find Use Latest Signup Credentials button');
+              }
+            } else {
+              console.error('Could not find Login button');
+            }
+          } else {
+            console.error('Could not find Send POST Request button for signup');
+          }
+        } else {
+          console.error('Could not find Signup button');
+        }
+      } else {
+        console.error('Could not find Generate Random User button');
+      }
+    } catch (error) {
+      console.error('Error during auth flow:', error);
+    } finally {
+      setIsFlowRunning(false);
+    }
+  };
+
   return (
     <div className="mb-8 bg-gray-800 rounded-lg p-4">
       <div className="flex flex-col md:flex-row justify-between items-center">
@@ -71,7 +251,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
           )}
         </div>
         
-        <div>
+        <div className="flex space-x-3">
           {isAuthenticated ? (
             <button
               onClick={handleLogout}
@@ -87,6 +267,21 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
               {showLoginForm ? 'Cancel' : 'Login'}
             </button>
           )}
+          
+          {/* Auth-Flow utility button */}
+          <button
+            onClick={runAuthFlow}
+            disabled={isFlowRunning}
+            className={`px-4 py-2 text-white rounded-md transition-colors ${
+              isFlowRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+            }`}
+            title="Utility: generates random user and signs in"
+          >
+            {isFlowRunning ? 'Running...' : 'Auth-Flow'}
+            {isFlowRunning && (
+              <span className="ml-2 inline-block animate-spin">⟳</span>
+            )}
+          </button>
         </div>
       </div>
       
