@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import EndpointButton from './EndpointButton';
 import JsonDisplay from './JsonDisplay';
 import ApiResponse from './ApiResponse';
@@ -43,6 +43,13 @@ export default function EndpointRow({
   const [showInputForm, setShowInputForm] = useState(false);
   const [pathParamValues, setPathParamValues] = useState<Record<string, string>>({});
   const [authError, setAuthError] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Prepare path parameters input fields
   const pathParamFields: InputField[] = pathParams.map(param => ({
@@ -185,7 +192,7 @@ export default function EndpointRow({
             isLoading={isLoading}
           />
           
-          {requiresAuth && (
+          {requiresAuth && !isAuthenticated && (
             <div className={`text-xs ${authError ? 'text-red-400' : 'text-yellow-400'} mt-1`}>
               {authError 
                 ? 'Authentication required. Please login first.' 

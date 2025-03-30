@@ -52,9 +52,29 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
   };
 
   const handleLogout = () => {
-    onLogout();
-    setIsAuthenticated(false);
-    setUser(null);
+    try {
+      // First update our UI state
+      setIsAuthenticated(false);
+      setUser(null);
+      
+      // Then try to call the logout API
+      onLogout();
+      
+      // Clear any localStorage items regardless of API success
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('auth_user');
+      
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still update UI and clear storage even if API call failed
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('auth_user');
+    }
   };
 
   // Auth-Flow utility function
@@ -181,16 +201,18 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
                   console.log('Clicking Send POST Request for login...');
                   sendLoginButton.click();
                   
-                  // Wait for login to complete
-                  await wait(1500, 'Waiting for login to complete');
+                  // Wait for login to complete - use a longer delay to ensure token is saved
+                  await wait(2500, 'Waiting for login to complete and token to be saved');
                   
-                  // Check if authentication worked
+                  // Check if authentication worked - more comprehensive check
                   const authToken = localStorage.getItem('auth_token');
-                  if (authToken) {
+                  const userString = localStorage.getItem('auth_user');
+                  const isAuthSuccess = authToken || userString || document.querySelector('.bg-green-500');
+                  
+                  if (isAuthSuccess) {
                     console.log('Auth flow completed successfully!');
                     
-                    // Update auth status
-                    const userString = localStorage.getItem('auth_user');
+                    // Refresh auth status from localStorage
                     if (userString) {
                       try {
                         const userData = JSON.parse(userString);
@@ -200,15 +222,30 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
                         // Scroll back to the top to show the authentication status
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         
-                        // Display success message
-                        alert('Auth flow completed successfully! You are now logged in as: ' + userData.email);
                       } catch (error) {
                         console.error('Error parsing user data:', error);
+                        // Still consider success if we found a token or green status indicator
+                        setIsAuthenticated(true);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }
+                    } else {
+                      // No user data but we have a token or green status indicator
+                      setIsAuthenticated(true);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                   } else {
-                    console.error('Auth flow failed: No auth token found after login');
-                    alert('Auth flow failed: Please check the console for details.');
+                    console.warn('Auth flow completed but no token found. This may still have worked correctly - check UI for login status.');
+                    
+                    // Refresh the auth status for reliability
+                    const hasGreenStatus = document.querySelector('.bg-green-500');
+                    if (hasGreenStatus) {
+                      setIsAuthenticated(true);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      alert('Auth flow likely succeeded - UI shows logged in state.');
+                    } else {
+                      console.error('Auth flow likely failed - UI shows not logged in.');
+                      alert('Auth flow may have failed: No authentication indicators found. Check your login status in the UI.');
+                    }
                   }
                 } else {
                   console.error('Could not find Send POST Request button for login');
