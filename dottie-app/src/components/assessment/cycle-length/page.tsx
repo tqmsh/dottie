@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/src/components/ui/!to-migrate/button"
+import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
+import { RadioGroup, RadioGroupItem } from "@/src/components/ui/!to-migrate/radio-group"
+import { Label } from "@/src/components/ui/!to-migrate/label"
 import { ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 
 export default function CycleLengthPage() {

@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { signInSchema, type SignInFormData } from "@/lib/validations/auth";
-import { FormInput } from "@/components/ui/form-input";
-import { Button } from "@/components/ui/button";
+import { FormInput } from "@/src/components/ui/!to-migrate/form-input";
+import { Button } from "@/src/components/ui/!to-migrate/button";
 import { toast } from "sonner";
 import AuthLayout from "@/src/components/AuthLayout";
 

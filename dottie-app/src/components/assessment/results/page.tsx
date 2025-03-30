@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/src/components/ui/!to-migrate/button"
+import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
 import { MessageCircle, Heart, ChevronRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ChatModal } from "@/components/chat-modal"
