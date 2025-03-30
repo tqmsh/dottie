@@ -1,6 +1,6 @@
-import apiClient from './core/apiClient';
-import { isSuccess, isClientError, isServerError } from './core/apiClient';
-import { checkDbConnection, fetchUserData } from './core/db';
+import apiClient from '@core/apiClient';
+import { isSuccess, isClientError, isServerError } from '@core/apiClient';
+import { checkDbConnection, fetchUserData } from '@core/db';
 
 import { authApi, login, signup, logout, refreshToken } from './auth';
 import { type User, type LoginInput, type SignupInput, type AuthResponse } from './auth/types';
@@ -8,6 +8,8 @@ import { type User, type LoginInput, type SignupInput, type AuthResponse } from 
 import { assessmentApi, type Assessment } from './assessment';
 import { chatApi, type ApiMessage, type Conversation, type ChatResponse } from './message';
 import { userApi, type UserProfile, type PasswordResetRequest, type PasswordUpdateRequest } from './user';
+import setupApi from './setup';
+import { type HealthResponse, type DatabaseStatusResponse, type DatabaseHelloResponse } from './setup/types';
 
 // Export all API modules
 export {
@@ -43,7 +45,13 @@ export {
   userApi,
   UserProfile,
   PasswordResetRequest,
-  PasswordUpdateRequest
+  PasswordUpdateRequest,
+  
+  // Setup exports
+  setupApi,
+  HealthResponse,
+  DatabaseStatusResponse,
+  DatabaseHelloResponse
 };
 
 // Default export for convenience
@@ -53,5 +61,6 @@ export default {
   assessment: assessmentApi,
   chat: chatApi,
   user: userApi,
+  setup: setupApi,
   db: { checkDbConnection, fetchUserData }
 }; 

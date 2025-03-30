@@ -1,4 +1,4 @@
-import { apiClient } from "../../../../core/apiClient";
+import { apiClient } from "@core/apiClient";
 import { PasswordResetRequest, PasswordResetCompletion } from "../../types";
 
 /**
@@ -27,6 +27,4 @@ export const completePasswordReset = async (resetData: PasswordResetCompletion):
     console.error('Failed to complete password reset:', error);
     throw error;
   }
-};
-
-export { requestPasswordReset, completePasswordReset }; 
+}; 

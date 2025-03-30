@@ -18,7 +18,9 @@
     "esModuleInterop": true,
     "incremental": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "core/*": ["./src/api/core/*"],
+      "@core/*": ["./src/api/core/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
