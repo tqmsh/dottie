@@ -1,4 +1,4 @@
-import { getList, getById, postSend, putUpdate, delete as deleteAssessment } from "./requests";
+import { getList, getById, postSend, putUpdate, deleteById as deleteAssessment } from "./requests";
 
 // Export types
 export * from "./types";
