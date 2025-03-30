@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { userApi } from '@/src/api/user';
-import { User } from '@/src/api/auth/utils/types';
+import { User } from '@/src/api/auth/types';
 
 interface AccountFormProps {
   user: User;

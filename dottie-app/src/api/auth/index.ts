@@ -1,10 +1,10 @@
-import postLogin from "./requests/postLogin";
-import postSignup from "./requests/postSignup";
-import postLogout from "./requests/postLogout";
-import postRefreshToken from "./requests/postRefreshToken";
+import { postLogin, postSignup, postLogout, postRefreshToken } from "./requests";
 
 // Export types
-export * from "./utils/types";
+export * from "./types";
+
+// Export schemas
+export * from "./schemas";
 
 // Export individual endpoints
 export {

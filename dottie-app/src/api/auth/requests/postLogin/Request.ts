@@ -1,13 +1,13 @@
-import { apiClient } from "../../core/apiClient";
-import { SignupInput, AuthResponse } from "../utils/types";
+import { apiClient } from "../../../core/apiClient";
+import { LoginInput, AuthResponse } from "../../types";
 
 /**
- * Register a new user
- * @endpoint /api/auth/signup (POST)
+ * Login user with credentials
+ * @endpoint /api/auth/login (POST)
  */
-export const postSignup = async (userData: SignupInput): Promise<AuthResponse> => {
+export const postLogin = async (credentials: LoginInput): Promise<AuthResponse> => {
   try {
-    const response = await apiClient.post('/api/auth/signup', userData);
+    const response = await apiClient.post('/api/auth/login', credentials);
     
     // Set the token in localStorage for global access
     if (response.data.token) {
@@ -19,9 +19,9 @@ export const postSignup = async (userData: SignupInput): Promise<AuthResponse> =
     
     return response.data;
   } catch (error) {
-    console.error('Signup failed:', error);
+    console.error('Login failed:', error);
     throw error;
   }
 };
 
-export default postSignup; 
+export default postLogin; 

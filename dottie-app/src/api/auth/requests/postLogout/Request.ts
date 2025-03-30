@@ -1,4 +1,4 @@
-import { apiClient } from "../../core/apiClient";
+import { apiClient } from "../../../core/apiClient";
 
 /**
  * Logout the current user
@@ -26,6 +26,4 @@ export const postLogout = async (): Promise<void> => {
   }
 };
 
-export default postLogout;
-
- 
+export default postLogout; 

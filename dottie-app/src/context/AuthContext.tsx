@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { authApi } from "@/src/api/auth/index";
-import { User, LoginInput, SignupInput } from "@/src/api/auth/utils/types";
+import { User, LoginInput, SignupInput } from "@/src/api/auth/types";
 import { userApi } from "@/src/api/user/index";
 
 interface AuthState {

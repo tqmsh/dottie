@@ -1,5 +1,5 @@
-import { apiClient } from "../../core/apiClient";
-import { AuthResponse } from "../utils/types";
+import { apiClient } from "../../../core/apiClient";
+import { AuthResponse } from "../../types";
 
 /**
  * Refresh authentication token
