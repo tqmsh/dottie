@@ -1,8 +1,4 @@
-import { z } from "zod";
 import { UserSchema } from "./schemas";
-
-// Re-export User from auth
-export { User } from "../../auth/utils/types";
 
 // User Types
 export interface UserProfile {
@@ -28,6 +24,4 @@ export interface PasswordResetCompletion {
   token: string;
   newPassword: string;
   confirmPassword: string;
-}
-
-export type User = z.infer<typeof UserSchema>; 
+} 
