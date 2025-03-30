@@ -1,12 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 
-// Mock axios
-vi.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
-// Mock the axios.create function
-vi.mock('axios', () => {
+// Properly mock axios
+vi.mock('axios', async (importOriginal) => {
   const axiosInstance = {
     get: vi.fn(),
     post: vi.fn(),
@@ -23,15 +19,35 @@ vi.mock('axios', () => {
   };
   
   return {
-    create: vi.fn(() => axiosInstance),
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-    isAxiosError: vi.fn((error) => error?.isAxiosError || false),
-    ...axiosInstance
+    default: {
+      create: vi.fn(() => axiosInstance),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      isAxiosError: vi.fn((error) => error?.isAxiosError || false),
+      ...axiosInstance
+    }
   };
 });
+
+// Type the mocked axios properly
+const mockedAxios = axios as unknown as {
+  create: vi.MockedFunction<typeof axios.create>;
+  get: vi.MockedFunction<typeof axios.get>;
+  post: vi.MockedFunction<typeof axios.post>;
+  put: vi.MockedFunction<typeof axios.put>;
+  delete: vi.MockedFunction<typeof axios.delete>;
+  isAxiosError: vi.MockedFunction<typeof axios.isAxiosError>;
+  interceptors: {
+    request: { use: vi.MockedFunction<any>, eject: vi.MockedFunction<any>, clear: vi.MockedFunction<any> },
+    response: { use: vi.MockedFunction<any>, eject: vi.MockedFunction<any>, clear: vi.MockedFunction<any> }
+  };
+  defaults: {
+    baseURL: string;
+    headers: Record<string, string>;
+  };
+};
 
 describe('API Client Configuration', () => {
   beforeEach(() => {

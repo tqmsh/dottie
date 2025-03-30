@@ -66,7 +66,7 @@ describe('Auth API Requests', () => {
         await axios.post('/api/auth/signup', userData);
         // If we reach here, test should fail because the request should throw an error
         expect(true).toBe(false);
-      } catch (error) {
+      } catch (error: any) {
         expect(mockedAxios.post).toHaveBeenCalledWith('/api/auth/signup', userData);
         expect(error.response.status).toBe(400);
         expect(error.response.data.error).toBe('Email already exists');
@@ -125,7 +125,7 @@ describe('Auth API Requests', () => {
         await axios.post('/api/auth/login', loginData);
         // If we reach here, test should fail because the request should throw an error
         expect(true).toBe(false);
-      } catch (error) {
+      } catch (error: any) {
         expect(mockedAxios.post).toHaveBeenCalledWith('/api/auth/login', loginData);
         expect(error.response.status).toBe(401);
         expect(error.response.data.error).toBe('Invalid email or password');
@@ -169,7 +169,7 @@ describe('Auth API Requests', () => {
         await axios.post('/api/auth/logout');
         // If we reach here, test should fail because the request should throw an error
         expect(true).toBe(false);
-      } catch (error) {
+      } catch (error: any) {
         expect(mockedAxios.post).toHaveBeenCalledWith('/api/auth/logout');
         expect(error.response.status).toBe(401);
         expect(error.response.data.error).toBe('Authentication required');
