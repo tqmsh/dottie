@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { authApi, PasswordResetRequestSchema } from "../auth";
+import { authApi, PasswordResetRequestSchema } from "../../../api/auth";
 import axios from "axios";
 
 // Mock axios

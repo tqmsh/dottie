@@ -1,4 +1,4 @@
-import { api } from "./auth";
+import { api } from "../../api/auth";
 
 export interface Assessment {
   id: string;

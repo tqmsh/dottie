@@ -11,20 +11,20 @@ import WelcomePage from "./LandingPage";
 import { Toaster } from "sonner";
 
 // Import assessment components
-import AgeVerification from "./components/assessment/age-verification/page";
-import CycleLength from "./components/assessment/cycle-length/page";
-import PeriodDuration from "./components/assessment/period-duration/page";
-import FlowLevel from "./components/assessment/flow/page";
-import PainLevel from "./components/assessment/pain/page";
-import Symptoms from "./components/assessment/symptoms/page";
-import Results from "./components/assessment/results/page";
-import ResourcesPage from "./components/assessment/resources/page";
-import HistoryPage from "./components/assessment/history/page";
-import DetailsPage from "./components/assessment/history/[id]/page";
+import AgeVerification from "./pages/assessment/age-verification/page";
+import CycleLength from "./pages/assessment/cycle-length/page";
+import PeriodDuration from "./pages/assessment/period-duration/page";
+import FlowLevel from "./pages/assessment/flow/page";
+import PainLevel from "./pages/assessment/pain/page";
+import Symptoms from "./pages/assessment/symptoms/page";
+import Results from "./pages/assessment/results/page";
+import ResourcesPage from "./pages/assessment/resources/page";
+import HistoryPage from "./pages/assessment/history/page";
+import DetailsPage from "./pages/assessment/history/[id]/page";
 // Import TestPage component
 import TestPage from "./pages/test_page/page";
 import ScrollToTop from "./components/scroll-to-top";
-import LandingPage from "./components/landing-page/page";
+import LandingPage from "./pages/landing-page/page";
 
 function App() {
   return (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button } from '../ui/button';
+import { Button } from '../../components/ui/button';
 import {
   Card,
   CardHeader,
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardContent,
   CardFooter
-} from '../ui/card';
+} from '../../components/ui/card';
 import {
   Form,
   FormControl,
@@ -19,10 +19,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form';
-import { Input } from '../ui/input';
-import { useToast } from '../ui/use-toast';
-import { Alert, AlertDescription } from '../ui/alert';
+} from '../../components/ui/form';
+import { Input } from '../../components/ui/input';
+import { useToast } from '../../components/ui/use-toast';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 import { useAuth } from '../../hooks/useAuth';
 
 const passwordUpdateSchema = z.object({
