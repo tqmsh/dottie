@@ -1,5 +1,8 @@
 import React from 'react';
-import { EndpointTable, EndpointRow } from '../../page-components';
+import { EndpointTable } from '../../page-components';
+import GetSetupHealthHello from './get-setup-health-hello/EndpointRow';
+import GetSetupDatabaseStatus from './get-setup-database-status/EndpointRow';
+import GetSetupDatabaseHello from './get-setup-database-hello/EndpointRow';
 
 /**
  * Container component for setup endpoints
@@ -7,25 +10,9 @@ import { EndpointTable, EndpointRow } from '../../page-components';
 export default function SetupEndpoints() {
   return (
     <EndpointTable title="Setup Endpoints">
-      <EndpointRow 
-        method="GET"
-        endpoint="/api/setup/health/hello"
-        expectedOutput={{ message: "Hello World from Dottie API!" }}
-      />
-      <EndpointRow 
-        method="GET"
-        endpoint="/api/setup/database/status"
-        expectedOutput={{ status: "connected" }}
-      />
-      <EndpointRow 
-        method="GET"
-        endpoint="/api/setup/database/hello"
-        expectedOutput={{ 
-          message: "Hello World from SQLite!", 
-          dbType: "sqlite3", 
-          isConnected: true 
-        }}
-      />
+      <GetSetupHealthHello />
+      <GetSetupDatabaseStatus />
+      <GetSetupDatabaseHello />
     </EndpointTable>
   );
 } 
