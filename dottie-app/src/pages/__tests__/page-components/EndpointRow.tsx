@@ -89,8 +89,25 @@ export default function EndpointRow({
         case 'POST':
           // Special case for logout endpoint
           if (endpoint === '/api/auth/logout') {
-            await authApi.logout();
-            result = { data: { message: "Logged out successfully" } };
+            try {
+              // Clear local storage tokens first
+              localStorage.removeItem("auth_token");
+              localStorage.removeItem("refresh_token");
+              localStorage.removeItem("auth_user");
+              
+              // Try the API call but don't fail if it returns 401
+              try {
+                await apiClient.post(processedEndpoint);
+              } catch (error) {
+                // Ignore 401 errors during logout
+                console.log("Logout API call failed, but local tokens were cleared");
+              }
+              
+              result = { data: { message: "Logged out successfully" } };
+            } catch (error) {
+              console.error("Error during logout:", error);
+              throw error;
+            }
           } else {
             result = await apiClient.post(processedEndpoint, formData || {});
           }
