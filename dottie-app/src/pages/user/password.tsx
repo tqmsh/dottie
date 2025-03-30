@@ -1,5 +1,5 @@
 import React from 'react';
-import { PasswordForm } from '../../pages/user/PasswordUpdateForm';
+import { PasswordForm } from './PasswordUpdateForm';
 
 export default function PasswordPage() {
   // In production, this would come from auth context

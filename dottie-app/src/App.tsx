@@ -5,8 +5,8 @@ import SignUp from "./pages/auth/sign-up";
 import SignOut from "./pages/auth/signout";
 
 // Import account management pages
-import ProfilePage from "./pages/account/profile";
-import PasswordPage from "./pages/account/password";
+import ProfilePage from "./pages/user/profile";
+import PasswordPage from "./pages/user/password";
 import WelcomePage from "./LandingPage";
 import { Toaster } from "sonner";
 
