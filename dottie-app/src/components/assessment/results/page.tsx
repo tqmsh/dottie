@@ -3,7 +3,7 @@ import { Button } from "@/src/components/ui/!to-migrate/button"
 import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
 import { MessageCircle, Heart, ChevronRight } from "lucide-react"
 import { useEffect, useState } from "react"
-import { ChatModal } from "@/components/chat-modal"
+import { ChatModal } from "@/src/components/chat-modal"
 
 
 // Define the types of menstrual patterns as per LogicTree.md
