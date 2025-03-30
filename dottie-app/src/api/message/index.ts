@@ -1,7 +1,9 @@
-import sendMessage from "./send";
-import getHistory from "./getHistory";
-import getConversation from "./getConversation";
-import deleteConversation from "./deleteConversation";
+import {
+  sendMessage,
+  getHistory,
+  getConversation,
+  deleteConversation
+} from "./requests";
 
 // Export types
 export * from "./types";

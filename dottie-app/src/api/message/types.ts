@@ -1,3 +1,4 @@
+// Message API Types
 export interface ApiMessage {
   role: "user" | "assistant";
   content: string;

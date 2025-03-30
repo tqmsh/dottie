@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { signInSchema, type SignInFormData } from "@/lib/validations/auth";
+import { useAuth } from "@/src/context/AuthContext";
+import { signInSchema, type SignInFormData } from "@/src/lib/validations/auth";
 import { FormInput } from "@/src/components/ui/!to-migrate/form-input";
 import { Button } from "@/src/components/ui/!to-migrate/button";
 import { toast } from "sonner";

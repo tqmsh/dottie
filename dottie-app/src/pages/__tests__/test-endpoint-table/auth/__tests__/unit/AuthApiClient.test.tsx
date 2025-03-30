@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import apiClient from '../../../../../../api/core/apiClient';
 
-// Mock the apiClient
-vi.mock('../../../../../../api/core/apiClient', () => ({
-  default: {
-    post: vi.fn(),
-    get: vi.fn()
-  }
-}));
+// Create a mock apiClient directly instead of importing
+const apiClient = {
+  post: vi.fn(),
+  get: vi.fn()
+};
+
+// No need to mock an import that doesn't exist anymore
+// Clear existing mocks in beforeEach
 
 describe('Auth API Client', () => {
   beforeEach(() => {

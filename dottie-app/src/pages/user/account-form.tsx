@@ -1,21 +1,16 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { api } from '@/src/api/auth';
+import { userApi } from '@/src/api/user';
+import { User } from '@/src/api/auth/types';
 
 interface AccountFormProps {
-  user: {
-    id: string;
-    username: string;
-    email: string;
-    name?: string;
-  };
+  user: User;
 }
 
 export default function AccountForm({ user }: AccountFormProps) {
   const [formData, setFormData] = useState({
-    username: user.username || '',
+    name: user.name || '',
     email: user.email || '',
-    // name: user.name || '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +25,7 @@ export default function AccountForm({ user }: AccountFormProps) {
     setIsLoading(true);
 
     try {
-      await api.put('/api/user/me', formData);
+      await userApi.update(user.id, formData);
       toast.success('Account updated successfully');
     } catch (error) {
       console.error('Error updating account:', error);
@@ -50,21 +45,7 @@ export default function AccountForm({ user }: AccountFormProps) {
           type="text"
           id="name"
           name="name"
-          // value={formData.name}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="username" className="block text-sm font-medium">
-          Username
-        </label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value={formData.username}
+          value={formData.name}
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
         />

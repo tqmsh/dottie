@@ -1,8 +1,4 @@
-import getList from "./getList";
-import getById from "./getById";
-import postSend from "./postSend";
-import putUpdate from "./putUpdate";
-import deleteAssessment from "./delete";
+import { getList, getById, postSend, putUpdate, deleteById as deleteAssessment } from "./requests";
 
 // Export types
 export * from "./types";

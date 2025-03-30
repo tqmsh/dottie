@@ -1,19 +1,12 @@
-import { z } from "zod";
-import { UserSchema } from "./schemas";
-
+// User Types
 export interface UserProfile {
   id: string;
+  email: string;
   name: string;
-  email: string;
-  age?: number;
   bio?: string;
-  preferences?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PasswordResetRequest {
-  email: string;
+  avatar?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PasswordUpdateRequest {
@@ -21,4 +14,12 @@ export interface PasswordUpdateRequest {
   newPassword: string;
 }
 
-export type User = z.infer<typeof UserSchema>; 
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetCompletion {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+} 

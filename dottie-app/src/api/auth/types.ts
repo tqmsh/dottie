@@ -1,19 +1,24 @@
-import { z } from "zod";
-import { 
-  LoginSchema, 
-  SignupSchema, 
-  AuthResponseSchema,
-  PasswordUpdateSchema,
-  PasswordResetRequestSchema,
-  PasswordResetCompletionSchema
-} from "./schemas";
-import type { User } from "../user/types";
+// Auth Types
+export interface LoginInput {
+  email: string;
+  password: string;
+}
 
-// Export type definitions
-export type LoginInput = z.infer<typeof LoginSchema>;
-export type SignupInput = z.infer<typeof SignupSchema>;
-export type { User };
-export type AuthResponse = z.infer<typeof AuthResponseSchema>;
-export type PasswordUpdateInput = z.infer<typeof PasswordUpdateSchema>;
-export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestSchema>;
-export type PasswordResetCompletionInput = z.infer<typeof PasswordResetCompletionSchema>; 
+export interface SignupInput extends LoginInput {
+  name: string;
+  confirmPassword: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  refreshToken?: string;
+  user: User;
+} 

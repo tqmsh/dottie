@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { UserSchema } from "../user/schemas";
+
+// Define UserSchema locally rather than importing it
+export const UserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+});
 
 // Zod schemas for validation
 export const LoginSchema = z.object({
