@@ -131,7 +131,7 @@ export const authApi = {
   // Signup
   signup: async (userData: SignupInput): Promise<User> => {
     try {
-      const response = await axios.post<User>(
+      const response = await api.post<User>(
         "/api/auth/signup",
         userData
       );
