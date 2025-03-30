@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { EndpointRow as BaseEndpointRow } from '../../../page-components';
 
 export default function EndpointRow() {
-  const [randomCredentials, setRandomCredentials] = useState<{ email: string, password: string, name: string } | null>(null);
+  const [randomCredentials, setRandomCredentials] = useState<{ email: string, password: string, username: string } | null>(null);
 
   const generateRandomCredentials = () => {
     // Create a more robust random string
@@ -14,10 +14,10 @@ export default function EndpointRow() {
     const password = `Pass${randomString}${Math.floor(Math.random() * 1000)}!`;
     
     // Create a proper name
-    const name = `Test User ${randomString.slice(0,3).toUpperCase()}`;
+    const username = `TestUser${randomString.slice(0,3).toUpperCase()}`;
     
-    setRandomCredentials({ email, password, name });
-    return { email, password, name };
+    setRandomCredentials({ email, password, username });
+    return { email, password, username };
   };
 
   return (
@@ -51,12 +51,12 @@ export default function EndpointRow() {
             defaultValue: randomCredentials?.password || ""
           },
           {
-            name: "name",
-            label: "Name",
+            name: "username",
+            label: "Username",
             type: "text",
             required: true,
-            placeholder: "Your name",
-            defaultValue: randomCredentials?.name || ""
+            placeholder: "Your username",
+            defaultValue: randomCredentials?.username || ""
           }
         ]}
       />
@@ -75,7 +75,7 @@ export default function EndpointRow() {
               <div className="ml-4 p-2 bg-gray-800 rounded text-xs">
                 <div>Email: <span className="text-green-400">{randomCredentials.email}</span></div>
                 <div>Password: <span className="text-green-400">{randomCredentials.password}</span></div>
-                <div>Name: <span className="text-green-400">{randomCredentials.name}</span></div>
+                <div>Username: <span className="text-green-400">{randomCredentials.username}</span></div>
               </div>
             )}
           </div>
