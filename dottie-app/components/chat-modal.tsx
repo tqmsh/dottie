@@ -1,8 +1,8 @@
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/!to-migrate/dialog"
+import { Button } from "@/src/components/ui/!to-migrate/button"
+import { Input } from "@/src/components/ui/!to-migrate/input"
+import { ScrollArea } from "@/src/components/ui/!to-migrate/scroll-area"
 import { Send, Loader2, X } from "lucide-react"
 import { getAIFeedback } from "@/src/services/ai"
 

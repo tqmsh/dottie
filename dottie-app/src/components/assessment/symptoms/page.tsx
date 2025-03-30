@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/src/components/ui/!to-migrate/button"
+import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
+import { Checkbox } from "@/src/components/ui/!to-migrate/checkbox"
+import { Input } from "@/src/components/ui/!to-migrate/input"
 import { ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
 
 export default function SymptomsPage() {
