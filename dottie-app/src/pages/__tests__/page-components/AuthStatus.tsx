@@ -306,19 +306,24 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
           )}
           
           {/* Auth-Flow utility button */}
-          <button
-            onClick={runAuthFlow}
-            disabled={isFlowRunning}
-            className={`px-4 py-2 text-white rounded-md transition-colors ${
-              isFlowRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            }`}
-            title="Utility: generates random user and signs in"
-          >
-            {isFlowRunning ? 'Running...' : 'Auth-Flow'}
-            {isFlowRunning && (
-              <span className="ml-2 inline-block animate-spin">⟳</span>
-            )}
-          </button>
+          <div className="px-14 relative">
+            <button
+              onClick={runAuthFlow}
+              disabled={isFlowRunning}
+              className={`px-4 py-2 text-white rounded-md transition-colors ${
+                isFlowRunning ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+              }`}
+              title="Utility: generates random user and signs in"
+            >
+              {isFlowRunning ? 'Running...' : 'Auth-Flow'}
+              {isFlowRunning && (
+                <span className="ml-2 inline-block animate-spin">⟳</span>
+              )}
+            </button>
+            <div className="text-xs text-gray-300 mt-1 absolute md:relative md:mt-2">
+              Click to quickly signup and login with a random user
+            </div>
+          </div>
         </div>
       </div>
       
