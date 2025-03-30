@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { InputForm } from './index';
+import { LoginInput } from '../../../api/auth/types';
 
 interface AuthStatusProps {
-  onLogin: (credentials: { email: string; password: string }) => Promise<void>;
+  onLogin: (credentials: LoginInput) => Promise<void>;
   onLogout: () => void;
 }
 

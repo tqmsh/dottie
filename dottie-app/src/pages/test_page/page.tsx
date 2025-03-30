@@ -7,9 +7,9 @@ import {
   AssessmentEndpoints,
   UserEndpoints,
   ChatEndpoints
-} from './endpoints';
+} from './tables';
 import { AuthStatus } from './page-components';
-import { authService } from '../../../api/auth';
+import { authService } from '../../api/auth';
 
 export default function TestPage() {
   const environment = process.env.NODE_ENV || 'development';
