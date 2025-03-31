@@ -6,7 +6,15 @@ import { apiClient } from "../../../core/apiClient";
  */
 export const postLogout = async (): Promise<void> => {
   try {
-    await apiClient.post('/api/auth/logout');
+    // Get the current token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    // Make sure to include the token in the request
+    await apiClient.post('/api/auth/logout', {}, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : ''
+      }
+    });
     
     // Remove token from localStorage
     localStorage.removeItem('authToken');

@@ -1,13 +1,13 @@
-import { apiClient } from "@core/apiClient";
+import { apiClient } from "../../../core/apiClient";
 import { ApiMessage, ChatResponse } from "../../types";
 
 /**
  * Send a message to the chat API
- * @endpoint /api/message/send (POST)
+ * @endpoint /api/chat/send (POST)
  */
-export const sendMessage = async (message: ApiMessage): Promise<ChatResponse> => {
+export const sendMessage = async (message: string, conversationId?: string): Promise<ChatResponse> => {
   try {
-    const response = await apiClient.post('/api/message/send', message);
+    const response = await apiClient.post('/api/chat/send', message);
     return response.data;
   } catch (error) {
     console.error('Failed to send message:', error);

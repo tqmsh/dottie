@@ -1,5 +1,5 @@
 import { GetDatabaseHelloResponse } from './types';
-import apiClient from '@core/apiClient';
+import apiClient from '../../../core/apiClient';
 
 /**
  * Database hello endpoint to verify connection

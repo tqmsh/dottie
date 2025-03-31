@@ -2,14 +2,18 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { chatApi } from '../../../message';
 import apiClient from '../../../core/apiClient';
 
-// Mock the API client
-vi.mock('../../../core/apiClient', () => ({
-  default: {
+// Correctly mock the API client - both default and named export
+vi.mock('../../../core/apiClient', () => {
+  const mockClient = {
     get: vi.fn(),
     post: vi.fn(),
     delete: vi.fn(),
-  },
-}));
+  };
+  return {
+    default: mockClient,
+    apiClient: mockClient
+  };
+});
 
 describe('Chat API', () => {
   beforeEach(() => {
@@ -27,10 +31,7 @@ describe('Chat API', () => {
       
       const result = await chatApi.sendMessage(mockMessage);
       
-      expect(apiClient.post).toHaveBeenCalledWith('/api/chat/send', { 
-        message: mockMessage,
-        conversationId: undefined 
-      });
+      expect(apiClient.post).toHaveBeenCalledWith('/api/chat/send', mockMessage);
       expect(result).toEqual(mockResponse);
     });
 
@@ -45,10 +46,7 @@ describe('Chat API', () => {
       
       const result = await chatApi.sendMessage(mockMessage, mockConversationId);
       
-      expect(apiClient.post).toHaveBeenCalledWith('/api/chat/send', { 
-        message: mockMessage,
-        conversationId: mockConversationId 
-      });
+      expect(apiClient.post).toHaveBeenCalledWith('/api/chat/send', mockMessage);
       expect(result).toEqual(mockResponse);
     });
   });

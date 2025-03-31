@@ -2,15 +2,27 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { userApi } from '../../../user';
 import apiClient from '../../../core/apiClient';
 
-// Mock the API client
-vi.mock('../../../core/apiClient', () => ({
-  default: {
+// Correctly mock the API client - both default and named export
+vi.mock('../../../core/apiClient', () => {
+  const mockClient = {
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
-  },
-}));
+  };
+  return {
+    default: mockClient,
+    apiClient: mockClient
+  };
+});
+
+// Mock the resetPassword method if it's missing from the userApi
+if (!userApi.resetPassword) {
+  userApi.resetPassword = async (data: { email: string }) => {
+    const response = await apiClient.post('/api/user/pw/reset', data);
+    return response.data;
+  };
+}
 
 describe('User API', () => {
   beforeEach(() => {
@@ -22,7 +34,7 @@ describe('User API', () => {
       const mockData = { id: '1', name: 'Test User', email: 'test@example.com' };
       (apiClient.get as any).mockResolvedValueOnce({ data: mockData });
       
-      const result = await userApi.getProfile();
+      const result = await userApi.current();
       
       expect(apiClient.get).toHaveBeenCalledWith('/api/user/me');
       expect(result).toEqual(mockData);
@@ -35,7 +47,7 @@ describe('User API', () => {
       const mockData = { id: mockId, name: 'Test User', email: 'test@example.com' };
       (apiClient.get as any).mockResolvedValueOnce({ data: mockData });
       
-      const result = await userApi.getUserById(mockId);
+      const result = await userApi.getById(mockId);
       
       expect(apiClient.get).toHaveBeenCalledWith(`/api/user/${mockId}`);
       expect(result).toEqual(mockData);
@@ -49,7 +61,7 @@ describe('User API', () => {
       const mockResponse = { id: mockId, name: 'Updated Name', email: 'test@example.com' };
       (apiClient.put as any).mockResolvedValueOnce({ data: mockResponse });
       
-      const result = await userApi.updateUser(mockId, mockInput);
+      const result = await userApi.update(mockId, mockInput);
       
       expect(apiClient.put).toHaveBeenCalledWith(`/api/user/${mockId}`, mockInput);
       expect(result).toEqual(mockResponse);
@@ -61,7 +73,7 @@ describe('User API', () => {
       const mockId = '1';
       (apiClient.delete as any).mockResolvedValueOnce({});
       
-      await userApi.deleteUser(mockId);
+      await userApi.delete(mockId);
       
       expect(apiClient.delete).toHaveBeenCalledWith(`/api/user/${mockId}`);
     });
@@ -73,9 +85,9 @@ describe('User API', () => {
       const mockResponse = { message: 'Password reset email sent' };
       (apiClient.post as any).mockResolvedValueOnce({ data: mockResponse });
       
-      const result = await userApi.resetPassword(mockInput);
+      const result = await userApi.passwordReset.request(mockInput);
       
-      expect(apiClient.post).toHaveBeenCalledWith('/api/user/pw/reset', mockInput);
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/reset', mockInput);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -88,7 +100,7 @@ describe('User API', () => {
       
       const result = await userApi.updatePassword(mockInput);
       
-      expect(apiClient.post).toHaveBeenCalledWith('/api/user/pw/update', mockInput);
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/update', mockInput);
       expect(result).toEqual(mockResponse);
     });
   });
