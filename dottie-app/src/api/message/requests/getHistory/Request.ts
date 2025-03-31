@@ -1,13 +1,13 @@
-import { apiClient } from "@core/apiClient";
+import { apiClient } from "../../../core/apiClient";
 import { Conversation } from "../../types";
 
 /**
- * Get chat conversation history
- * @endpoint /api/message/history (GET)
+ * Get chat history for authenticated user
+ * @endpoint /api/chat/history (GET)
  */
 export const getHistory = async (): Promise<Conversation[]> => {
   try {
-    const response = await apiClient.get('/api/message/history');
+    const response = await apiClient.get('/api/chat/history');
     return response.data;
   } catch (error) {
     console.error('Failed to get message history:', error);

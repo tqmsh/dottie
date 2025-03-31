@@ -1,15 +1,19 @@
-import { expect, describe, it, vi, beforeEach, afterEach } from 'vitest';
-import { apiClient } from '../../../../core/apiClient';
+import { expect, describe, it, vi, beforeEach } from 'vitest';
+import { apiClient } from '../../../core/apiClient';
 import { getHealthHello } from '../../requests/getHealthHello';
 import { getDatabaseStatus } from '../../requests/getDatabaseStatus';
 import { getDatabaseHello } from '../../requests/getDatabaseHello';
 
-// Mock the apiClient
-vi.mock('../../../../core/apiClient', () => ({
-  apiClient: {
+// Mock the apiClient with proper path and mocking syntax
+vi.mock('../../../core/apiClient', () => {
+  const mockClient = {
     get: vi.fn()
-  }
-}));
+  };
+  return {
+    default: mockClient,
+    apiClient: mockClient
+  };
+});
 
 describe('Setup API', () => {
   const mockResponse = { data: {} };

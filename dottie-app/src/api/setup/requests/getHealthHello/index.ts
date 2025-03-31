@@ -1,5 +1,5 @@
 import { HealthHelloResponse } from './types';
-import apiClient from '@core/apiClient';
+import apiClient from '../../../core/apiClient';
 
 /**
  * Health check endpoint for setup

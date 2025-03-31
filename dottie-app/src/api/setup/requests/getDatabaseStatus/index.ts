@@ -1,5 +1,5 @@
 import { GetDatabaseStatusResponse } from './types';
-import apiClient from '@core/apiClient';
+import apiClient from '../../../core/apiClient';
 
 /**
  * Database status check endpoint
