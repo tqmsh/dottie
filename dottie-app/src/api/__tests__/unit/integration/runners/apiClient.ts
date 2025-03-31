@@ -4,7 +4,7 @@
  * This module wraps axios with interceptors to automatically handle
  * authentication token management
  */
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 // Create axios instance
 export const api: AxiosInstance = axios.create({
@@ -19,7 +19,7 @@ export const api: AxiosInstance = axios.create({
 let authToken: string | null = null;
 
 // Interceptor to add auth token to requests
-api.interceptors.request.use((config: AxiosRequestConfig) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // Add token to Authorization header if available
   if (authToken && config.headers) {
     config.headers.Authorization = `Bearer ${authToken}`;
