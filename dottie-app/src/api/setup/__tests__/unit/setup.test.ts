@@ -1,12 +1,12 @@
 import { expect, describe, it, vi, beforeEach, afterEach } from 'vitest';
-import apiClient from '../../../../core/apiClient';
+import { apiClient } from '../../../../core/apiClient';
 import { getHealthHello } from '../../requests/getHealthHello';
 import { getDatabaseStatus } from '../../requests/getDatabaseStatus';
 import { getDatabaseHello } from '../../requests/getDatabaseHello';
 
 // Mock the apiClient
 vi.mock('../../../../core/apiClient', () => ({
-  default: {
+  apiClient: {
     get: vi.fn()
   }
 }));

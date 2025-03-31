@@ -16,7 +16,7 @@ vi.mock('../../../../../core/apiClient', () => ({
 
 // Mock localStorage
 vi.stubGlobal('localStorage', {
-  getItem: vi.fn(),
+  getItem: vi.fn().mockReturnValue('mock-token'),
   setItem: vi.fn(),
   removeItem: vi.fn()
 });
@@ -39,7 +39,11 @@ describe('postLogout', () => {
     await postLogout();
 
     // Verify
-    expect(apiClient.post).toHaveBeenCalledWith('/api/auth/logout');
+    expect(apiClient.post).toHaveBeenCalledWith('/api/auth/logout', {}, {
+      headers: {
+        Authorization: 'Bearer mock-token'
+      }
+    });
   });
 
   it('should remove the token from localStorage and clear the Authorization header', async () => {
