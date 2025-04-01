@@ -7,12 +7,11 @@ export default function EndpointRow() {
   // Use our centralized auth hook
   const { authToken, refreshToken, authTokenExists, refreshTokenExists } = useAuth();
   
-  // This is purely a frontend operation that checks the status of auth tokens in localStorage
   return (
     <div>
       <BaseEndpointRow 
         method="GET"
-        endpoint="/api/auth/verify"
+        endpoint="(Frontend) /auth/token-verification"
         expectedOutput={{ 
           success: true,
           authTokenExists: true,
@@ -24,6 +23,9 @@ export default function EndpointRow() {
       />
       
       <div className="px-4 py-2 mt-2">
+        <div className="text-sm font-medium text-amber-500 mb-2">
+          Frontend Operation Only (useAuth Hook + Context)
+        </div>
         <div className="text-sm text-gray-300 mb-2">Current Token Status:</div>
         <ApiResponse
           data={{
