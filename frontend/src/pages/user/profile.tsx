@@ -1,4 +1,4 @@
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/src/context/AuthContext';
 import AccountLayout from './account-layout';
 import AccountForm from './account-form';
 

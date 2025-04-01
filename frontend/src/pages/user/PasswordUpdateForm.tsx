@@ -23,7 +23,7 @@ import {
 import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/use-toast';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '@/src/hooks/use-auth';
 
 const passwordUpdateSchema = z.object({
   currentPassword: z.string().min(8, {
