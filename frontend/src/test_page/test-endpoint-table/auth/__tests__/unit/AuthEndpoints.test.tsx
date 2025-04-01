@@ -18,14 +18,9 @@ describe('AuthEndpoints', () => {
     const postElements = screen.getAllByText('POST', { selector: 'span.font-bold' });
     expect(postElements.length).toBe(3); // There should be 3 POST methods
     
-    // Check if GET method for token verification is rendered
-    const getElement = screen.getByText('GET', { selector: 'span.font-bold' });
-    expect(getElement).toBeInTheDocument();
-    
     expect(screen.getByText('/api/auth/signup')).toBeInTheDocument();
     expect(screen.getByText('/api/auth/login')).toBeInTheDocument();
     expect(screen.getByText('/api/auth/logout')).toBeInTheDocument();
-    expect(screen.getByText('(Frontend) /auth/token-verification')).toBeInTheDocument();
   });
 
   it('renders signup endpoint with correct expected output', () => {
@@ -64,24 +59,6 @@ describe('AuthEndpoints', () => {
     expect(loginOutput?.textContent).toContain('"email": "user@example.com"');
   });
 
-  it('renders token verification endpoint', () => {
-    render(<AuthEndpoints />);
-    
-    // Find the token verification button
-    const verifyButton = screen.getByTestId('test-get -frontend-auth-token-verification-button');
-    expect(verifyButton).toBeInTheDocument();
-    
-    // Find the closest tr element to the button
-    const verifyRow = verifyButton.closest('tr');
-    expect(verifyRow).toBeInTheDocument();
-    
-    // Check the expected output contains token-related fields
-    const verifyOutput = verifyRow?.querySelector('pre');
-    expect(verifyOutput?.textContent).toContain('"success": true');
-    expect(verifyOutput?.textContent).toContain('"authTokenExists": true');
-    expect(verifyOutput?.textContent).toContain('"refreshTokenExists": true');
-  });
-
   it('renders logout endpoint with authentication requirement', () => {
     render(<AuthEndpoints />);
     
@@ -95,11 +72,9 @@ describe('AuthEndpoints', () => {
     const signupButton = screen.getByTestId('test-post -api-auth-signup-button');
     const loginButton = screen.getByTestId('test-post -api-auth-login-button');
     const logoutButton = screen.getByTestId('test-post -api-auth-logout-button');
-    const verifyButton = screen.getByTestId('test-get -frontend-auth-token-verification-button');
     
     expect(signupButton).toBeInTheDocument();
     expect(loginButton).toBeInTheDocument();
     expect(logoutButton).toBeInTheDocument();
-    expect(verifyButton).toBeInTheDocument();
   });
 }); 

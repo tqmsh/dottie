@@ -3,7 +3,6 @@ import { EndpointTable } from '../../page-components';
 import PostAuthSignup from './post-auth-signup/EndpointRow';
 import PostAuthLogin from './post-auth-login/EndpointRow';
 import PostAuthLogout from './post-auth-logout/EndpointRow';
-import GetVerifyAuthToken from './get-verify-authtoken/EndpointRow';
 
 /**
  * Container component for authentication endpoints
@@ -13,7 +12,6 @@ export default function AuthEndpoints() {
     <EndpointTable title="Authentication Endpoints">
       <PostAuthSignup />
       <PostAuthLogin />
-      <GetVerifyAuthToken />
       <PostAuthLogout />
     </EndpointTable>
   );

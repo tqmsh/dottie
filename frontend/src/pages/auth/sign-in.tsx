@@ -47,6 +47,26 @@ export default function SignInPage() {
     try {
       await login(data);
       toast.success("Successfully signed in!");
+      
+      // Debug: Log authentication token and user data
+      console.log('[Auth Debug] After login - localStorage items:', {
+        auth_token: localStorage.getItem('auth_token'),
+        authToken: localStorage.getItem('authToken'),
+        refresh_token: localStorage.getItem('refresh_token'),
+        user: localStorage.getItem('user'),
+        auth_user: localStorage.getItem('auth_user')
+      });
+      
+      // Log context values
+      setTimeout(() => {
+        // Log with a small delay to ensure context is updated
+        const authContext = useAuth();
+        console.log('[Auth Debug] Auth context after login:', {
+          isAuthenticated: authContext.isAuthenticated,
+          user: authContext.user
+        });
+      }, 100);
+      
       navigate("/assessment");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign in");

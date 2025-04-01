@@ -30,6 +30,11 @@ const getStoredAuthData = (): { user: User | null; token: string | null } => {
   const userStr = localStorage.getItem("auth_user");
   const token = localStorage.getItem("auth_token");
 
+  console.log('[AuthContext Debug] Getting stored auth data:', {
+    hasUserStr: !!userStr,
+    hasToken: !!token
+  });
+
   return {
     user: userStr ? JSON.parse(userStr) : null,
     token,
@@ -47,22 +52,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state from storage
   useEffect(() => {
     const initializeAuth = async () => {
+      console.log('[AuthContext Debug] Initializing auth state');
       const { user, token } = getStoredAuthData();
 
       if (user && token) {
+        console.log('[AuthContext Debug] Found existing user and token');
         // Verify token validity by fetching current user
         try {
           const currentUser = await userApi.current();
+          console.log('[AuthContext Debug] Current user validated:', currentUser.id);
           setState({
             user: currentUser,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
+          console.log('[AuthContext Debug] Auth state updated - user authenticated');
         } catch (error) {
+          console.log('[AuthContext Debug] Error validating current user:', error);
           setState((prev) => ({ ...prev, isLoading: false }));
         }
       } else {
+        console.log('[AuthContext Debug] No valid user/token found');
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     };
@@ -96,11 +107,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginInput) => {
     try {
+      console.log('[AuthContext Debug] Login attempt with:', credentials.email);
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
       const { user, token } = await authApi.login(credentials);
+      console.log('[AuthContext Debug] Login successful, received token and user:', {
+        userId: user.id,
+        hasToken: !!token
+      });
 
       localStorage.setItem("auth_user", JSON.stringify(user));
       localStorage.setItem("auth_token", token as string);
+      console.log('[AuthContext Debug] Saved user and token to localStorage');
 
       setState({
         user,
@@ -108,7 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: false,
         error: null,
       });
+      console.log('[AuthContext Debug] Updated auth state to authenticated');
     } catch (error) {
+      console.error('[AuthContext Debug] Login error:', error);
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -120,8 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (userData: SignupInput): Promise<any> => {
     try {
+      console.log('[AuthContext Debug] Signup attempt');
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
       const response = await authApi.signup(userData);
+      console.log('[AuthContext Debug] Signup successful');
 
       setState((prev) => ({
         ...prev,
@@ -131,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return response.user;
     } catch (error) {
+      console.error('[AuthContext Debug] Signup error:', error);
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -142,18 +164,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      console.log('[AuthContext Debug] Logout attempt');
       await authApi.logout();
+      console.log('[AuthContext Debug] Logout API call successful');
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("[AuthContext Debug] Logout error:", error);
     } finally {
       localStorage.removeItem("auth_user");
       localStorage.removeItem("auth_token");
+      console.log('[AuthContext Debug] Removed user and token from localStorage');
+      
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
         error: null,
       });
+      console.log('[AuthContext Debug] Reset auth state');
     }
   };
 
