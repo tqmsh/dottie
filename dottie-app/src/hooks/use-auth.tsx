@@ -2,21 +2,42 @@
 
 import { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
 
+// Define user interface
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+}
+
 // Define the context interface
 interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
   authToken: string | null;
   refreshToken: string | null;
   authTokenExists: boolean;
   refreshTokenExists: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  logout: () => void;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   checkTokens: () => void; // Expose to make testing easier
 }
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: false,
+  error: null,
   authToken: null,
   refreshToken: null,
   authTokenExists: false,
   refreshTokenExists: false,
+  isAuthenticated: false,
+  login: async () => ({ id: '', email: '' }),
+  logout: () => {},
+  updatePassword: async () => false,
   checkTokens: () => {} // Default implementation
 });
 
@@ -26,6 +47,9 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [authTokenExists, setAuthTokenExists] = useState<boolean>(false);
@@ -42,19 +66,48 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setRefreshTokenExists(!!currentRefreshToken);
   }, []);
 
+  // Function to validate and retrieve user information
+  const validateToken = useCallback(async () => {
+    try {
+      setLoading(true);
+      const currentAuthToken = localStorage.getItem('auth_token');
+      
+      if (currentAuthToken) {
+        // In a real app, make an API call to validate the token
+        // For now, try to load user from localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to validate token'));
+      // Clear invalid tokens
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     // Initial check for tokens
     checkTokens();
+    validateToken();
     
     // Set up event listeners
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'auth_token' || event.key === 'refresh_token' || event.key === null) {
+      if (event.key === 'auth_token' || event.key === 'refresh_token' || event.key === 'user' || event.key === null) {
         checkTokens();
+        validateToken();
       }
     };
     
     const handleAuthTokenChanged = () => {
       checkTokens();
+      validateToken();
     };
     
     // Add event listeners
@@ -66,13 +119,77 @@ export function AuthProvider({ children }: AuthProviderProps) {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth_token_changed', handleAuthTokenChanged);
     };
-  }, [checkTokens]);
+  }, [checkTokens, validateToken]);
+
+  const login = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      
+      // This would be an API call in a real app
+      // For demo, we'll just simulate a successful login
+      const user = { id: '123', email };
+      
+      // Store tokens and user info
+      localStorage.setItem('auth_token', 'demo-auth-token-' + Date.now());
+      localStorage.setItem('refresh_token', 'demo-refresh-token-' + Date.now());
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Update state
+      setUser(user);
+      checkTokens();
+      
+      // Dispatch event to notify other tabs
+      window.dispatchEvent(new Event('auth_token_changed'));
+      
+      return user;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to login'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    // Clear storage
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    
+    // Update state
+    setUser(null);
+    checkTokens();
+    
+    // Dispatch event to notify other tabs
+    window.dispatchEvent(new Event('auth_token_changed'));
+  };
+
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      setLoading(true);
+      // This would be an API call in a real app
+      // Mock successful password update
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to update password'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const value = {
+    user,
+    loading,
+    error,
     authToken,
     refreshToken,
     authTokenExists,
     refreshTokenExists,
+    isAuthenticated: !!user && !!authToken,
+    login,
+    logout,
+    updatePassword,
     checkTokens // Expose to make testing easier
   };
 
