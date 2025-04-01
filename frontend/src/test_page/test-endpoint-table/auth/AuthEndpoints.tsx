@@ -11,9 +11,9 @@ import GetVerifyAuthToken from './get-verify-authtoken/EndpointRow';
 export default function AuthEndpoints() {
   return (
     <EndpointTable title="Authentication Endpoints">
-      <GetVerifyAuthToken />
       <PostAuthSignup />
       <PostAuthLogin />
+      <GetVerifyAuthToken />
       <PostAuthLogout />
     </EndpointTable>
   );
