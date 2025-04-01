@@ -11,17 +11,86 @@ const apiClient = axios.create({
   },
 });
 
-// Add request interceptor to include auth token from localStorage
+// In-memory backup storage in case localStorage is not available or blocked
+const tokenStorage = {
+  authToken: null as string | null,
+  refreshToken: null as string | null,
+};
+
+// Initialize headers from localStorage if available
+try {
+  const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+  if (token) {
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('[API Client] Initialized with token from localStorage');
+  } else {
+    console.log('[API Client] No token found in localStorage during initialization');
+  }
+} catch (error) {
+  console.error('[API Client] Error accessing localStorage:', error);
+}
+
+// Add a request interceptor to always try to include the latest token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      // Try to get token from localStorage first
+      let token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+      
+      // Fall back to in-memory storage if needed
+      if (!token && tokenStorage.authToken) {
+        token = tokenStorage.authToken;
+        console.log('[API Client] Using in-memory token fallback');
+      }
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('[API Client] Error in request interceptor:', error);
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
+
+// Helper functions to set tokens that handle localStorage errors
+export const setAuthToken = (token: string) => {
+  if (!token) return;
+  
+  // Store in memory first as backup
+  tokenStorage.authToken = token;
+  
+  // Try localStorage but don't break if it fails
+  try {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('authToken', token);
+    console.log('[API Client] Auth token stored successfully');
+  } catch (e) {
+    console.error('[API Client] Could not store token in localStorage:', e);
+  }
+  
+  // Set for future API requests
+  apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+};
+
+export const setRefreshToken = (token: string) => {
+  if (!token) return;
+  
+  // Store in memory as backup
+  tokenStorage.refreshToken = token;
+  
+  // Try localStorage but don't break if it fails
+  try {
+    localStorage.setItem('refresh_token', token);
+    localStorage.setItem('refreshToken', token);
+    console.log('[API Client] Refresh token stored successfully');
+  } catch (e) {
+    console.error('[API Client] Could not store refresh token in localStorage:', e);
+  }
+};
 
 // Add response interceptor for common error handling
 apiClient.interceptors.response.use(

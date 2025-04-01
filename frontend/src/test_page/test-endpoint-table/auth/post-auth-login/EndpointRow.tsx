@@ -10,8 +10,19 @@ let authApi: any = {
     
     // Try to access localStorage safely (for tests and SSR environments)
     try {
-      authToken = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      refreshToken = typeof localStorage !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+      // Check for both token naming conventions
+      authToken = typeof localStorage !== 'undefined' ? 
+        localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
+      
+      refreshToken = typeof localStorage !== 'undefined' ? 
+        localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
+      
+      console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
+        auth_token: localStorage.getItem('auth_token'),
+        authToken: localStorage.getItem('authToken'),
+        refreshToken: localStorage.getItem('refreshToken'),
+        refresh_token: localStorage.getItem('refresh_token')
+      });
     } catch (e) {
       console.warn('LocalStorage not available, using mock values');
     }
@@ -38,8 +49,19 @@ try {
       let refreshToken = null;
       
       try {
-        authToken = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        refreshToken = typeof localStorage !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+        // Check for both token naming conventions
+        authToken = typeof localStorage !== 'undefined' ? 
+          localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
+        
+        refreshToken = typeof localStorage !== 'undefined' ? 
+          localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
+        
+        console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
+          auth_token: localStorage.getItem('auth_token'),
+          authToken: localStorage.getItem('authToken'),
+          refreshToken: localStorage.getItem('refreshToken'),
+          refresh_token: localStorage.getItem('refresh_token')
+        });
       } catch (e) {
         console.warn('LocalStorage not available, using mock values');
       }
@@ -64,6 +86,7 @@ export default function EndpointRow() {
   const [verificationResponse, setVerificationResponse] = useState<any>(null);
   const [verifyStatus, setVerifyStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [manualTokenCreated, setManualTokenCreated] = useState(false);
 
   // Check for any stored credentials when component loads
   useEffect(() => {
@@ -98,17 +121,115 @@ export default function EndpointRow() {
     }
   };
 
+  const handleCreateTestToken = () => {
+    try {
+      const testToken = 'test-auth-token-' + Date.now();
+      localStorage.setItem('auth_token', testToken);
+      localStorage.setItem('authToken', testToken);
+      
+      const testRefreshToken = 'test-refresh-token-' + Date.now();
+      localStorage.setItem('refresh_token', testRefreshToken);
+      localStorage.setItem('refreshToken', testRefreshToken);
+      
+      console.log('[Manual Token] Created test tokens:', {
+        auth_token: testToken.substring(0, 10) + '...',
+        refresh_token: testRefreshToken.substring(0, 10) + '...',
+      });
+      
+      // Verify storage was successful
+      console.log('[Manual Token] Verification after setting:', {
+        auth_token: localStorage.getItem('auth_token'),
+        authToken: localStorage.getItem('authToken'),
+        refresh_token: localStorage.getItem('refresh_token'),
+        refreshToken: localStorage.getItem('refreshToken')
+      });
+      
+      setManualTokenCreated(true);
+      
+      // Try to dispatch the token changed event
+      window.dispatchEvent(new Event('auth_token_changed'));
+      
+    } catch (error) {
+      console.error('[Manual Token] Error creating test tokens:', error);
+    }
+  };
+
   const handleVerifyToken = () => {
     try {
       setIsVerifying(true);
-      // This is frontend-only, no actual API call
-      const response = authApi.verifyToken();
-      setVerificationResponse(response.data);
-      setVerifyStatus('success');
+      
+      // Add a delay and multiple verification attempts to handle timing issues
+      console.log('[Token Verification] Starting token verification with retries');
+      
+      // Try verification up to 3 times with a delay between attempts
+      let attempts = 0;
+      const maxAttempts = 3;
+      const delay = 800; // ms
+      
+      // First try to forcefully set a token to test if localStorage is working
+      try {
+        console.log('[Token Verification] Testing localStorage access by setting a test token');
+        localStorage.setItem('test_token', 'test-value-' + Date.now());
+        const testValue = localStorage.getItem('test_token');
+        console.log('[Token Verification] Test localStorage write/read result:', {
+          testValue,
+          success: !!testValue
+        });
+        
+        // List all keys in localStorage for debugging
+        console.log('[Token Verification] All localStorage keys:', Object.keys(localStorage));
+        
+        // Check if localStorage is being blocked or cleared
+        if (!testValue) {
+          console.error('[Token Verification] ERROR: localStorage test failed - cannot read/write to localStorage');
+        }
+      } catch (e) {
+        console.error('[Token Verification] ERROR accessing localStorage:', e);
+      }
+      
+      const attemptVerification = () => {
+        attempts++;
+        console.log(`[Token Verification] Attempt ${attempts} of ${maxAttempts}`);
+        
+        // This is frontend-only, no actual API call
+        const response = authApi.verifyToken();
+        
+        if (response.data.authTokenExists || attempts >= maxAttempts) {
+          // Success or max attempts reached
+          setVerificationResponse(response.data);
+          setVerifyStatus(response.data.authTokenExists ? 'success' : 'error');
+          setIsVerifying(false);
+          console.log('[Token Verification] Final result:', response.data);
+          
+          if (!response.data.authTokenExists) {
+            // If verification failed at the end, add a direct token for debugging
+            try {
+              console.log('[Token Verification] Last resort: Adding a direct test token');
+              localStorage.setItem('auth_token', 'direct-test-token-' + Date.now());
+              localStorage.setItem('authToken', 'direct-test-token-' + Date.now());
+              
+              // Check if direct token was set
+              console.log('[Token Verification] Direct token test:', {
+                auth_token: localStorage.getItem('auth_token'),
+                authToken: localStorage.getItem('authToken')
+              });
+            } catch (e) {
+              console.error('[Token Verification] ERROR setting direct test token:', e);
+            }
+          }
+        } else {
+          // Try again after delay
+          console.log(`[Token Verification] Token not found, retrying in ${delay}ms...`);
+          setTimeout(attemptVerification, delay);
+        }
+      };
+      
+      // Start the verification process
+      attemptVerification();
+      
     } catch (error) {
       console.error('Error verifying tokens:', error);
       setVerifyStatus('error');
-    } finally {
       setIsVerifying(false);
     }
   };
@@ -161,6 +282,22 @@ export default function EndpointRow() {
               {savedCredentials && (
                 <div className="ml-4 p-2 bg-gray-800 rounded text-xs">
                   <div>Using credentials for: <span className="text-purple-400">{savedCredentials.email}</span></div>
+                </div>
+              )}
+            </div>
+
+            {/* Manual Token Creation Button */}
+            <div className="flex items-center">
+              <button
+                onClick={handleCreateTestToken}
+                className="px-3 py-1 bg-yellow-600 text-white text-sm rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2"
+              >
+                Create Test Tokens Manually
+              </button>
+              
+              {manualTokenCreated && (
+                <div className="ml-4 p-2 bg-yellow-900 rounded text-xs">
+                  <div>Test tokens <span className="text-yellow-400">created</span></div>
                 </div>
               )}
             </div>
