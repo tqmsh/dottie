@@ -23,6 +23,7 @@ interface EndpointRowProps {
   requiresParams?: boolean;
   inputFields?: InputField[];
   pathParams?: string[];
+  onCustomButtonClick?: () => void;
 }
 
 /**
@@ -36,6 +37,7 @@ export default function EndpointRow({
   requiresParams = false,
   inputFields = [],
   pathParams = [],
+  onCustomButtonClick,
 }: EndpointRowProps) {
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,6 +185,12 @@ export default function EndpointRow({
   };
 
   const handleButtonClick = () => {
+    // If a custom handler is provided, use that instead
+    if (onCustomButtonClick) {
+      onCustomButtonClick();
+      return;
+    }
+    
     // If this endpoint requires parameters, show the form instead of making API call
     if ((requiresParams && inputFields.length > 0) || pathParams.length > 0) {
       setShowInputForm(true);
