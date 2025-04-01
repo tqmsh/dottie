@@ -28,9 +28,19 @@ vi.mock('../../../../../api/auth', () => ({
   }
 }));
 
+// Need to render the TR inside a table context to avoid DOM nesting warnings
+const TableWrapper = ({ children }: { children: React.ReactNode }) => (
+  <table>
+    <tbody>
+      {children}
+    </tbody>
+  </table>
+);
+
 describe('GetVerifyAuthToken EndpointRow', () => {
   it('renders correctly', () => {
-    render(<EndpointRow />);
-    expect(screen.getByText(/GET \(Frontend\) \/auth\/token-verification/i)).toBeInTheDocument();
+    render(<EndpointRow />, { wrapper: TableWrapper });
+    expect(screen.getByText('GET')).toBeInTheDocument();
+    expect(screen.getByText('(Frontend) /auth/token-verification')).toBeInTheDocument();
   });
 }); 
