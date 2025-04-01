@@ -56,7 +56,10 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Helper functions to set tokens that handle localStorage errors
+/**
+ * Stores an authentication token in both localStorage and memory
+ * Handles errors gracefully if localStorage is not available
+ */
 export const setAuthToken = (token: string) => {
   if (!token) return;
   
@@ -76,6 +79,10 @@ export const setAuthToken = (token: string) => {
   apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 };
 
+/**
+ * Stores a refresh token in both localStorage and memory
+ * Handles errors gracefully if localStorage is not available
+ */
 export const setRefreshToken = (token: string) => {
   if (!token) return;
   

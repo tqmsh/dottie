@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EndpointRow as BaseEndpointRow, testCredentialsManager } from '../../../page-components';
+
+// Track the last API response globally for debugging
+let lastLoginResponse = null;
 
 // Import authApi in a way that won't break if it's not available
 let authApi: any = {
@@ -87,6 +90,87 @@ export default function EndpointRow() {
   const [verifyStatus, setVerifyStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isVerifying, setIsVerifying] = useState(false);
   const [manualTokenCreated, setManualTokenCreated] = useState(false);
+  const [lastApiResponse, setLastApiResponse] = useState<any>(null);
+  
+  const responseMonitorInterval = useRef<any>(null);
+  
+  // Monitor for API responses
+  useEffect(() => {
+    // Function to capture API responses by overriding fetch and XMLHttpRequest
+    const setupResponseMonitoring = () => {
+      // Monitor fetch API
+      const originalFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const response = await originalFetch.apply(this, args);
+        
+        // Only capture login requests
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('/api/auth/login')) {
+          try {
+            // Clone the response to avoid consuming it
+            const clonedResponse = response.clone();
+            const data = await clonedResponse.json();
+            lastLoginResponse = data;
+            setLastApiResponse(data);
+            console.log('[Response Monitor] Captured login API response:', data);
+          } catch (e) {
+            console.error('[Response Monitor] Error capturing fetch response:', e);
+          }
+        }
+        
+        return response;
+      };
+      
+      // Also try to monitor XMLHttpRequest for axios
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      const originalXhrSend = XMLHttpRequest.prototype.send;
+      
+      XMLHttpRequest.prototype.open = function(...args) {
+        if (args[1] && typeof args[1] === 'string' && args[1].includes('/api/auth/login')) {
+          this._isLoginRequest = true;
+        }
+        return originalXhrOpen.apply(this, args);
+      };
+      
+      XMLHttpRequest.prototype.send = function(...args) {
+        if (this._isLoginRequest) {
+          const originalOnload = this.onload;
+          this.onload = function(e) {
+            try {
+              if (this.responseText) {
+                const data = JSON.parse(this.responseText);
+                lastLoginResponse = data;
+                setLastApiResponse(data);
+                console.log('[Response Monitor] Captured XHR login response:', data);
+              }
+            } catch (e) {
+              console.error('[Response Monitor] Error parsing XHR response:', e);
+            }
+            
+            if (originalOnload) {
+              originalOnload.call(this, e);
+            }
+          };
+        }
+        return originalXhrSend.apply(this, args);
+      };
+      
+      console.log('[Response Monitor] API response monitoring set up');
+    };
+    
+    // Set up response monitoring
+    setupResponseMonitoring();
+    
+    // Also check periodically if a global response variable was set
+    responseMonitorInterval.current = setInterval(() => {
+      if (lastLoginResponse && !lastApiResponse) {
+        setLastApiResponse(lastLoginResponse);
+      }
+    }, 1000);
+    
+    return () => {
+      clearInterval(responseMonitorInterval.current);
+    };
+  }, [lastApiResponse]);
 
   // Check for any stored credentials when component loads
   useEffect(() => {
@@ -151,6 +235,74 @@ export default function EndpointRow() {
       
     } catch (error) {
       console.error('[Manual Token] Error creating test tokens:', error);
+    }
+  };
+  
+  const handleExtractFromResponse = () => {
+    if (!lastApiResponse) {
+      console.error('[Extract Tokens] No API response available');
+      return;
+    }
+    
+    try {
+      console.log('[Extract Tokens] Examining response:', lastApiResponse);
+      
+      // Check all possible token field names
+      const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'authToken', 'jwtToken'];
+      const possibleRefreshTokenFields = ['refreshToken', 'refresh_token', 'refresh'];
+      
+      // Try to find a token
+      let token = null;
+      let tokenField = null;
+      
+      for (const field of possibleTokenFields) {
+        if (lastApiResponse[field]) {
+          token = lastApiResponse[field];
+          tokenField = field;
+          break;
+        }
+      }
+      
+      // Try to find a refresh token
+      let refreshToken = null;
+      let refreshField = null;
+      
+      for (const field of possibleRefreshTokenFields) {
+        if (lastApiResponse[field]) {
+          refreshToken = lastApiResponse[field];
+          refreshField = field;
+          break;
+        }
+      }
+      
+      console.log('[Extract Tokens] Found tokens:', {
+        tokenField,
+        token: token ? token.substring(0, 10) + '...' : 'none',
+        refreshField,
+        refreshToken: refreshToken ? refreshToken.substring(0, 10) + '...' : 'none'
+      });
+      
+      // Store the tokens if found
+      if (token) {
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('authToken', token);
+        console.log('[Extract Tokens] Stored auth token');
+      }
+      
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        console.log('[Extract Tokens] Stored refresh token');
+      }
+      
+      // Set state to indicate tokens were created
+      setManualTokenCreated(true);
+      
+      // Dispatch event
+      window.dispatchEvent(new Event('auth_token_changed'));
+      
+    } catch (error) {
+      console.error('[Extract Tokens] Error extracting tokens:', error);
     }
   };
 
