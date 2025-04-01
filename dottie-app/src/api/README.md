@@ -1,6 +1,8 @@
-# Dottie API Structure
+# src/api
 
-This directory contains all API-related code organized by domain. They should be access the endpoints of the backend as described in the `backend/Endpoints-master.md` file.
+This directory is the entry point between the frontend and the backend. 
+
+It contains all API-related code organized by domain. They should access the established endpoints of the backend as described in the `backend/Endpoints-master.md` file and built in the `backend/routes` folder.
 
 ## Structure
 
