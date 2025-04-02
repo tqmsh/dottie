@@ -34,7 +34,7 @@ function App() {
         <ScrollToTop />
         <main className="flex min-h-screen flex-col">
           <Routes>
-            <Route index element={<LandingPage />} />
+            <Route index element={<TestPage />} />
 
             {/* Assessment routes */}
             <Route path="/assessment">
