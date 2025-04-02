@@ -5,10 +5,10 @@ export default function EndpointRow() {
   return (
     <BaseEndpointRow 
       method="DELETE"
-      endpoint="/api/assessment/:id"
+      endpoint="/api/assessment/:userId/:id"
       expectedOutput={{ message: "Assessment deleted" }}
       requiresAuth={true}
-      pathParams={["id"]}
+      pathParams={["userId", "id"]}
     />
   );
 } 
