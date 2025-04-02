@@ -1,36 +1,28 @@
 import { apiClient } from "../../../core/apiClient";
+import { clearAllTokens } from "../../../core/tokenManager";
 
 /**
- * Logout the current user
+ * Logout user and clear all tokens 
  * @endpoint /api/auth/logout (POST)
  */
-export const postLogout = async (): Promise<void> => {
+export const postLogout = async (): Promise<{ success: boolean }> => {
   try {
-    // Get the current token from localStorage
-    const token = localStorage.getItem('auth_token');
+    const response = await apiClient.post('/api/auth/logout');
     
-    // Make sure to include the token in the request
-    await apiClient.post('/api/auth/logout', {}, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
-      }
-    });
+    // Clear all tokens using the token manager
+    clearAllTokens();
     
-    // Remove token from localStorage
-    localStorage.removeItem('auth_token');
+    // Clear Authorization header from API client
+    if (apiClient.defaults.headers.common['Authorization']) {
+      delete apiClient.defaults.headers.common['Authorization'];
+    }
     
-    // Remove Authorization header
-    delete apiClient.defaults.headers.common['Authorization'];
-    
-    return;
+    return { success: true };
   } catch (error) {
     console.error('Logout failed:', error);
-    
-    // Still remove token and headers locally on error
-    localStorage.removeItem('auth_token');
-    delete apiClient.defaults.headers.common['Authorization'];
-    
-    throw error;
+    // Still clear tokens even if API call fails
+    clearAllTokens();
+    return { success: false };
   }
 };
 

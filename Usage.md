@@ -14,3 +14,11 @@ cd backend; npm install; npm run dev
 cd dottie-app; npm install; npm run build; npm run dev
 ```
 
+## concurrent workflow
+
+due to a concurrent workflow, the user can run both the backend and frontend at the same time.
+
+```
+cd frontend
+npm run dev
+```
