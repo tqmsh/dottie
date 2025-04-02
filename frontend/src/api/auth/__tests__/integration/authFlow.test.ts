@@ -111,11 +111,11 @@ describe('Auth Flow Integration', () => {
     const signupResult = await postSignup(testUser);
     expect(apiClient.post).toHaveBeenCalledWith('/api/auth/signup', testUser);
     expect(signupResult.token).toBe('signup-jwt-token');
-    expect(localStorage.getItem('auth_token')).toBe('signup-jwt-token');
+    expect(localStorage.getItem('authToken')).toBe('signup-jwt-token');
     
     // Step 2: Logout (to reset state for login test)
     await postLogout();
-    expect(localStorage.getItem('auth_token')).toBeNull();
+    expect(localStorage.getItem('authToken')).toBeNull();
     
     // Step 3: Login
     const loginResult = await postLogin({ 
@@ -127,13 +127,13 @@ describe('Auth Flow Integration', () => {
       password: testUser.password 
     });
     expect(loginResult.token).toBe('login-jwt-token');
-    expect(localStorage.getItem('auth_token')).toBe('login-jwt-token');
+    expect(localStorage.getItem('authToken')).toBe('login-jwt-token');
     
     // Step 4: Refresh token
     const refreshResult = await postRefreshToken();
     expect(apiClient.post).toHaveBeenCalledWith('/api/auth/refresh');
     expect(refreshResult.token).toBe('refreshed-jwt-token');
-    expect(localStorage.getItem('auth_token')).toBe('refreshed-jwt-token');
+    expect(localStorage.getItem('authToken')).toBe('refreshed-jwt-token');
     
     // Step 5: Logout again
     await postLogout();
@@ -142,12 +142,12 @@ describe('Auth Flow Integration', () => {
         Authorization: 'Bearer refreshed-jwt-token'
       }
     });
-    expect(localStorage.getItem('auth_token')).toBeNull();
+    expect(localStorage.getItem('authToken')).toBeNull();
   });
   
   it('should handle token validation', async () => {
     // First store a valid token
-    localStorage.setItem('auth_token', 'valid-token');
+    localStorage.setItem('authToken', 'valid-token');
     
     // Mock a protected API endpoint that requires auth
     vi.spyOn(apiClient, 'get').mockResolvedValueOnce({ 
@@ -160,7 +160,7 @@ describe('Auth Flow Integration', () => {
     expect(response.status).toBe(200);
     
     // Now simulate an expired token scenario
-    localStorage.setItem('auth_token', 'invalid-token');
+    localStorage.setItem('authToken', 'invalid-token');
     
     // Mock the API to return 401 for invalid token
     vi.spyOn(apiClient, 'get').mockRejectedValueOnce({

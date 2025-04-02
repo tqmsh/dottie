@@ -17,7 +17,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
 
   // Check if token exists on mount
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('authToken');
     const userString = localStorage.getItem('auth_user');
     
     if (token) {
@@ -61,7 +61,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
       onLogout();
       
       // Clear any localStorage items regardless of API success
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth_user');
       
@@ -71,7 +71,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
       // Still update UI and clear storage even if API call failed
       setIsAuthenticated(false);
       setUser(null);
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth_user');
     }
@@ -205,7 +205,7 @@ export default function AuthStatus({ onLogin, onLogout }: AuthStatusProps) {
                   await wait(2500, 'Waiting for login to complete and token to be saved');
                   
                   // Check if authentication worked - more comprehensive check
-                  const authToken = localStorage.getItem('auth_token');
+                  const authToken = localStorage.getItem('authToken');
                   const userString = localStorage.getItem('auth_user');
                   const isAuthSuccess = authToken || userString || document.querySelector('.bg-green-500');
                   

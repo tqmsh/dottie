@@ -57,7 +57,7 @@ apiClient.interceptors.response.use(
       // Handle 401 Unauthorized - redirect to login
       if (error.response.status === 401) {
         // Remove token and redirect to login
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('authToken');
         // Redirect logic would go here for a real app
       }
     } else if (error.request) {

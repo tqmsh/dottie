@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Helper function to get stored auth data
 const getStoredAuthData = (): { user: User | null; token: string | null } => {
   const userStr = localStorage.getItem("auth_user");
-  const token = localStorage.getItem("auth_token");
+  const token = localStorage.getItem("authToken");
 
   return {
     user: userStr ? JSON.parse(userStr) : null,
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //     refreshInterval = setInterval(async () => {
   //       try {
   //         const { token } = await authApi.refreshToken();
-  //         localStorage.setItem('auth_token', token);
+  //         localStorage.setItem('authToken', token);
   //       } catch (error) {
   //         // If refresh fails, logout user
   //         await logout();
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { user, token } = await authApi.login(credentials);
 
       localStorage.setItem("auth_user", JSON.stringify(user));
-      localStorage.setItem("auth_token", token as string);
+      localStorage.setItem("authToken", token as string);
 
       setState({
         user,
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout error:", error);
     } finally {
       localStorage.removeItem("auth_user");
-      localStorage.removeItem("auth_token");
+      localStorage.removeItem("authToken");
       setState({
         user: null,
         isAuthenticated: false,

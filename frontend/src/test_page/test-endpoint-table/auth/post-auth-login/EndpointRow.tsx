@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EndpointRow as BaseEndpointRow, testCredentialsManager } from '../../../page-components';
-import { getAuthToken, getRefreshToken, setAuthToken, setRefreshToken, TOKEN_KEYS } from '../../../../api/core/tokenManager';
 
 // Track the last API response globally for debugging
 let lastLoginResponse: any = null;
@@ -8,12 +7,12 @@ let lastLoginResponse: any = null;
 // Import authApi in a way that won't break if it's not available
 let authApi: any = {
   verifyToken: () => {
-    // Implement a direct token verification function using the token manager
-    const authToken = getAuthToken();
-    const refreshToken = getRefreshToken();
+    // Implement a direct token verification function using localStorage
+    const authToken = localStorage.getItem('authToken');
+    const refreshToken = localStorage.getItem('refresh_token');
     
     console.log('[Token Verification Debug] Checking for tokens:', {
-      auth_token: authToken ? `${authToken.substring(0, 10)}...` : null,
+      authToken: authToken ? `${authToken.substring(0, 10)}...` : null,
       refresh_token: refreshToken ? `${refreshToken.substring(0, 10)}...` : null
     });
     
@@ -41,13 +40,13 @@ try {
       try {
         // Use only snake_case naming convention
         authToken = typeof localStorage !== 'undefined' ? 
-          localStorage.getItem('auth_token') : null;
+          localStorage.getItem('authToken') : null;
         
         refreshToken = typeof localStorage !== 'undefined' ? 
           localStorage.getItem('refresh_token') : null;
         
         console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
-          auth_token: localStorage.getItem('auth_token'),
+          authToken: localStorage.getItem('authToken'),
           refresh_token: localStorage.getItem('refresh_token')
         });
       } catch (e) {
@@ -97,6 +96,19 @@ export default function EndpointRow() {
             lastLoginResponse = data;
             setLastApiResponse(data);
             console.log('[Response Monitor] Captured login API response:', data);
+            
+            // Automatically save tokens with correct naming
+            if (data.token) {
+              localStorage.setItem('authToken', data.token);
+              console.log('[Response Monitor] Automatically saved authToken');
+            }
+            if (data.refreshToken) {
+              localStorage.setItem('refresh_token', data.refreshToken);
+              console.log('[Response Monitor] Automatically saved refresh_token');
+            }
+            
+            // Dispatch auth token changed event
+            window.dispatchEvent(new Event('authToken_changed'));
           } catch (e) {
             console.error('[Response Monitor] Error capturing fetch response:', e);
           }
@@ -133,6 +145,19 @@ export default function EndpointRow() {
                 lastLoginResponse = data;
                 setLastApiResponse(data);
                 console.log('[Response Monitor] Captured XHR login response:', data);
+                
+                // Automatically save tokens with correct naming
+                if (data.token) {
+                  localStorage.setItem('authToken', data.token);
+                  console.log('[Response Monitor] Automatically saved authToken');
+                }
+                if (data.refreshToken) {
+                  localStorage.setItem('refresh_token', data.refreshToken);
+                  console.log('[Response Monitor] Automatically saved refresh_token');
+                }
+                
+                // Dispatch auth token changed event
+                window.dispatchEvent(new Event('authToken_changed'));
               }
             } catch (e) {
               console.error('[Response Monitor] Error parsing XHR response:', e);
@@ -202,19 +227,19 @@ export default function EndpointRow() {
       const testToken = 'test-auth-token-' + Date.now();
       const testRefreshToken = 'test-refresh-token-' + Date.now();
       
-      // Use the token manager to set tokens
-      setAuthToken(testToken);
-      setRefreshToken(testRefreshToken);
+      // Use snake_case naming convention consistently
+      localStorage.setItem('authToken', testToken);
+      localStorage.setItem('refresh_token', testRefreshToken);
       
       console.log('[Manual Token] Created test tokens:', {
-        auth_token: testToken.substring(0, 10) + '...',
+        authToken: testToken.substring(0, 10) + '...',
         refresh_token: testRefreshToken.substring(0, 10) + '...',
       });
       
       // Verify storage was successful
       console.log('[Manual Token] Verification after setting:', {
-        auth_token: getAuthToken(),
-        refresh_token: getRefreshToken()
+        authToken: localStorage.getItem('authToken'),
+        refresh_token: localStorage.getItem('refresh_token')
       });
       
       setManualTokenCreated(true);
@@ -267,9 +292,9 @@ export default function EndpointRow() {
         refreshToken: refreshToken ? refreshToken.substring(0, 10) + '...' : 'none'
       });
       
-      // Store the tokens if found
+      // Store the tokens if found - using snake_case naming convention
       if (token) {
-        localStorage.setItem('auth_token', token);
+        localStorage.setItem('authToken', token);
         console.log('[Extract Tokens] Stored auth token');
       }
       
@@ -282,7 +307,7 @@ export default function EndpointRow() {
       setManualTokenCreated(true);
       
       // Dispatch event
-      window.dispatchEvent(new Event('auth_token_changed'));
+      window.dispatchEvent(new Event('authToken_changed'));
       
     } catch (error) {
       console.error('[Extract Tokens] Error extracting tokens:', error);
@@ -326,9 +351,9 @@ export default function EndpointRow() {
         attempts++;
         console.log(`[Token Verification] Attempt ${attempts} of ${maxAttempts}`);
         
-        // Use the token manager for verification
-        const authToken = getAuthToken();
-        const refreshToken = getRefreshToken();
+        // Get tokens using snake_case consistently
+        const authToken = localStorage.getItem('authToken');
+        const refreshToken = localStorage.getItem('refresh_token');
         
         const verificationResult = {
           success: true,
@@ -350,11 +375,11 @@ export default function EndpointRow() {
             try {
               console.log('[Token Verification] Last resort: Adding a direct test token');
               const directTestToken = 'direct-test-token-' + Date.now();
-              setAuthToken(directTestToken);
+              localStorage.setItem('authToken', directTestToken);
               
               // Check if direct token was set
               console.log('[Token Verification] Direct token test:', {
-                auth_token: getAuthToken()
+                authToken: localStorage.getItem('authToken')
               });
             } catch (e) {
               console.error('[Token Verification] ERROR setting direct test token:', e);
@@ -471,6 +496,22 @@ export default function EndpointRow() {
                     ? <div>Token verification <span className="text-green-400">successful</span></div>
                     : <div>Token verification <span className="text-red-400">failed</span></div>
                   }
+                </div>
+              )}
+            </div>
+            
+            {/* Extract Tokens from Last Response Button */}
+            <div className="flex items-center mt-2">
+              <button
+                onClick={handleExtractFromResponse}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 focus:outline-none focus:ring-2"
+              >
+                Extract Tokens from Response
+              </button>
+              
+              {lastApiResponse && (
+                <div className="ml-4 p-2 bg-gray-800 rounded text-xs">
+                  <div>Response captured <span className="text-green-400">✓</span></div>
                 </div>
               )}
             </div>

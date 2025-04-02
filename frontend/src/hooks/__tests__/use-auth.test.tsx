@@ -50,7 +50,7 @@ describe('Auth hooks', () => {
 
   it('should detect tokens from localStorage', () => {
     // Set tokens before rendering hook
-    localStorageMock.setItem('auth_token', 'test-auth-token');
+    localStorageMock.setItem('authToken', 'test-auth-token');
     localStorageMock.setItem('refresh_token', 'test-refresh-token');
     localStorageMock.setItem('user', JSON.stringify({ id: 'test', email: 'test@example.com' }));
 
@@ -72,7 +72,7 @@ describe('Auth hooks', () => {
 
     // Update localStorage and call checkTokens explicitly
     act(() => {
-      localStorageMock.setItem('auth_token', 'new-auth-token');
+      localStorageMock.setItem('authToken', 'new-auth-token');
       localStorageMock.setItem('user', JSON.stringify({ id: 'new', email: 'new@example.com' }));
       // Call the helper method directly
       result.current.checkTokens();
@@ -96,7 +96,7 @@ describe('Auth hooks', () => {
     expect(result.current.user).toEqual({ id: '123', email: 'test@example.com' });
     expect(result.current.authTokenExists).toBe(true);
     expect(result.current.isAuthenticated).toBe(true);
-    expect(localStorageMock.getItem('auth_token')).toBeTruthy();
+    expect(localStorageMock.getItem('authToken')).toBeTruthy();
     expect(localStorageMock.getItem('user')).toBeTruthy();
   });
   
@@ -120,7 +120,7 @@ describe('Auth hooks', () => {
     expect(result.current.user).toBeNull();
     expect(result.current.authTokenExists).toBe(false);
     expect(result.current.isAuthenticated).toBe(false);
-    expect(localStorageMock.getItem('auth_token')).toBeNull();
+    expect(localStorageMock.getItem('authToken')).toBeNull();
     expect(localStorageMock.getItem('user')).toBeNull();
   });
 }); 
