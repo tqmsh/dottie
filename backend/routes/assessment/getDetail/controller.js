@@ -9,7 +9,8 @@ import db from "../../../db/index.js";
 export const getAssessmentDetail = async (req, res) => {
   try {
     const assessmentId = req.params.id;
-    const userId = req.user.userId;
+    // Get userId from JWT token or from URL params
+    const userId = req.user?.userId || req.params.userId;
     
     if (!assessmentId) {
       return res.status(400).json({ error: 'Assessment ID is required' });
