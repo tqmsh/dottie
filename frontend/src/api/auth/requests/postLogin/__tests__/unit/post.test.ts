@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { postLogin } from '../../Request';
-import { apiClient } from '../../../../../core/apiClient';
+import { apiClient, setAuthToken, setRefreshToken } from '../../../../../core/apiClient';
 
-// Mock the axios client
+// Mock the axios client and helper functions
 vi.mock('../../../../../core/apiClient', () => ({
   apiClient: {
     post: vi.fn(),
@@ -63,16 +63,16 @@ describe('postLogin', () => {
     expect(result).toEqual(mockResponse.data);
   });
 
-  it('should store the token in localStorage and set the Authorization header', async () => {
+  it('should store the token using helper functions', async () => {
     // Setup
     vi.mocked(apiClient.post).mockResolvedValueOnce(mockResponse);
 
     // Execute
     await postLogin(mockCredentials);
 
-    // Verify
-    expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', mockResponse.data.token);
-    expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockResponse.data.token}`);
+    // Verify helper functions were called
+    expect(setAuthToken).toHaveBeenCalledWith(mockResponse.data.token);
+    expect(setRefreshToken).toHaveBeenCalledWith(mockResponse.data.refreshToken);
   });
 
   it('should throw an error if the API call fails', async () => {
