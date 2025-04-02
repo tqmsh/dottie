@@ -14,7 +14,6 @@ export const getById = async (id: string): Promise<Assessment> => {
       throw new Error('User ID not found. Please login again.');
     }
     
-    // Need to add userId to URL for consistency with other endpoints
     const response = await apiClient.get(`/api/assessment/${id}`);
     return response.data;
   } catch (error) {
