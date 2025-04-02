@@ -8,26 +8,15 @@ import db from "../../../db/index.js";
  */
 export const getAssessmentDetail = async (req, res) => {
   try {
-    console.log('GET assessment detail request received:', {
-      params: req.params,
-      user: req.user,
-      path: req.path,
-      url: req.url
-    });
-    
     const assessmentId = req.params.id;
     // Get userId from JWT token or from URL params
     const userId = req.user?.userId || req.params.userId;
     
-    console.log('Extracted IDs:', { assessmentId, userId });
-    
     if (!assessmentId) {
-      console.log('Assessment ID is missing');
       return res.status(400).json({ error: 'Assessment ID is required' });
     }
     
     if (!userId) {
-      console.log('User ID is missing');
       return res.status(400).json({ error: 'User ID is required' });
     }
     
@@ -73,18 +62,13 @@ export const getAssessmentDetail = async (req, res) => {
       }
     }
     
-    console.log('Looking for assessment in memory:', { assessmentId, userId });
-    console.log('Available assessments:', assessments.map(a => ({ id: a.id, userId: a.userId })));
-    
     // Find the assessment by ID and userId in memory
     const assessment = assessments.find(a => a.id === assessmentId && a.userId === userId);
     
     if (!assessment) {
-      console.log('Assessment not found');
       return res.status(404).json({ error: 'Assessment not found' });
     }
     
-    console.log('Assessment found:', assessment);
     res.json(assessment);
   } catch (error) {
     console.error('Error fetching assessment:', error);
