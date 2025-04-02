@@ -7,7 +7,7 @@ import { apiClient } from "../../../core/apiClient";
 export const postLogout = async (): Promise<void> => {
   try {
     // Get the current token from localStorage
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('auth_token');
     
     // Make sure to include the token in the request
     await apiClient.post('/api/auth/logout', {}, {
@@ -17,7 +17,7 @@ export const postLogout = async (): Promise<void> => {
     });
     
     // Remove token from localStorage
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('auth_token');
     
     // Remove Authorization header
     delete apiClient.defaults.headers.common['Authorization'];
@@ -27,7 +27,7 @@ export const postLogout = async (): Promise<void> => {
     console.error('Logout failed:', error);
     
     // Still remove token and headers locally on error
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('auth_token');
     delete apiClient.defaults.headers.common['Authorization'];
     
     throw error;

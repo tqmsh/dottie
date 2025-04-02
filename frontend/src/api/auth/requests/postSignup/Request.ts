@@ -11,7 +11,7 @@ export const postSignup = async (userData: SignupInput): Promise<AuthResponse> =
     
     // Set the token in localStorage for global access
     if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('auth_token', response.data.token);
       
       // Add token to default headers for subsequent requests
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;

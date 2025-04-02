@@ -8,7 +8,7 @@ import { AuthResponse } from "../../types";
 export const postRefreshToken = async (): Promise<AuthResponse> => {
   try {
     // Get the current token from localStorage
-    const currentToken = localStorage.getItem('authToken');
+    const currentToken = localStorage.getItem('auth_token');
     
     if (!currentToken) {
       throw new Error('No authentication token found');
@@ -18,7 +18,7 @@ export const postRefreshToken = async (): Promise<AuthResponse> => {
     
     // Update token in localStorage
     if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('auth_token', response.data.token);
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
     }
     

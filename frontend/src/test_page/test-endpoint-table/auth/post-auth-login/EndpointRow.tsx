@@ -13,17 +13,15 @@ let authApi: any = {
     
     // Try to access localStorage safely (for tests and SSR environments)
     try {
-      // Check for both token naming conventions
+      // Use only snake_case naming convention
       authToken = typeof localStorage !== 'undefined' ? 
-        localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
+        localStorage.getItem('auth_token') : null;
       
       refreshToken = typeof localStorage !== 'undefined' ? 
-        localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
+        localStorage.getItem('refresh_token') : null;
       
       console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
         auth_token: localStorage.getItem('auth_token'),
-        authToken: localStorage.getItem('authToken'),
-        refreshToken: localStorage.getItem('refreshToken'),
         refresh_token: localStorage.getItem('refresh_token')
       });
     } catch (e) {
@@ -52,17 +50,15 @@ try {
       let refreshToken = null;
       
       try {
-        // Check for both token naming conventions
+        // Use only snake_case naming convention
         authToken = typeof localStorage !== 'undefined' ? 
-          localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
+          localStorage.getItem('auth_token') : null;
         
         refreshToken = typeof localStorage !== 'undefined' ? 
-          localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
+          localStorage.getItem('refresh_token') : null;
         
         console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
           auth_token: localStorage.getItem('auth_token'),
-          authToken: localStorage.getItem('authToken'),
-          refreshToken: localStorage.getItem('refreshToken'),
           refresh_token: localStorage.getItem('refresh_token')
         });
       } catch (e) {
@@ -209,11 +205,9 @@ export default function EndpointRow() {
     try {
       const testToken = 'test-auth-token-' + Date.now();
       localStorage.setItem('auth_token', testToken);
-      localStorage.setItem('authToken', testToken);
       
       const testRefreshToken = 'test-refresh-token-' + Date.now();
       localStorage.setItem('refresh_token', testRefreshToken);
-      localStorage.setItem('refreshToken', testRefreshToken);
       
       console.log('[Manual Token] Created test tokens:', {
         auth_token: testToken.substring(0, 10) + '...',
@@ -223,9 +217,7 @@ export default function EndpointRow() {
       // Verify storage was successful
       console.log('[Manual Token] Verification after setting:', {
         auth_token: localStorage.getItem('auth_token'),
-        authToken: localStorage.getItem('authToken'),
-        refresh_token: localStorage.getItem('refresh_token'),
-        refreshToken: localStorage.getItem('refreshToken')
+        refresh_token: localStorage.getItem('refresh_token')
       });
       
       setManualTokenCreated(true);
@@ -248,7 +240,7 @@ export default function EndpointRow() {
       console.log('[Extract Tokens] Examining response:', lastApiResponse);
       
       // Check all possible token field names
-      const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'authToken', 'jwtToken'];
+      const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'jwtToken'];
       const possibleRefreshTokenFields = ['refreshToken', 'refresh_token', 'refresh'];
       
       // Try to find a token
@@ -285,13 +277,11 @@ export default function EndpointRow() {
       // Store the tokens if found
       if (token) {
         localStorage.setItem('auth_token', token);
-        localStorage.setItem('authToken', token);
         console.log('[Extract Tokens] Stored auth token');
       }
       
       if (refreshToken) {
         localStorage.setItem('refresh_token', refreshToken);
-        localStorage.setItem('refreshToken', refreshToken);
         console.log('[Extract Tokens] Stored refresh token');
       }
       
@@ -358,12 +348,10 @@ export default function EndpointRow() {
             try {
               console.log('[Token Verification] Last resort: Adding a direct test token');
               localStorage.setItem('auth_token', 'direct-test-token-' + Date.now());
-              localStorage.setItem('authToken', 'direct-test-token-' + Date.now());
               
               // Check if direct token was set
               console.log('[Token Verification] Direct token test:', {
-                auth_token: localStorage.getItem('auth_token'),
-                authToken: localStorage.getItem('authToken')
+                auth_token: localStorage.getItem('auth_token')
               });
             } catch (e) {
               console.error('[Token Verification] ERROR setting direct test token:', e);

@@ -11,7 +11,9 @@ vi.mock('../../../../../core/apiClient', () => ({
         common: {}
       }
     }
-  }
+  },
+  setAuthToken: vi.fn(),
+  setRefreshToken: vi.fn()
 }));
 
 // Mock localStorage
@@ -69,7 +71,7 @@ describe('postLogin', () => {
     await postLogin(mockCredentials);
 
     // Verify
-    expect(localStorage.setItem).toHaveBeenCalledWith('authToken', mockResponse.data.token);
+    expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', mockResponse.data.token);
     expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockResponse.data.token}`);
   });
 

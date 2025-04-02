@@ -18,7 +18,7 @@ export const postLogin = async (credentials: LoginInput): Promise<AuthResponse> 
     console.log('[Login Debug] FULL login response:', response);
     
     // Check all possible token field names in the response
-    const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'authToken', 'jwtToken'];
+    const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'auth_token', 'jwtToken'];
     const possibleRefreshTokenFields = ['refreshToken', 'refresh_token', 'refresh'];
     
     // Extract the token from the response using the first matching field name
@@ -66,9 +66,7 @@ export const postLogin = async (credentials: LoginInput): Promise<AuthResponse> 
       // Verify storage worked immediately
       console.log('[Login Debug] Verification of token storage:', {
         'auth_token in localStorage': !!localStorage.getItem('auth_token'),
-        'authToken in localStorage': !!localStorage.getItem('authToken'),
-        'auth_token value': localStorage.getItem('auth_token')?.substring(0, 10) + '...',
-        'authToken value': localStorage.getItem('authToken')?.substring(0, 10) + '...'
+        'auth_token value': localStorage.getItem('auth_token')?.substring(0, 10) + '...'
       });
     } else {
       console.error('[Login Debug] No token found in any expected field of the response');

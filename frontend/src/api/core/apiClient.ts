@@ -13,13 +13,13 @@ const apiClient = axios.create({
 
 // In-memory backup storage in case localStorage is not available or blocked
 const tokenStorage = {
-  authToken: null as string | null,
-  refreshToken: null as string | null,
+  auth_token: null as string | null,
+  refresh_token: null as string | null,
 };
 
 // Initialize headers from localStorage if available
 try {
-  const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+  const token = localStorage.getItem('auth_token');
   if (token) {
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     console.log('[API Client] Initialized with token from localStorage');
@@ -35,11 +35,11 @@ apiClient.interceptors.request.use(
   (config) => {
     try {
       // Try to get token from localStorage first
-      let token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+      let token = localStorage.getItem('auth_token');
       
       // Fall back to in-memory storage if needed
-      if (!token && tokenStorage.authToken) {
-        token = tokenStorage.authToken;
+      if (!token && tokenStorage.auth_token) {
+        token = tokenStorage.auth_token;
         console.log('[API Client] Using in-memory token fallback');
       }
       
@@ -64,12 +64,11 @@ export const setAuthToken = (token: string) => {
   if (!token) return;
   
   // Store in memory first as backup
-  tokenStorage.authToken = token;
+  tokenStorage.auth_token = token;
   
   // Try localStorage but don't break if it fails
   try {
     localStorage.setItem('auth_token', token);
-    localStorage.setItem('authToken', token);
     console.log('[API Client] Auth token stored successfully');
   } catch (e) {
     console.error('[API Client] Could not store token in localStorage:', e);
@@ -87,12 +86,11 @@ export const setRefreshToken = (token: string) => {
   if (!token) return;
   
   // Store in memory as backup
-  tokenStorage.refreshToken = token;
+  tokenStorage.refresh_token = token;
   
   // Try localStorage but don't break if it fails
   try {
     localStorage.setItem('refresh_token', token);
-    localStorage.setItem('refreshToken', token);
     console.log('[API Client] Refresh token stored successfully');
   } catch (e) {
     console.error('[API Client] Could not store refresh token in localStorage:', e);
@@ -111,7 +109,7 @@ apiClient.interceptors.response.use(
       // Handle 401 Unauthorized - redirect to login
       if (error.response.status === 401) {
         // Remove token and redirect to login
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('auth_token');
         // Redirect logic would go here for a real app
       }
     } else if (error.request) {
