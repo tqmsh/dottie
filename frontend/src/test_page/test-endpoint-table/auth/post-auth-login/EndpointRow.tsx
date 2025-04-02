@@ -1,34 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EndpointRow as BaseEndpointRow, testCredentialsManager } from '../../../page-components';
+import { getAuthToken, getRefreshToken, setAuthToken, setRefreshToken, TOKEN_KEYS } from '../../../../api/core/tokenManager';
 
 // Track the last API response globally for debugging
-let lastLoginResponse = null;
+let lastLoginResponse: any = null;
 
 // Import authApi in a way that won't break if it's not available
 let authApi: any = {
   verifyToken: () => {
-    // Implement a direct token verification function
-    let authToken = null;
-    let refreshToken = null;
+    // Implement a direct token verification function using the token manager
+    const authToken = getAuthToken();
+    const refreshToken = getRefreshToken();
     
-    // Try to access localStorage safely (for tests and SSR environments)
-    try {
-      // Check for both token naming conventions
-      authToken = typeof localStorage !== 'undefined' ? 
-        localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
-      
-      refreshToken = typeof localStorage !== 'undefined' ? 
-        localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
-      
-      console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
-        auth_token: localStorage.getItem('auth_token'),
-        authToken: localStorage.getItem('authToken'),
-        refreshToken: localStorage.getItem('refreshToken'),
-        refresh_token: localStorage.getItem('refresh_token')
-      });
-    } catch (e) {
-      console.warn('LocalStorage not available, using mock values');
-    }
+    console.log('[Token Verification Debug] Checking for tokens:', {
+      auth_token: authToken ? `${authToken.substring(0, 10)}...` : null,
+      refresh_token: refreshToken ? `${refreshToken.substring(0, 10)}...` : null
+    });
     
     return {
       data: {
@@ -52,17 +39,15 @@ try {
       let refreshToken = null;
       
       try {
-        // Check for both token naming conventions
+        // Use only snake_case naming convention
         authToken = typeof localStorage !== 'undefined' ? 
-          localStorage.getItem('auth_token') || localStorage.getItem('authToken') : null;
+          localStorage.getItem('auth_token') : null;
         
         refreshToken = typeof localStorage !== 'undefined' ? 
-          localStorage.getItem('refresh_token') || localStorage.getItem('refreshToken') : null;
+          localStorage.getItem('refresh_token') : null;
         
         console.log('[Token Verification Debug] Checking for tokens in localStorage:', {
           auth_token: localStorage.getItem('auth_token'),
-          authToken: localStorage.getItem('authToken'),
-          refreshToken: localStorage.getItem('refreshToken'),
           refresh_token: localStorage.getItem('refresh_token')
         });
       } catch (e) {
@@ -124,14 +109,21 @@ export default function EndpointRow() {
       const originalXhrOpen = XMLHttpRequest.prototype.open;
       const originalXhrSend = XMLHttpRequest.prototype.send;
       
-      XMLHttpRequest.prototype.open = function(...args) {
-        if (args[1] && typeof args[1] === 'string' && args[1].includes('/api/auth/login')) {
-          this._isLoginRequest = true;
-        }
-        return originalXhrOpen.apply(this, args);
+      // Add custom property to XMLHttpRequest prototype
+      type CustomXMLHttpRequest = XMLHttpRequest & {
+        _isLoginRequest?: boolean;
       };
       
-      XMLHttpRequest.prototype.send = function(...args) {
+      // Using a more specific type definition for the open method
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(this: CustomXMLHttpRequest, method: string, url: string | URL, async: boolean = true, username?: string | null, password?: string | null) {
+        if (typeof url === 'string' && url.includes('/api/auth/login')) {
+          this._isLoginRequest = true;
+        }
+        return originalOpen.call(this, method, url, async, username || undefined, password || undefined);
+      };
+      
+      XMLHttpRequest.prototype.send = function(this: CustomXMLHttpRequest, ...args) {
         if (this._isLoginRequest) {
           const originalOnload = this.onload;
           this.onload = function(e) {
@@ -208,12 +200,11 @@ export default function EndpointRow() {
   const handleCreateTestToken = () => {
     try {
       const testToken = 'test-auth-token-' + Date.now();
-      localStorage.setItem('auth_token', testToken);
-      localStorage.setItem('authToken', testToken);
-      
       const testRefreshToken = 'test-refresh-token-' + Date.now();
-      localStorage.setItem('refresh_token', testRefreshToken);
-      localStorage.setItem('refreshToken', testRefreshToken);
+      
+      // Use the token manager to set tokens
+      setAuthToken(testToken);
+      setRefreshToken(testRefreshToken);
       
       console.log('[Manual Token] Created test tokens:', {
         auth_token: testToken.substring(0, 10) + '...',
@@ -222,17 +213,11 @@ export default function EndpointRow() {
       
       // Verify storage was successful
       console.log('[Manual Token] Verification after setting:', {
-        auth_token: localStorage.getItem('auth_token'),
-        authToken: localStorage.getItem('authToken'),
-        refresh_token: localStorage.getItem('refresh_token'),
-        refreshToken: localStorage.getItem('refreshToken')
+        auth_token: getAuthToken(),
+        refresh_token: getRefreshToken()
       });
       
       setManualTokenCreated(true);
-      
-      // Try to dispatch the token changed event
-      window.dispatchEvent(new Event('auth_token_changed'));
-      
     } catch (error) {
       console.error('[Manual Token] Error creating test tokens:', error);
     }
@@ -248,7 +233,7 @@ export default function EndpointRow() {
       console.log('[Extract Tokens] Examining response:', lastApiResponse);
       
       // Check all possible token field names
-      const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'authToken', 'jwtToken'];
+      const possibleTokenFields = ['token', 'accessToken', 'jwt', 'access_token', 'jwtToken'];
       const possibleRefreshTokenFields = ['refreshToken', 'refresh_token', 'refresh'];
       
       // Try to find a token
@@ -285,13 +270,11 @@ export default function EndpointRow() {
       // Store the tokens if found
       if (token) {
         localStorage.setItem('auth_token', token);
-        localStorage.setItem('authToken', token);
         console.log('[Extract Tokens] Stored auth token');
       }
       
       if (refreshToken) {
         localStorage.setItem('refresh_token', refreshToken);
-        localStorage.setItem('refreshToken', refreshToken);
         console.log('[Extract Tokens] Stored refresh token');
       }
       
@@ -343,27 +326,35 @@ export default function EndpointRow() {
         attempts++;
         console.log(`[Token Verification] Attempt ${attempts} of ${maxAttempts}`);
         
-        // This is frontend-only, no actual API call
-        const response = authApi.verifyToken();
+        // Use the token manager for verification
+        const authToken = getAuthToken();
+        const refreshToken = getRefreshToken();
         
-        if (response.data.authTokenExists || attempts >= maxAttempts) {
+        const verificationResult = {
+          success: true,
+          authTokenExists: !!authToken,
+          refreshTokenExists: !!refreshToken,
+          authTokenValue: authToken ? `${authToken.substring(0, 10)}...` : null,
+          refreshTokenValue: refreshToken ? `${refreshToken.substring(0, 10)}...` : null
+        };
+        
+        if (verificationResult.authTokenExists || attempts >= maxAttempts) {
           // Success or max attempts reached
-          setVerificationResponse(response.data);
-          setVerifyStatus(response.data.authTokenExists ? 'success' : 'error');
+          setVerificationResponse(verificationResult);
+          setVerifyStatus(verificationResult.authTokenExists ? 'success' : 'error');
           setIsVerifying(false);
-          console.log('[Token Verification] Final result:', response.data);
+          console.log('[Token Verification] Final result:', verificationResult);
           
-          if (!response.data.authTokenExists) {
+          if (!verificationResult.authTokenExists) {
             // If verification failed at the end, add a direct token for debugging
             try {
               console.log('[Token Verification] Last resort: Adding a direct test token');
-              localStorage.setItem('auth_token', 'direct-test-token-' + Date.now());
-              localStorage.setItem('authToken', 'direct-test-token-' + Date.now());
+              const directTestToken = 'direct-test-token-' + Date.now();
+              setAuthToken(directTestToken);
               
               // Check if direct token was set
               console.log('[Token Verification] Direct token test:', {
-                auth_token: localStorage.getItem('auth_token'),
-                authToken: localStorage.getItem('authToken')
+                auth_token: getAuthToken()
               });
             } catch (e) {
               console.error('[Token Verification] ERROR setting direct test token:', e);
@@ -378,7 +369,6 @@ export default function EndpointRow() {
       
       // Start the verification process
       attemptVerification();
-      
     } catch (error) {
       console.error('Error verifying tokens:', error);
       setVerifyStatus('error');

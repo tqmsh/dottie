@@ -1,5 +1,6 @@
 import { apiClient } from "../../../core/apiClient";
 import { AuthResponse } from "../../types";
+import { getAuthToken, setAuthToken } from "../../../core/tokenManager";
 
 /**
  * Refresh authentication token
@@ -7,8 +8,8 @@ import { AuthResponse } from "../../types";
  */
 export const postRefreshToken = async (): Promise<AuthResponse> => {
   try {
-    // Get the current token from localStorage
-    const currentToken = localStorage.getItem('authToken');
+    // Get the current token using token manager
+    const currentToken = getAuthToken();
     
     if (!currentToken) {
       throw new Error('No authentication token found');
@@ -16,10 +17,9 @@ export const postRefreshToken = async (): Promise<AuthResponse> => {
     
     const response = await apiClient.post('/api/auth/refresh');
     
-    // Update token in localStorage
+    // Update token using token manager
     if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      setAuthToken(response.data.token);
     }
     
     return response.data;

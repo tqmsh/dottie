@@ -8,6 +8,7 @@ import {
 import { authApi } from "@/src/api/auth/index";
 import { User, LoginInput, SignupInput } from "@/src/api/auth/types";
 import { userApi } from "@/src/api/user/index";
+import { storeAuthData, getAuthToken, getUserData, clearAllTokens } from "../api/core/tokenManager";
 
 interface AuthState {
   user: User | null;
@@ -27,16 +28,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Helper function to get stored auth data
 const getStoredAuthData = (): { user: User | null; token: string | null } => {
-  const userStr = localStorage.getItem("auth_user");
-  const token = localStorage.getItem("auth_token");
+  const user = getUserData();
+  const token = getAuthToken();
 
   console.log('[AuthContext Debug] Getting stored auth data:', {
-    hasUserStr: !!userStr,
+    hasUserStr: !!user,
     hasToken: !!token
   });
 
   return {
-    user: userStr ? JSON.parse(userStr) : null,
+    user,
     token,
   };
 };
@@ -109,18 +110,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('[AuthContext Debug] Login attempt with:', credentials.email);
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const { user, token } = await authApi.login(credentials);
+      const response = await authApi.login(credentials);
       console.log('[AuthContext Debug] Login successful, received token and user:', {
-        userId: user.id,
-        hasToken: !!token
+        userId: response.user.id,
+        hasToken: !!response.token
       });
 
-      localStorage.setItem("auth_user", JSON.stringify(user));
-      localStorage.setItem("auth_token", token as string);
-      console.log('[AuthContext Debug] Saved user and token to localStorage');
+      // Use the token manager to store auth data
+      storeAuthData(response);
+      console.log('[AuthContext Debug] Saved user and token using token manager');
 
       setState({
-        user,
+        user: response.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -170,9 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("[AuthContext Debug] Logout error:", error);
     } finally {
-      localStorage.removeItem("auth_user");
-      localStorage.removeItem("auth_token");
-      console.log('[AuthContext Debug] Removed user and token from localStorage');
+      // Use token manager to clear all tokens
+      clearAllTokens();
+      console.log('[AuthContext Debug] Removed user and tokens using token manager');
       
       setState({
         user: null,

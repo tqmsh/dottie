@@ -54,7 +54,7 @@ describe('postLogout', () => {
     await postLogout();
 
     // Verify
-    expect(localStorage.removeItem).toHaveBeenCalledWith('authToken');
+    expect(localStorage.removeItem).toHaveBeenCalledWith('auth_token');
     expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
   });
 
@@ -65,7 +65,7 @@ describe('postLogout', () => {
     
     // Execute & Verify
     await expect(postLogout()).rejects.toThrow(mockError);
-    expect(localStorage.removeItem).toHaveBeenCalledWith('authToken');
+    expect(localStorage.removeItem).toHaveBeenCalledWith('auth_token');
     expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
   });
 }); 
