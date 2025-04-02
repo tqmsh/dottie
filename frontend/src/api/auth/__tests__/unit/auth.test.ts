@@ -73,7 +73,7 @@ describe('Auth Functions', () => {
         password: 'password123'
       });
       expect(result).toEqual(mockResponse.data);
-      expect(localStorage.getItem('auth_token')).toBe('fake-jwt-token');
+      expect(localStorage.getItem('authToken')).toBe('fake-jwt-token');
       expect(apiClient.defaults.headers.common['Authorization']).toBe('Bearer fake-jwt-token');
     });
     
@@ -86,14 +86,14 @@ describe('Auth Functions', () => {
         .rejects.toThrow('Invalid credentials');
         
       // Token should not be set
-      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorage.getItem('authToken')).toBeNull();
     });
   });
   
   describe('postLogout', () => {
     it('should remove token from localStorage on logout', async () => {
       // Setup initial state with token
-      localStorage.setItem('auth_token', 'existing-token');
+      localStorage.setItem('authToken', 'existing-token');
       apiClient.defaults.headers.common['Authorization'] = 'Bearer existing-token';
       
       // Mock successful logout
@@ -110,13 +110,13 @@ describe('Auth Functions', () => {
       });
       
       // Verify token was removed
-      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorage.getItem('authToken')).toBeNull();
       expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
     });
     
     it('should remove token locally even if logout API fails', async () => {
       // Setup initial state with token
-      localStorage.setItem('auth_token', 'existing-token');
+      localStorage.setItem('authToken', 'existing-token');
       apiClient.defaults.headers.common['Authorization'] = 'Bearer existing-token';
       
       // Mock failed logout
@@ -126,7 +126,7 @@ describe('Auth Functions', () => {
       await expect(postLogout()).rejects.toThrow('Network error');
       
       // Verify token was still removed locally
-      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorage.getItem('authToken')).toBeNull();
       expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
     });
   });

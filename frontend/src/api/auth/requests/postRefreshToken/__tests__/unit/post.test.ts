@@ -66,7 +66,7 @@ describe('postRefreshToken', () => {
     await postRefreshToken();
 
     // Verify
-    expect(localStorage.setItem).toHaveBeenCalledWith('auth_token', mockResponse.data.token);
+    expect(localStorage.setItem).toHaveBeenCalledWith('authToken', mockResponse.data.token);
     expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockResponse.data.token}`);
   });
 

@@ -49,7 +49,7 @@ export default function EndpointRow({
 
   // Check authentication status on component mount
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('authToken');
     setIsAuthenticated(!!token);
   }, []);
 
@@ -83,7 +83,7 @@ export default function EndpointRow({
       const processedEndpoint = getProcessedEndpoint();
       
       // Check authentication if required - special case for logout which should still work
-      if (requiresAuth && !localStorage.getItem('auth_token') && endpoint !== '/api/auth/logout') {
+      if (requiresAuth && !localStorage.getItem('authToken') && endpoint !== '/api/auth/logout') {
         setAuthError(true);
         throw new Error('Authentication required. Please login first.');
       }
@@ -101,7 +101,7 @@ export default function EndpointRow({
             try {
               // Get tokens before clearing storage
               const refreshToken = localStorage.getItem("refresh_token");
-              const authToken = localStorage.getItem("auth_token");
+              const authToken = localStorage.getItem("authToken");
               
               console.log('[Logout Debug] Current tokens:', { 
                 authTokenExists: !!authToken, 
@@ -147,7 +147,7 @@ export default function EndpointRow({
               
               // Clear local storage tokens after API call attempt
               console.log('[Logout Debug] Clearing local storage tokens');
-              localStorage.removeItem("auth_token");
+              localStorage.removeItem("authToken");
               localStorage.removeItem("refresh_token");
               localStorage.removeItem("auth_user");
               

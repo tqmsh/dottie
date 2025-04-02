@@ -50,7 +50,7 @@ export default function SignInPage() {
       
       // Debug: Log authentication token and user data
       console.log('[Auth Debug] After login - localStorage items:', {
-        auth_token: localStorage.getItem('auth_token'),
+        authToken: localStorage.getItem('authToken'),
         refresh_token: localStorage.getItem('refresh_token'),
         user: localStorage.getItem('user'),
         auth_user: localStorage.getItem('auth_user')

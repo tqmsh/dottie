@@ -57,7 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Create a memoized function to check and update tokens
   const checkTokens = useCallback(() => {
-    const currentAuthToken = localStorage.getItem('auth_token');
+    const currentAuthToken = localStorage.getItem('authToken');
     const currentRefreshToken = localStorage.getItem('refresh_token');
     
     setAuthToken(currentAuthToken);
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const validateToken = useCallback(async () => {
     try {
       setLoading(true);
-      const currentAuthToken = localStorage.getItem('auth_token');
+      const currentAuthToken = localStorage.getItem('authToken');
       
       if (currentAuthToken) {
         // In a real app, make an API call to validate the token
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to validate token'));
       // Clear invalid tokens
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
       setUser(null);
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     // Set up event listeners
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'auth_token' || event.key === 'refresh_token' || event.key === 'user' || event.key === null) {
+      if (event.key === 'authToken' || event.key === 'refresh_token' || event.key === 'user' || event.key === null) {
         checkTokens();
         validateToken();
       }
@@ -112,12 +112,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     // Add event listeners
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('auth_token_changed', handleAuthTokenChanged);
+    window.addEventListener('authToken_changed', handleAuthTokenChanged);
     
     return () => {
       // Remove event listeners on cleanup
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auth_token_changed', handleAuthTokenChanged);
+      window.removeEventListener('authToken_changed', handleAuthTokenChanged);
     };
   }, [checkTokens, validateToken]);
 
@@ -130,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const user = { id: '123', email };
       
       // Store tokens and user info
-      localStorage.setItem('auth_token', 'demo-auth-token-' + Date.now());
+      localStorage.setItem('authToken', 'demo-auth-token-' + Date.now());
       localStorage.setItem('refresh_token', 'demo-refresh-token-' + Date.now());
       localStorage.setItem('user', JSON.stringify(user));
       
@@ -139,7 +139,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       checkTokens();
       
       // Dispatch event to notify other tabs
-      window.dispatchEvent(new Event('auth_token_changed'));
+      window.dispatchEvent(new Event('authToken_changed'));
       
       return user;
     } catch (err) {
@@ -152,7 +152,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     // Clear storage
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     
@@ -161,7 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkTokens();
     
     // Dispatch event to notify other tabs
-    window.dispatchEvent(new Event('auth_token_changed'));
+    window.dispatchEvent(new Event('authToken_changed'));
   };
 
   const updatePassword = async (currentPassword: string, newPassword: string) => {

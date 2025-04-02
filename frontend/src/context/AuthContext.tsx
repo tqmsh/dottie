@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //     refreshInterval = setInterval(async () => {
   //       try {
   //         const { token } = await authApi.refreshToken();
-  //         localStorage.setItem('auth_token', token);
+  //         localStorage.setItem('authToken', token);
   //       } catch (error) {
   //         // If refresh fails, logout user
   //         await logout();

@@ -5,7 +5,7 @@
 
 // Constants for token keys to ensure consistency
 export const TOKEN_KEYS = {
-  AUTH_TOKEN: 'auth_token',
+  AUTH_TOKEN: 'authToken',
   REFRESH_TOKEN: 'refresh_token',
   USER: 'auth_user'
 };
@@ -32,7 +32,7 @@ export const setAuthToken = (token: string): boolean => {
     
     // Dispatch token change event
     try {
-      window.dispatchEvent(new Event('auth_token_changed'));
+      window.dispatchEvent(new Event('authToken_changed'));
     } catch (e) {
       console.error('[Token Manager] Failed to dispatch token change event:', e);
     }
@@ -179,7 +179,7 @@ export const clearAllTokens = (): void => {
     
     // Dispatch token change event
     try {
-      window.dispatchEvent(new Event('auth_token_changed'));
+      window.dispatchEvent(new Event('authToken_changed'));
     } catch (e) {
       console.error('[Token Manager] Failed to dispatch token change event:', e);
     }
