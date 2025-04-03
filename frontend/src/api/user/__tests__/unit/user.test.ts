@@ -91,7 +91,11 @@ describe('User API', () => {
       expect(result).toEqual(mockResponse);
     });
   });
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 04796da (feat: implement chat functionality with conversation and message management)
   describe('updatePassword', () => {
     it('should update the user password', async () => {
       const mockInput = { currentPassword: 'old', newPassword: 'new' };
