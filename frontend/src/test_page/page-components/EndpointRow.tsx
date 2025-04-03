@@ -5,6 +5,7 @@ import ApiResponse from './ApiResponse';
 import InputForm from './InputForm';
 import { apiClient } from '../../api';
 import { authApi } from '../../api/auth';
+import { AxiosError } from 'axios';
 
 interface InputField {
   name: string;
@@ -63,16 +64,19 @@ export default function EndpointRow({
   }));
 
   // Replace path parameters in endpoint
-  const getProcessedEndpoint = () => {
+  const getProcessedEndpoint = (overridePathParams?: Record<string, string>) => {
     let processedEndpoint = endpoint;
+    // Use overridePathParams if provided, otherwise use state
+    const paramsToUse = overridePathParams || pathParamValues;
+    
     console.log('Processing endpoint:', endpoint);
     console.log('Path params:', pathParams);
-    console.log('Path param values:', pathParamValues);
+    console.log('Path param values:', paramsToUse);
     
     pathParams.forEach(param => {
-      if (pathParamValues[param]) {
-        console.log(`Replacing :${param} with ${pathParamValues[param]}`);
-        processedEndpoint = processedEndpoint.replace(`:${param}`, pathParamValues[param]);
+      if (paramsToUse[param]) {
+        console.log(`Replacing :${param} with ${paramsToUse[param]}`);
+        processedEndpoint = processedEndpoint.replace(`:${param}`, paramsToUse[param]);
       } else {
         console.log(`No value provided for path parameter :${param}`);
       }
@@ -82,14 +86,14 @@ export default function EndpointRow({
     return processedEndpoint;
   };
 
-  const handleApiCall = async (formData?: Record<string, any>) => {
+  const handleApiCall = async (formData?: Record<string, any>, overridePathParams?: Record<string, string>) => {
     setIsLoading(true);
     setStatus('idle');
     setAuthError(false);
     
     try {
       let result;
-      const processedEndpoint = getProcessedEndpoint();
+      const processedEndpoint = getProcessedEndpoint(overridePathParams);
       console.log('API Call - Method:', method);
       console.log('API Call - Original endpoint:', endpoint);
       console.log('API Call - Processed endpoint:', processedEndpoint);
@@ -192,13 +196,13 @@ export default function EndpointRow({
       if (requiresParams) {
         setShowInputForm(false);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error calling ${endpoint}:`, error);
       console.error('Full error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
+        message: error instanceof Error ? error.message : 'Unknown error',
+        response: (error as AxiosError)?.response?.data,
+        status: (error as AxiosError)?.response?.status,
+        headers: (error as AxiosError)?.response?.headers
       });
       setResponse(error);
       setStatus('error');
@@ -247,12 +251,14 @@ export default function EndpointRow({
 
   const handlePathParamSubmit = (formData: Record<string, any>) => {
     console.log('Path param submit with data:', formData);
+    // Update state for future reference
     setPathParamValues(formData);
     
     // If no other parameters are needed, make the call
     if (!requiresParams || inputFields.length === 0) {
       console.log('No additional params needed, making API call');
-      handleApiCall();
+      // Pass the form data directly instead of relying on state update
+      handleApiCall(undefined, formData);
     } else {
       // Otherwise keep the form open for body parameters
       console.log('Keeping form open for body parameters');

@@ -3,11 +3,11 @@ import { PasswordUpdateRequest } from "../../types";
 
 /**
  * Update user password
- * @endpoint /api/user/password/update (POST)
+ * @endpoint /api/user/pw/update (POST)
  */
 export const postPasswordUpdate = async (passwordData: PasswordUpdateRequest): Promise<{ message: string }> => {
   try {
-    const response = await apiClient.post('/api/user/password/update', passwordData);
+    const response = await apiClient.post('/api/user/pw/update', passwordData);
     return response.data;
   } catch (error) {
     console.error('Failed to update password:', error);
