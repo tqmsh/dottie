@@ -65,11 +65,20 @@ export default function EndpointRow({
   // Replace path parameters in endpoint
   const getProcessedEndpoint = () => {
     let processedEndpoint = endpoint;
+    console.log('Processing endpoint:', endpoint);
+    console.log('Path params:', pathParams);
+    console.log('Path param values:', pathParamValues);
+    
     pathParams.forEach(param => {
       if (pathParamValues[param]) {
+        console.log(`Replacing :${param} with ${pathParamValues[param]}`);
         processedEndpoint = processedEndpoint.replace(`:${param}`, pathParamValues[param]);
+      } else {
+        console.log(`No value provided for path parameter :${param}`);
       }
     });
+    
+    console.log('Processed endpoint:', processedEndpoint);
     return processedEndpoint;
   };
 
@@ -81,6 +90,10 @@ export default function EndpointRow({
     try {
       let result;
       const processedEndpoint = getProcessedEndpoint();
+      console.log('API Call - Method:', method);
+      console.log('API Call - Original endpoint:', endpoint);
+      console.log('API Call - Processed endpoint:', processedEndpoint);
+      console.log('API Call - Form data:', formData);
       
       // Check authentication if required - special case for logout which should still work
       if (requiresAuth && !localStorage.getItem('authToken') && endpoint !== '/api/auth/logout') {
@@ -93,6 +106,7 @@ export default function EndpointRow({
       // Make appropriate API call based on method
       switch (method) {
         case 'GET':
+          console.log('Making GET request to:', processedEndpoint);
           result = await apiClient.get(processedEndpoint);
           break;
         case 'POST':
@@ -161,13 +175,16 @@ export default function EndpointRow({
           }
           break;
         case 'PUT':
+          console.log('Making PUT request to:', processedEndpoint, 'with data:', formData);
           result = await apiClient.put(processedEndpoint, formData || {});
           break;
         case 'DELETE':
+          console.log('Making DELETE request to:', processedEndpoint);
           result = await apiClient.delete(processedEndpoint);
           break;
       }
       
+      console.log('API Call - Success response:', result.data);
       setResponse(result.data);
       setStatus('success');
       
@@ -177,6 +194,12 @@ export default function EndpointRow({
       }
     } catch (error) {
       console.error(`Error calling ${endpoint}:`, error);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
       setResponse(error);
       setStatus('error');
     } finally {
@@ -200,29 +223,39 @@ export default function EndpointRow({
   };
 
   const handleFormSubmit = (formData: Record<string, any>) => {
+    console.log('Form submit with data:', formData);
+    
     // Extract path parameters if needed
     if (pathParams.length > 0) {
       const newPathParamValues: Record<string, string> = {};
       pathParams.forEach(param => {
         if (formData[param]) {
+          console.log(`Extracting path param ${param} with value ${formData[param]}`);
           newPathParamValues[param] = formData[param];
           delete formData[param]; // Remove from form data
+        } else {
+          console.log(`Path param ${param} not found in form data`);
         }
       });
+      console.log('Setting path param values:', newPathParamValues);
       setPathParamValues(newPathParamValues);
     }
     
+    console.log('Calling API with form data:', formData);
     handleApiCall(formData);
   };
 
   const handlePathParamSubmit = (formData: Record<string, any>) => {
+    console.log('Path param submit with data:', formData);
     setPathParamValues(formData);
     
     // If no other parameters are needed, make the call
     if (!requiresParams || inputFields.length === 0) {
+      console.log('No additional params needed, making API call');
       handleApiCall();
     } else {
       // Otherwise keep the form open for body parameters
+      console.log('Keeping form open for body parameters');
       setShowInputForm(true);
     }
   };

@@ -6,7 +6,7 @@ export default function EndpointRow() {
     <BaseEndpointRow 
       method="POST"
       endpoint="/api/user/pw/reset"
-      expectedOutput={{ message: "Password reset email sent" }}
+      expectedOutput={{ message: "If a user with that email exists, a password reset link has been sent" }}
       requiresParams={true}
       inputFields={[
         {
