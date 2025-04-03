@@ -15,6 +15,7 @@ export const getCurrentUser = async (req, res) => {
       return res.json({
         id: userId,
         username: `test_user_${Date.now()}`,
+        name: `test_user_${Date.now()}`,
         email: `test_${Date.now()}@example.com`,
         age: "18_24",
         created_at: new Date().toISOString(),
@@ -31,7 +32,13 @@ export const getCurrentUser = async (req, res) => {
     // Remove sensitive information
     const { password_hash, ...userWithoutPassword } = user;
     
-    res.json(userWithoutPassword);
+    // Map 'username' to 'name' in the response for frontend compatibility
+    const responseData = {
+      ...userWithoutPassword,
+      name: userWithoutPassword.username
+    };
+    
+    res.json(responseData);
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
@@ -71,6 +78,7 @@ export const getUserById = async (req, res) => {
     res.json(userWithoutPassword);
   } catch (error) {
     console.error('Error fetching user:', error);
+
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
