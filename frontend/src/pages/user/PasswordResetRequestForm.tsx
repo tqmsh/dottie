@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { requestPasswordReset } from "../../api/user/requests/passwordReset";
 
 // Define schema directly here for simplicity
 const PasswordResetRequestSchema = z.object({
@@ -38,10 +39,9 @@ export const PasswordResetRequestForm: React.FC = () => {
   const onSubmit: SubmitHandler<PasswordResetRequestFormInputs> = async (data) => {
     setIsLoading(true);
     try {
-      // Mock API call
-      console.log("Requesting password reset for:", data.email);
+      // Call the actual API endpoint
+      await requestPasswordReset({ email: data.email });
       
-      // Simulate API success
       setIsRequestSubmitted(true);
       reset();
     } catch (error) {

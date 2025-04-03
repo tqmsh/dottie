@@ -12,6 +12,11 @@ export const updatePassword = async (req, res) => {
     const userId = req.params.id;
     const { currentPassword, newPassword } = req.body;
     
+    // Check if userId exists
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+    
     // Special handling for test user IDs in tests
     if (userId.startsWith('test-user-')) {
       // Return mock updated user for test
