@@ -1,5 +1,5 @@
 import { apiClient, isSuccess, isClientError, isServerError } from './core/apiClient';
-import { checkDbConnection, fetchUserData } from '@core/db';
+import { checkDbConnection, fetchUserData } from './core/db';
 
 import { authApi, login, signup, logout, refreshToken } from './auth';
 import { type User, type LoginInput, type SignupInput, type AuthResponse } from './auth/types';
