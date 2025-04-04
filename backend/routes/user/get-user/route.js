@@ -10,4 +10,4 @@ router.get('/me', authenticateToken, getCurrentUser);
 // GET - Get user by ID
 router.get('/:id', authenticateToken, getUserById);
 
-export default router; 
+export default router;
