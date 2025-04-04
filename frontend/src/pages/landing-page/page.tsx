@@ -26,12 +26,12 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                <Link to="/auth/signup">
+                <Link to="/auth/sign-up">
                   <Button className="w-full sm:w-auto bg-pink-500 hover:bg-pink-600 text-white">
                     Get Started
                   </Button>
                 </Link>
-                <Link to="/auth/signin">
+                <Link to="/auth/sign-in">
                   <Button variant="outline" className="w-full sm:w-auto">
                     Sign In
                   </Button>

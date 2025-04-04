@@ -18,7 +18,7 @@ export default function SignOut() {
         toast.error('There was a problem signing you out');
       } finally {
         // Redirect to the sign-in page regardless of outcome
-        navigate('/auth/signin', { replace: true });
+        navigate('/auth/sign-in', { replace: true });
       }
     };
 

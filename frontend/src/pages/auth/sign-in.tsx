@@ -66,7 +66,7 @@ export default function SignInPage() {
         });
       }, 100);
       
-      navigate("/assessment");
+      navigate("/assessment/age-verification");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign in");
     }
@@ -114,7 +114,7 @@ export default function SignInPage() {
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link to="/auth/signup" className="text-pink-500 hover:text-pink-600">
+          <Link to="/auth/sign-up" className="text-pink-500 hover:text-pink-600">
             Sign up
           </Link>
         </p>
