@@ -7,7 +7,6 @@ import SignOut from "./pages/auth/signout";
 // Import account management pages
 import ProfilePage from "./pages/user/profile";
 import PasswordPage from "./pages/user/password";
-import WelcomePage from "./LandingPage";
 import { Toaster } from "sonner";
 
 // Import assessment components
@@ -25,6 +24,7 @@ import DetailsPage from "./pages/assessment/history/[id]/page";
 import TestPage from "./test_page/page";
 import ScrollToTop from "./components/scroll-to-top";
 import LandingPage from "./pages/landing-page/page";
+import UITestPageSwitch from "./components/navigation/UITestPageSwitch";
 
 function App() {
   return (
@@ -34,11 +34,12 @@ function App() {
         <ScrollToTop />
         <main className="flex min-h-screen flex-col">
           <Routes>
-            <Route index element={<TestPage />} />
+            <Route index element={<LandingPage />} />
+            <Route path="/test-page" element={<TestPage />} />
 
             {/* Assessment routes */}
             <Route path="/assessment">
-              <Route index element={<WelcomePage />} />
+              <Route index element={<LandingPage />} />
               <Route path="age-verification" element={<AgeVerification />} />
               <Route path="cycle-length" element={<CycleLength />} />
               <Route path="period-duration" element={<PeriodDuration />} />
@@ -55,14 +56,15 @@ function App() {
             <Route path="/test" element={<TestPage />} />
 
             {/* Authentication routes */}
-            <Route path="/auth/signin" element={<SignIn />} />
-            <Route path="/auth/signup" element={<SignUp />} />
+            <Route path="/auth/sign-in" element={<SignIn />} />
+            <Route path="/auth/sign-up" element={<SignUp />} />
             <Route path="/auth/signout" element={<SignOut />} />
 
             {/* Account management routes */}
             <Route path="/account/profile" element={<ProfilePage />} />
             <Route path="/account/password" element={<PasswordPage />} />
           </Routes>
+          <UITestPageSwitch />
         </main>
       </BrowserRouter>
     </>

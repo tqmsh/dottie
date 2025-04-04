@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 export default function SignInPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -58,15 +58,14 @@ export default function SignInPage() {
       
       // Log context values
       setTimeout(() => {
-        // Log with a small delay to ensure context is updated
-        const authContext = useAuth();
+        // Log auth state after login
         console.log('[Auth Debug] Auth context after login:', {
-          isAuthenticated: authContext.isAuthenticated,
-          user: authContext.user
+          isAuthenticated,
+          user
         });
       }, 100);
       
-      navigate("/assessment");
+      navigate("/assessment/age-verification");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign in");
     }
@@ -114,7 +113,7 @@ export default function SignInPage() {
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link to="/auth/signup" className="text-pink-500 hover:text-pink-600">
+          <Link to="/auth/sign-up" className="text-pink-500 hover:text-pink-600">
             Sign up
           </Link>
         </p>

@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { userApi } from '../../../user';
-import apiClient from '../../../core/apiClient';
+import { apiClient } from '../../../core/apiClient';
 
 // Correctly mock the API client - both default and named export
 vi.mock('../../../core/apiClient', () => {
@@ -16,13 +16,13 @@ vi.mock('../../../core/apiClient', () => {
   };
 });
 
-// Mock the resetPassword method if it's missing from the userApi
-if (!userApi.resetPassword) {
-  userApi.resetPassword = async (data: { email: string }) => {
-    const response = await apiClient.post('/api/user/pw/reset', data);
-    return response.data;
-  };
-}
+// Mock the resetPassword method if it's missing from the userApi -> ! Removed to test the actual function!
+// if (!userApi.resetPassword) {
+//   userApi.resetPassword = async (data: { email: string }) => {
+//     const response = await apiClient.post('/api/user/pw/reset', data);
+//     return response.data;
+//   };
+// }
 
 describe('User API', () => {
   beforeEach(() => {
@@ -80,32 +80,83 @@ describe('User API', () => {
   });
 
   describe('resetPassword', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+  
     it('should request a password reset', async () => {
       const mockInput = { email: 'test@example.com' };
-      const mockResponse = { message: 'Password reset email sent' };
+      const mockResponse = { message: 'If a user with that email exists, a password reset link has been sent' };
+  
       (apiClient.post as any).mockResolvedValueOnce({ data: mockResponse });
-      
+  
       const result = await userApi.passwordReset.request(mockInput);
-      
+  
       expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/reset', mockInput);
       expect(result).toEqual(mockResponse);
     });
-  });
-<<<<<<< HEAD
-
-=======
   
->>>>>>> 04796da (feat: implement chat functionality with conversation and message management)
+    it('should handle failure when requesting a password reset', async () => {
+      const mockInput = { email: 'test@example.com' };
+      const mockError = new Error('Failed to process password reset request');
+  
+      (apiClient.post as any).mockRejectedValueOnce(mockError);
+  
+      await expect(userApi.passwordReset.request(mockInput)).rejects.toThrow('Failed to process password reset request');
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/reset', mockInput);
+    });
+  
+    it('should complete a password reset', async () => {
+      const mockInput = { token: 'abc123', newPassword: 'newpassword123', confirmPassword:'newpassword123' };
+      const mockResponse = { message: 'Password has been reset successfully' };
+  
+      (apiClient.post as any).mockResolvedValueOnce({ data: mockResponse });
+  
+      const result = await userApi.passwordReset.complete(mockInput);
+  
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/reset/complete', mockInput);
+      expect(result).toEqual(mockResponse);
+    });
+  
+    it('should handle failure when completing a password reset', async () => {
+      const mockInput = { token: 'abc123', newPassword: 'newpassword123', confirmPassword:'newpassword123' };
+      const mockError = new Error('Invalid or expired reset token');
+  
+      (apiClient.post as any).mockRejectedValueOnce(mockError);
+  
+      await expect(userApi.passwordReset.complete(mockInput)).rejects.toThrow('Invalid or expired reset token');
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/reset/complete', mockInput);
+    });
+  });
+  
+  
+
+
   describe('updatePassword', () => {
     it('should update the user password', async () => {
       const mockInput = { currentPassword: 'old', newPassword: 'new' };
-      const mockResponse = { message: 'Password updated successfully' };
+      const mockResponse = { 
+        message: 'Password updated successfully',
+        updated_at: expect.any(String)
+      };
+  
       (apiClient.post as any).mockResolvedValueOnce({ data: mockResponse });
       
       const result = await userApi.updatePassword(mockInput);
       
-      expect(apiClient.post).toHaveBeenCalledWith('/api/user/password/update', mockInput);
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/pw/update', mockInput);
       expect(result).toEqual(mockResponse);
+    });
+  
+    it('should handle incorrect current password', async () => {
+      const mockInput = { currentPassword: 'wrong', newPassword: 'new' };
+      const mockError = new Error('Current password is incorrect');
+  
+      (apiClient.post as any).mockRejectedValueOnce(mockError);
+  
+      await expect(userApi.updatePassword(mockInput))
+        .rejects.toThrow('Current password is incorrect');
+      expect(apiClient.post).toHaveBeenCalledWith('/api/user/pw/update', mockInput);
     });
   });
 }); 

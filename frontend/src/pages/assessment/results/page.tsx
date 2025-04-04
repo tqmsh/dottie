@@ -235,16 +235,75 @@ export default function ResultsPage() {
   const patternInfo = patternData[pattern]
 
   // Calculate progress bar widths based on values
-  const getProgressWidth = (value: string) => {
-    if (value.includes("Less than")) return "20%"
-    if (value.includes("More than")) return "80%"
-    if (value === "Heavy") return "80%"
-    if (value === "Severe") return "80%"
-    if (value === "Moderate") return "50%"
-    if (value === "Light") return "20%"
-    if (value === "Mild") return "20%"
-    return "50%"
+  const getProgressWidth = (value: string): string => {
+    if (!value) return "0%"
+    
+    // Make sure value is a string for consistent handling
+    const val = String(value).trim().toLowerCase()
+    
+    // Age handling
+    if (val === "13-17") return "25%"
+    if (val === "18-24") return "35%"
+    if (val.includes("25")) return "45%" // Handle "25+", "25-plus", etc.
+    if (val.includes("35")) return "65%" // Handle "35+", "35-plus", etc.
+    if (val.includes("45")) return "85%" // Handle "45+", "45-plus", etc.
+    
+    // Cycle length handling
+    if (val.includes("less than 21")) return "20%"
+    if (val.includes("21-25") || val === "21-25 days") return "30%"
+    if (val.includes("26-30")) return "45%"
+    if (val.includes("31-35")) return "60%"
+    if (val.includes("36-40")) return "75%"
+    if (val.includes("more than 45") || val.includes("45+")) return "100%"
+    if (val.includes("irregular")) return "50%"
+    
+    // Period duration handling
+    if (val.includes("1-2")) return "20%"
+    if (val.includes("3-4")) return "40%"
+    if (val.includes("5-7")) return "60%"
+    if (val.includes("8+") || val.includes("8-plus") || val.includes("more than 7")) return "100%"
+    
+    // Flow level handling
+    if (val === "light" || val.includes("light")) return "25%"
+    if (val === "moderate" || val.includes("moderate")) return "50%"
+    if (val === "heavy" || val.includes("heavy")) return "75%"
+    if (val.includes("very heavy") || val === "very-heavy") return "100%"
+    
+    // Pain level handling
+    if (val === "mild" || val.includes("mild")) return "25%"
+    if (val === "moderate" || val.includes("moderate")) return "50%"
+    if (val === "severe" || val.includes("severe")) return "75%"
+    if (val === "debilitating" || val.includes("debilitating")) return "100%"
+    
+    // If we couldn't match anything specific, use sensible defaults
+    if (val.includes("less than")) return "20%"
+    if (val.includes("more than")) return "80%"
+    
+    console.log("Using default width for value:", val)
+    return "50%" // Default value
   }
+
+  // Force progress bars to update when values change
+  useEffect(() => {
+    // Debug logging
+    console.log("Calculated widths:", {
+      age: getProgressWidth(age),
+      cycleLength: getProgressWidth(cycleLength),
+      periodDuration: getProgressWidth(periodDuration),
+      flowLevel: getProgressWidth(flowLevel),
+      painLevel: getProgressWidth(painLevel)
+    });
+    
+    // Trigger a re-render when these values change
+    const progressElements = document.querySelectorAll('.bg-pink-500.h-2.rounded-full');
+    if (progressElements.length > 0) {
+      // This forces a style recalculation
+      progressElements.forEach(el => {
+        el.classList.remove('bg-pink-500');
+        setTimeout(() => el.classList.add('bg-pink-500'), 0);
+      });
+    }
+  }, [age, cycleLength, periodDuration, flowLevel, painLevel]);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -295,7 +354,11 @@ export default function ResultsPage() {
                 <span className="text-sm text-gray-500">{age || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(age) }}></div>
+                <div 
+                  key={`age-${age}`} 
+                  className="bg-pink-500 h-2 rounded-full" 
+                  style={{ width: getProgressWidth(age) }}
+                ></div>
               </div>
             </div>
 
@@ -305,7 +368,11 @@ export default function ResultsPage() {
                 <span className="text-sm text-gray-500">{cycleLength || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(cycleLength) }}></div>
+                <div 
+                  key={`cycle-${cycleLength}`} 
+                  className="bg-pink-500 h-2 rounded-full" 
+                  style={{ width: getProgressWidth(cycleLength) }}
+                ></div>
               </div>
             </div>
 
@@ -315,7 +382,11 @@ export default function ResultsPage() {
                 <span className="text-sm text-gray-500">{periodDuration || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(periodDuration) }}></div>
+                <div 
+                  key={`period-${periodDuration}`} 
+                  className="bg-pink-500 h-2 rounded-full" 
+                  style={{ width: getProgressWidth(periodDuration) }}
+                ></div>
               </div>
             </div>
 
@@ -343,7 +414,11 @@ export default function ResultsPage() {
                 <span className="text-sm text-gray-500">{painLevel || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(painLevel) }}></div>
+                <div 
+                  key={`pain-${painLevel}`} 
+                  className="bg-pink-500 h-2 rounded-full" 
+                  style={{ width: getProgressWidth(painLevel) }}
+                ></div>
               </div>
             </div>
 
@@ -353,7 +428,11 @@ export default function ResultsPage() {
                 <span className="text-sm text-gray-500">{flowLevel || "Not provided"}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div className="bg-pink-500 h-2 rounded-full" style={{ width: getProgressWidth(flowLevel) }}></div>
+                <div 
+                  key={`flow-${flowLevel}`} 
+                  className="bg-pink-500 h-2 rounded-full" 
+                  style={{ width: getProgressWidth(flowLevel) }}
+                ></div>
               </div>
             </div>
           </div>
