@@ -68,7 +68,7 @@ export const getConversation = async (conversationId, userId) => {
   try {
     // First check if the conversation exists and belongs to the user
     const conversation = await DbService.findBy('conversations', 'id', conversationId);
-    
+
     if (!conversation || conversation.length === 0 || conversation[0].user_id !== userId) {
       return null;
     }
@@ -77,10 +77,11 @@ export const getConversation = async (conversationId, userId) => {
     const messages = await DbService.findBy('chat_messages', 'conversation_id', conversationId);
     
     return {
-      ...conversation[0],
-      userId: conversation[0].user_id,
-      createdAt: conversation[0].created_at,
-      updatedAt: conversation[0].updated_at,
+      // ...conversation[0],
+      // userId: conversation[0].user_id,
+      // createdAt: conversation[0].created_at,
+      // updatedAt: conversation[0].updated_at,
+      id: conversationId,
       messages: messages.map(msg => ({
         role: msg.role,
         content: msg.content,
@@ -100,14 +101,16 @@ export const getConversation = async (conversationId, userId) => {
  */
 export const getUserConversations = async (userId) => {
   try {
-    // Get all conversations
-    const conversations = await DbService.findBy('conversations', 'user_id', userId);
+    const conversations = await DbService.getConversationsWithPreviews(userId);
     
     return conversations.map(conversation => ({
       id: conversation.id,
-      lastMessageDate: conversation.updated_at,
-      preview: conversation.updated_at
+      lastMessageDate: conversation.lastMessageDate,
+      preview: conversation.preview 
+        ? conversation.preview + (conversation.preview.length >= 50 ? '...' : '')
+        : 'No messages yet'
     }));
+
   } catch (error) {
     logger.error('Error getting user conversations:', error);
     throw error;
@@ -123,19 +126,40 @@ export const getUserConversations = async (userId) => {
 export const deleteConversation = async (conversationId, userId) => {
   try {
     // First check if the conversation exists and belongs to the user
-    const conversation = await DbService.findBy('conversations', 'id', conversationId);
+    const conversations = await DbService.findBy('conversations', 'id', conversationId);
     
-    if (!conversation || conversation.length === 0 || conversation[0].user_id !== userId) {
+    // Check if conversation exists and belongs to user
+    if (!conversations || conversations.length === 0) {
+      logger.warn(`Conversation ${conversationId} not found`);
       return false;
     }
-    
+
+    const conversation = conversations[0];
+    if (conversation.user_id !== userId) {
+      logger.warn(`User ${userId} not authorized to delete conversation ${conversationId}`);
+      return false;
+    }
+
     // Delete all messages first (due to foreign key constraint)
-    await DbService.delete('chat_messages', 'conversation_id', conversationId);
-    
+    const messagesDeleted = await DbService.delete('chat_messages', {
+      conversation_id: conversationId
+    });
+    logger.info(`Deleted ${messagesDeleted} messages from conversation ${conversationId}`);
+
     // Delete the conversation
-    await DbService.delete('conversations', 'id', conversationId);
-    
+    const conversationDeleted = await DbService.delete('conversations', {
+      id: conversationId,
+      user_id: userId  // Extra safety: ensure user owns the conversation
+    });
+
+    if (!conversationDeleted) {
+      logger.error(`Failed to delete conversation ${conversationId}`);
+      return false;
+    }
+
+    logger.info(`Successfully deleted conversation ${conversationId}`);
     return true;
+
   } catch (error) {
     logger.error('Error deleting conversation:', error);
     throw error;
