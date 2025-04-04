@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 export default function SignInPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -58,11 +58,10 @@ export default function SignInPage() {
       
       // Log context values
       setTimeout(() => {
-        // Log with a small delay to ensure context is updated
-        const authContext = useAuth();
+        // Log auth state after login
         console.log('[Auth Debug] Auth context after login:', {
-          isAuthenticated: authContext.isAuthenticated,
-          user: authContext.user
+          isAuthenticated,
+          user
         });
       }, 100);
       
