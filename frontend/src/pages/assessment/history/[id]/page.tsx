@@ -1,9 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ArrowLeft, Calendar, Activity, Droplet, Heart, Brain } from 'lucide-react';
-import { assessmentApi, type Assessment } from '@/src/api/assessment';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { format, isValid, parseISO } from "date-fns";
+import {
+  ArrowLeft,
+  Calendar,
+  Activity,
+  Droplet,
+  Heart,
+  Brain,
+} from "lucide-react";
+import { Assessment } from "@/src/api/assessment/types";
+import { assessmentApi } from "@/src/api/assessment";
+import { toast } from "sonner";
 
 export default function AssessmentDetailsPage() {
   const { id } = useParams();
@@ -12,14 +20,17 @@ export default function AssessmentDetailsPage() {
 
   useEffect(() => {
     const fetchAssessment = async () => {
-      if (!id) return;
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const data = await assessmentApi.getById(id);
         setAssessment(data);
       } catch (error) {
-        toast.error('Failed to load assessment details');
-        console.error('Error fetching assessment:', error);
+        console.error("Failed to fetch assessment:", error);
+        toast.error("Failed to load assessment details");
       } finally {
         setIsLoading(false);
       }
@@ -27,6 +38,29 @@ export default function AssessmentDetailsPage() {
 
     fetchAssessment();
   }, [id]);
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "Unknown date";
+
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) return "Invalid date";
+
+      return format(date, "MMMM d, yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date format";
+    }
+  };
+
+  const formatValue = (value: string | undefined) => {
+    if (!value) return "Not provided";
+
+    return value
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   if (isLoading) {
     return (
@@ -39,7 +73,9 @@ export default function AssessmentDetailsPage() {
     );
   }
 
-  if (!assessment) {
+  const assessmentData = assessment?.assessmentData;
+
+  if (!assessmentData) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -52,32 +88,14 @@ export default function AssessmentDetailsPage() {
           </Link>
 
           <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="h-12 w-12 text-gray-400 mb-4">⚠️</div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Assessment Not Found
-              </h2>
-              <p className="text-gray-600 mb-6">
-                The assessment you're looking for doesn't exist or has been removed.
-              </p>
-              <Link
-                to="/assessment/history"
-                className="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
-              >
-                Return to History
-              </Link>
-            </div>
+            <p className="text-gray-600 mb-6">
+              Invalid assessment data format.
+            </p>
           </div>
         </div>
       </div>
     );
   }
-
-  const formatValue = (value: string) => {
-    return value.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,13 +111,15 @@ export default function AssessmentDetailsPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Assessment Details</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Assessment Details
+              </h1>
               <p className="text-sm text-gray-500">
-                {format(new Date(assessment.date), 'MMMM d, yyyy')}
+                {formatDate(assessmentData.date)}
               </p>
             </div>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800">
-              {formatValue(assessment.pattern)}
+              {formatValue(assessmentData.pattern)}
             </span>
           </div>
 
@@ -107,17 +127,22 @@ export default function AssessmentDetailsPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-900">Cycle Information</span>
+                <span className="text-sm font-medium text-gray-900">
+                  Cycle Information
+                </span>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Age:</span> {formatValue(assessment.age)} years
+                  <span className="font-medium">Age:</span>{" "}
+                  {formatValue(assessmentData.age)} years
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Cycle Length:</span> {formatValue(assessment.cycleLength)} days
+                  <span className="font-medium">Cycle Length:</span>{" "}
+                  {formatValue(assessmentData.cycleLength)} days
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Period Duration:</span> {formatValue(assessment.periodDuration)} days
+                  <span className="font-medium">Period Duration:</span>{" "}
+                  {formatValue(assessmentData.periodDuration)} days
                 </p>
               </div>
             </div>
@@ -125,14 +150,18 @@ export default function AssessmentDetailsPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-900">Flow & Pain</span>
+                <span className="text-sm font-medium text-gray-900">
+                  Flow & Pain
+                </span>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Flow Level:</span> {formatValue(assessment.flowHeaviness)}
+                  <span className="font-medium">Flow Level:</span>{" "}
+                  {formatValue(assessmentData.flowHeaviness)}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Pain Level:</span> {formatValue(assessment.painLevel)}
+                  <span className="font-medium">Pain Level:</span>{" "}
+                  {formatValue(assessmentData.painLevel)}
                 </p>
               </div>
             </div>
@@ -142,49 +171,66 @@ export default function AssessmentDetailsPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Droplet className="h-5 w-5 text-gray-400" />
-                <h2 className="text-lg font-medium text-gray-900">Physical Symptoms</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Physical Symptoms
+                </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {assessment.symptoms.physical.map((symptom, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                  >
-                    {symptom}
-                  </span>
-                ))}
+                {assessmentData.symptoms.physical.map(
+                  (symptom: string, index: number) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
+                      {symptom}
+                    </span>
+                  )
+                )}
               </div>
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Brain className="h-5 w-5 text-gray-400" />
-                <h2 className="text-lg font-medium text-gray-900">Emotional Symptoms</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Emotional Symptoms
+                </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {assessment.symptoms.emotional.map((symptom, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                  >
-                    {symptom}
-                  </span>
-                ))}
+                {assessmentData.symptoms.emotional.map(
+                  (symptom: string, index: number) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
+                      {symptom}
+                    </span>
+                  )
+                )}
               </div>
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Heart className="h-5 w-5 text-gray-400" />
-                <h2 className="text-lg font-medium text-gray-900">Recommendations</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Recommendations
+                </h2>
               </div>
               <div className="space-y-4">
-                {assessment.recommendations.map((rec, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-medium text-gray-900">{rec.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{rec.description}</p>
-                  </div>
-                ))}
+                {assessmentData.recommendations.map(
+                  (
+                    rec: { title: string; description: string },
+                    index: number
+                  ) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="font-medium text-gray-900">{rec.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {rec.description}
+                      </p>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -192,4 +238,4 @@ export default function AssessmentDetailsPage() {
       </div>
     </div>
   );
-} 
+}
