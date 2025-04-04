@@ -73,7 +73,7 @@ export default function AssessmentDetailsPage() {
     );
   }
 
-  const assessmentData = assessment?.assessmentData;
+  const assessmentData = (assessment?.assessmentData as any)?.assessmentData;
 
   if (!assessmentData) {
     return (
@@ -96,6 +96,10 @@ export default function AssessmentDetailsPage() {
       </div>
     );
   }
+
+  const physicalSymptoms = assessmentData.symptoms?.physical || [];
+  const emotionalSymptoms = assessmentData.symptoms?.emotional || [];
+  const recommendations = assessmentData.recommendations || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -176,15 +180,19 @@ export default function AssessmentDetailsPage() {
                 </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {assessmentData.symptoms.physical.map(
-                  (symptom: string, index: number) => (
+                {physicalSymptoms.length > 0 ? (
+                  physicalSymptoms.map((symptom: string, index: number) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                     >
                       {symptom}
                     </span>
-                  )
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-500">
+                    No physical symptoms reported
+                  </span>
                 )}
               </div>
             </div>
@@ -197,15 +205,19 @@ export default function AssessmentDetailsPage() {
                 </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {assessmentData.symptoms.emotional.map(
-                  (symptom: string, index: number) => (
+                {emotionalSymptoms.length > 0 ? (
+                  emotionalSymptoms.map((symptom: string, index: number) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                     >
                       {symptom}
                     </span>
-                  )
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-500">
+                    No emotional symptoms reported
+                  </span>
                 )}
               </div>
             </div>
@@ -218,18 +230,26 @@ export default function AssessmentDetailsPage() {
                 </h2>
               </div>
               <div className="space-y-4">
-                {assessmentData.recommendations.map(
-                  (
-                    rec: { title: string; description: string },
-                    index: number
-                  ) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="font-medium text-gray-900">{rec.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {rec.description}
-                      </p>
-                    </div>
+                {recommendations.length > 0 ? (
+                  recommendations.map(
+                    (
+                      rec: { title: string; description: string },
+                      index: number
+                    ) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4">
+                        <h3 className="font-medium text-gray-900">
+                          {rec.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {rec.description}
+                        </p>
+                      </div>
+                    )
                   )
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No recommendations available
+                  </p>
                 )}
               </div>
             </div>

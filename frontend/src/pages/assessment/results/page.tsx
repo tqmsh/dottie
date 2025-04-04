@@ -367,22 +367,26 @@ export default function ResultsPage() {
         userId: "", // This will be set by the backend
         createdAt: new Date().toISOString(),
         assessmentData: {
-          date: new Date().toISOString(),
-          pattern,
-          age,
-          cycleLength,
-          periodDuration: periodDuration || "Not provided",
-          flowHeaviness: flowLevel,
-          painLevel: painLevel || "Not provided",
-          symptoms: {
-            physical: symptoms || [],
-            emotional: [],
+          userId: "", // This will be set by the backend
+          createdAt: new Date().toISOString(),
+          assessmentData: {
+            date: new Date().toISOString(),
+            pattern,
+            age,
+            cycleLength,
+            periodDuration: periodDuration || "Not provided",
+            flowHeaviness: flowLevel,
+            painLevel: painLevel || "Not provided",
+            symptoms: {
+              physical: symptoms || [],
+              emotional: [],
+            },
+            recommendations:
+              patternInfo?.recommendations?.map((rec) => ({
+                title: rec.title,
+                description: rec.description,
+              })) || [],
           },
-          recommendations:
-            patternInfo?.recommendations?.map((rec) => ({
-              title: rec.title,
-              description: rec.description,
-            })) || [],
         },
       };
 

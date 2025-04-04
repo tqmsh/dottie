@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { assessmentApi, type Assessment } from "@/src/api/assessment";
@@ -9,6 +9,32 @@ export default function HistoryPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const formatValue = (value: string | undefined): string => {
+    if (!value) return "Not provided";
+
+    if (value === "not-sure") return "Not sure";
+    if (value === "varies") return "Varies";
+    if (value === "under-13") return "Under 13";
+    if (value === "8-plus") return "8+ days";
+
+    return value
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return "Unknown date";
+
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) return "Invalid date";
+      return format(date, "MMM d, yyyy");
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
 
   useEffect(() => {
     const fetchAssessments = async () => {
@@ -87,47 +113,46 @@ export default function HistoryPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {assessments.map((assessment) => (
-              <Link
-                key={assessment.id}
-                to={`/assessment/history/${assessment.id}`}
-                className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                        {assessment.assessmentData.pattern
-                          .charAt(0)
-                          .toUpperCase() +
-                          assessment.assessmentData.pattern.slice(1)}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {format(
-                          new Date(assessment.assessmentData.date),
-                          "MMM d, yyyy"
-                        )}
-                      </span>
+            {assessments.map((assessment) => {
+              const data = assessment?.assessmentData?.assessmentData;
+
+              return (
+                <Link
+                  key={assessment.id}
+                  to={`/assessment/history/${assessment.id}`}
+                  className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                          {formatValue(data?.pattern)}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {formatDate(data?.date)}
+                        </span>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <p>
+                          Age: {formatValue(data?.age)}
+                          {data?.age && data.age !== "under-13" ? " years" : ""}
+                        </p>
+                        <p>
+                          Cycle Length: {formatValue(data?.cycleLength)}
+                          {data?.cycleLength &&
+                          !["other", "varies", "not-sure"].includes(
+                            data.cycleLength
+                          )
+                            ? " days"
+                            : ""}
+                        </p>
+                      </div>
                     </div>
-                    <div className="mt-2 text-sm text-gray-600">
-                      <p>
-                        Age: {assessment.assessmentData.age.replace("-", " ")}{" "}
-                        years
-                      </p>
-                      <p>
-                        Cycle Length:{" "}
-                        {assessment.assessmentData.cycleLength.replace(
-                          "-",
-                          " "
-                        )}{" "}
-                        days
-                      </p>
-                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
                   </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
