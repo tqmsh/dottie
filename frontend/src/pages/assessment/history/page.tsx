@@ -1,38 +1,25 @@
-import { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-import { Calendar, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { assessmentApi, type Assessment } from '@/src/api/assessment';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { Calendar, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { assessmentApi, type Assessment } from "@/src/api/assessment";
+import { toast } from "sonner";
 
 export default function HistoryPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const dummyAssessments = [
-  //   {
-  //     id: '1',
-  //     date: new Date(),
-  //     pattern: 'regular',
-  //     age: '18_24',
-  //     cycleLength: '26_30',
-  //   },
-  //   {
-  //     id: '2',
-  //     date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-  //     pattern: 'irregular',
-  //     age: '18_24',
-  //     cycleLength: 'irregular',
-  //   },
-  // ];
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAssessments = async () => {
       try {
         const data = await assessmentApi.list();
         setAssessments(data);
+        setError(null);
       } catch (error) {
-        toast.error('Failed to load assessments');
-        console.error('Error fetching assessments:', error);
+        console.error("Error fetching assessments:", error);
+        setError("Unable to load your assessments. Please try again later.");
+        toast.error("Failed to load assessments");
       } finally {
         setIsLoading(false);
       }
@@ -56,7 +43,9 @@ export default function HistoryPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Assessment History</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Assessment History
+          </h1>
           <Link
             to="/assessment"
             className="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
@@ -65,10 +54,25 @@ export default function HistoryPage() {
           </Link>
         </div>
 
-        {assessments.length === 0 ? (
+        {error ? (
+          <div className="text-center py-12">
+            <div className="text-red-500 mb-4">⚠️</div>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{error}</h3>
+            <div className="mt-6">
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        ) : assessments.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No assessments yet</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No assessments yet
+            </h3>
             <p className="mt-1 text-sm text-gray-500">
               Start your first assessment to track your menstrual health.
             </p>
@@ -93,15 +97,31 @@ export default function HistoryPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                        {assessment.pattern.charAt(0).toUpperCase() + assessment.pattern.slice(1)}
+                        {assessment.assessmentData.pattern
+                          .charAt(0)
+                          .toUpperCase() +
+                          assessment.assessmentData.pattern.slice(1)}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {format(new Date(assessment.date), 'MMM d, yyyy')}
+                        {format(
+                          new Date(assessment.assessmentData.date),
+                          "MMM d, yyyy"
+                        )}
                       </span>
                     </div>
                     <div className="mt-2 text-sm text-gray-600">
-                      <p>Age: {assessment.age.replace('_', '-')} years</p>
-                      <p>Cycle Length: {assessment.cycleLength.replace('_', '-')} days</p>
+                      <p>
+                        Age: {assessment.assessmentData.age.replace("-", " ")}{" "}
+                        years
+                      </p>
+                      <p>
+                        Cycle Length:{" "}
+                        {assessment.assessmentData.cycleLength.replace(
+                          "-",
+                          " "
+                        )}{" "}
+                        days
+                      </p>
                     </div>
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
@@ -113,4 +133,4 @@ export default function HistoryPage() {
       </div>
     </div>
   );
-} 
+}
