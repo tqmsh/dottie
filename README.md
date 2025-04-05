@@ -34,7 +34,6 @@ Dottie is a conversational AI assistant designed as a friendly, knowledgeable "P
 - **Symptom Assessment**: Evaluates menstrual patterns against age-appropriate clinical guidelines.
 - **Personalized Education**: Provides developmentally appropriate explanations based on user's age and knowledge level.
 - **Decision Support**: Helps determine when to seek medical attention vs. when patterns are within normal range.
-- **Period Tracking**: Simple logging system with visual representation of patterns over time.
 - **Conversation Starters**: Provides scripts to help teens discuss concerns with parents and healthcare providers.
 
 ### Unique Approach:
@@ -50,14 +49,12 @@ Dottie is a conversational AI assistant designed as a friendly, knowledgeable "P
 ### User Journey:
 
 1. **Onboarding**: Brief questionnaire establishes baseline information about age, menstrual history, and concerns.
-2. **Daily Tracking**: Simple interface to log cycle days, symptoms, and other relevant information.
-3. **Assessment**: When users report concerns or unusual symptoms, Dottie guides them through a conversational assessment using clinically-validated questions.
-4. **Personalized Guidance**:
+2. **Assessment**: When users report concerns or unusual symptoms, Dottie guides them through a conversational assessment using clinically-validated questions.
+3. **Personalized Guidance**:
    - **Green**: Reassurance when patterns are within normal range.
-   - **Yellow**: Monitoring recommendations for borderline patterns.
    - **Red**: Clear guidance to seek healthcare when patterns suggest potential issues.
-5. **Educational Content**: Contextual information about menstrual health delivered through engaging, age-appropriate explanations.
-6. **Healthcare Connection**: When needed, helps prepare for healthcare visits with symptom summaries and questions to ask.
+4. **Educational Content**: Contextual information about menstrual health delivered through engaging, age-appropriate explanations.
+5. **Healthcare Connection**: When needed, helps prepare for healthcare visits with symptom summaries and questions to ask.
 
 ### User Experience:
 The interface balances friendly engagement with medical credibility, using accessible language while maintaining scientific accuracy.

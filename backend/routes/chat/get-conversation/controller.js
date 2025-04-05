@@ -8,7 +8,7 @@ import { getConversation as getConversationModel } from '../../../models/chat.js
  */
 export const getConversation = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId
     const { conversationId } = req.params;
     
     if (!conversationId) {

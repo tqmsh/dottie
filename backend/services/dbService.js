@@ -79,20 +79,28 @@ class DbService {
   }
 
   /**
-   * Delete a record
-   * @param {string} table - Table name
-   * @param {string|number} id - Record ID
-   * @returns {Promise<boolean>} - Success flag
-   */
-  static async delete(table, id) {
-    try {
-      const count = await db(table).where('id', id).delete();
-      return count > 0;
-    } catch (error) {
-      console.error(`Error in delete for ${table}:`, error);
-      throw error;
+ * Delete record(s) from a table
+ * @param {string} table - Table name
+ * @param {string|number|Object} option - Record ID or conditions object
+ * @returns {Promise<boolean>} - Success flag
+ */
+static async delete(table, option) {
+  try {
+    const query = db(table);
+
+    if (typeof option === 'object' && option !== null) {
+      query.where(option); // custom conditions
+    } else {
+      query.where('id', option); // single id
     }
+
+    const deletedCount = await query.del();
+    return deletedCount > 0;
+  } catch (error) {
+    console.error(`Error deleting from ${table}:`, error);
+    throw error;
   }
+}
 
   /**
    * Get all records from a table
@@ -104,6 +112,33 @@ class DbService {
       return await db(table);
     } catch (error) {
       console.error(`Error in getAll for ${table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get conversations with their latest message preview
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} - Conversations with previews
+   */
+  static async getConversationsWithPreviews(userId) {
+    try {
+      return await db('conversations as c')
+        .select([
+          'c.id',
+          'c.updated_at as lastMessageDate',
+          db.raw(`(
+            SELECT SUBSTR(content, 1, 50) 
+            FROM chat_messages 
+            WHERE conversation_id = c.id 
+            ORDER BY created_at DESC 
+            LIMIT 1
+          ) as preview`)
+        ])
+        .where('c.user_id', userId)
+        .orderBy('c.updated_at', 'desc');
+    } catch (error) {
+      console.error(`Error in getConversationsWithPreviews:`, error);
       throw error;
     }
   }
