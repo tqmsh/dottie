@@ -412,9 +412,7 @@ export default function ResultsPage() {
           <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link to="/" className="text-gray-500">
-          X
-        </Link>
+        <UserIcon />
       </header>
 
       <main className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full">
