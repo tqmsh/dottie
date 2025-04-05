@@ -7,11 +7,15 @@ import { FormInput } from "@/src/components/ui/!to-migrate/form-input";
 import { Button } from "@/src/components/ui/!to-migrate/button";
 import { toast } from "sonner";
 import AuthLayout from "@/src/components/AuthLayout";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { PasswordInput } from "@/src/components/ui/PasswordInput";
 
 export default function SignInPage() {
   const navigate = useNavigate();
   const { login, isAuthenticated, user } = useAuth();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const togglePasswordVisibility = () => setPasswordVisible((prev) => !prev);
+
   const {
     register,
     handleSubmit,
@@ -25,7 +29,7 @@ export default function SignInPage() {
   useEffect(() => {
     const email = localStorage.getItem("login_email");
     const password = localStorage.getItem("login_password");
-    
+
     if (email) {
       // Set with a slight delay to ensure form is ready
       setTimeout(() => {
@@ -33,7 +37,7 @@ export default function SignInPage() {
         localStorage.removeItem("login_email");
       }, 100);
     }
-    
+
     if (password) {
       // Set with a slight delay to ensure form is ready
       setTimeout(() => {
@@ -47,7 +51,7 @@ export default function SignInPage() {
     try {
       await login(data);
       toast.success("Successfully signed in!");
-      
+
       // Debug: Log authentication token and user data
       console.log('[Auth Debug] After login - localStorage items:', {
         authToken: localStorage.getItem('authToken'),
@@ -55,7 +59,7 @@ export default function SignInPage() {
         user: localStorage.getItem('user'),
         auth_user: localStorage.getItem('auth_user')
       });
-      
+
       // Log context values
       setTimeout(() => {
         // Log auth state after login
@@ -64,7 +68,7 @@ export default function SignInPage() {
           user
         });
       }, 100);
-      
+
       navigate("/assessment/age-verification");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign in");
@@ -86,7 +90,7 @@ export default function SignInPage() {
             {...register("email")}
             error={errors.email?.message}
           />
-          <FormInput
+          {/* <FormInput
             id="password"
             type="password"
             label="Password"
@@ -95,15 +99,28 @@ export default function SignInPage() {
             required
             {...register("password")}
             error={errors.password?.message}
+          /> */}
+
+          <PasswordInput
+            id="password"
+            label="Password"
+            autoComplete="current-password"
+            register={register}
+            error={errors.password?.message}
+            required
+            placeholder="Enter your password"
+            isVisible={passwordVisible}
+            toggleVisibility={togglePasswordVisibility}
           />
+
         </div>
-        
+
         <div className="flex items-center justify-end">
           <Link to="/auth/forgot-password" className="text-sm text-pink-500 hover:text-pink-600">
             Forgot your password?
           </Link>
         </div>
-        
+
         <div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Signing in..." : "Sign in"}
