@@ -8,7 +8,7 @@ import { deleteConversation as deleteConversationModel } from '../../../models/c
  */
 export const deleteConversation = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId
     const { conversationId } = req.params;
     
     if (!conversationId) {
