@@ -5,21 +5,24 @@ export default function EndpointRow() {
   return (
     <BaseEndpointRow 
       method="PUT"
-      endpoint="/api/user/:id"
+      endpoint="/api/user/me"
       expectedOutput={{ message: "User updated" }}
       requiresAuth={true}
-      pathParams={["id"]}
       requiresParams={true}
       inputFields={[
         {
-          name: "userData",
-          label: "User Data",
-          type: "json",
+          name: "name",
+          label: "Name",
+          type: "text",
           required: true,
-          defaultValue: JSON.stringify({
-            name: "Updated Name",
-            email: "updated@example.com"
-          }, null, 2)
+          defaultValue: `UpdatedUser_${Date.now()}`
+        },
+        {
+          name: "email",
+          label: "Email",
+          type: "text",
+          required: true,
+          defaultValue: `updated_${Date.now()}@example.com`
         }
       ]}
     />

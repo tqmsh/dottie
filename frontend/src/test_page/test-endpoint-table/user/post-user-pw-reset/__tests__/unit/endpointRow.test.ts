@@ -21,8 +21,10 @@ describe('Password Reset Endpoint Row', () => {
     // Check if the method is displayed correctly
     expect(screen.getByText('POST')).toBeInTheDocument();
     
-    // Check if email input field is present
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    // Check if email input field is present but optional
+    const emailInput = screen.getByLabelText(/email/i);
+    expect(emailInput).toBeInTheDocument();
+    expect(emailInput).not.toHaveAttribute('required');
   });
   
   it('shows expected response format', () => {
@@ -33,6 +35,6 @@ describe('Password Reset Endpoint Row', () => {
     );
     
     // Check if expected output is displayed
-    expect(screen.getByText(/if a user with that email exists/i)).toBeInTheDocument();
+    expect(screen.getByText(/We have sent a password reset link to/i)).toBeInTheDocument();
   });
 }); 

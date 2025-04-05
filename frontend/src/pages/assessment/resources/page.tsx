@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { Button } from "@/src/components/ui/!to-migrate/button"
 import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
 import { DotIcon, ExternalLink, Heart } from "lucide-react"
+import UserIcon from "@/src/components/navigation/UserIcon"
 
 export default function ResourcesPage() {
   return (
@@ -11,9 +12,7 @@ export default function ResourcesPage() {
         <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link to="/" className="text-gray-500">
-          X
-        </Link>
+        <UserIcon />
       </header>
 
       <main className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full">

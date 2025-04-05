@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/!to-migrate/radio-group"
 import { Label } from "@/src/components/ui/!to-migrate/label"
 import { ChevronRight, ChevronLeft, InfoIcon } from "lucide-react"
+import UserIcon from "@/src/components/navigation/UserIcon"
 
 export default function PainPage() {
   const [selectedPain, setSelectedPain] = useState<string | null>(null)
@@ -23,9 +24,7 @@ export default function PainPage() {
         <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link to="/" className="text-gray-500">
-          X
-        </Link>
+        <UserIcon />
       </header>
 
       <main className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full">
