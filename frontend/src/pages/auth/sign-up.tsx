@@ -7,10 +7,16 @@ import { FormInput } from "@/src/components/ui/!to-migrate/form-input";
 import { Button } from "@/src/components/ui/!to-migrate/button";
 import { toast } from "sonner";
 import AuthLayout from "@/src/components/AuthLayout";
+import { useState } from "react";
+import { PasswordInput } from "@/src/components/ui/PasswordInput";
+
 
 export default function SignUpPage() {
   const navigate = useNavigate();
   const { signup } = useAuth();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const togglePasswordVisibility = () => setPasswordVisible((prev) => !prev);
+
   const {
     register,
     handleSubmit,
@@ -22,11 +28,11 @@ export default function SignUpPage() {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       await signup(data);
-      
+
       // Store signup credentials for autofill in the login form
       localStorage.setItem("login_email", data.email);
       localStorage.setItem("login_password", data.password);
-      
+
       toast.success("Account created successfully!");
       navigate("/auth/sign-in");
     } catch (error) {
@@ -72,26 +78,46 @@ export default function SignUpPage() {
             {...register("email")}
             error={errors.email?.message}
           />
-          <FormInput
+            {/* <FormInput
+              id="password"
+              type={passwordVisible ? "text" : "password"}
+              label="Password"
+              autoComplete="new-password"
+              required
+              {...register("password")}
+              error={errors.password?.message}
+              
+            /> */}
+            {/* <FormInput
+              id="confirmPassword"
+              type={passwordVisible ? "text" : "password"}
+              label="Confirm password"
+              autoComplete="new-password"
+              required
+              {...register("confirmPassword")}
+              error={errors.confirmPassword?.message}
+            /> */}
+          <PasswordInput
             id="password"
-            type="password"
             label="Password"
             autoComplete="new-password"
-            required
-            {...register("password")}
+            register={register}
             error={errors.password?.message}
+            required
+            isVisible={passwordVisible}
+            toggleVisibility={togglePasswordVisibility}
           />
-          <FormInput
+          <PasswordInput
             id="confirmPassword"
-            type="password"
             label="Confirm password"
             autoComplete="new-password"
-            required
-            {...register("confirmPassword")}
+            register={register}
             error={errors.confirmPassword?.message}
+            required
+            isVisible={passwordVisible}
+            toggleVisibility={togglePasswordVisibility}
           />
         </div>
-
         <div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Creating account..." : "Create account"}
