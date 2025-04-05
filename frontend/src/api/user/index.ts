@@ -1,5 +1,4 @@
 import {
-  getById,
   getCurrentUser,
   putUpdate,
   deleteUser,
@@ -14,7 +13,6 @@ export * from "./types";
 // Export individual endpoints
 export {
   getCurrentUser,
-  getById as getUserById,
   putUpdate as updateUser,
   deleteUser,
   postPasswordUpdate as updatePassword,
@@ -25,7 +23,6 @@ export {
 // User API object for backward compatibility
 export const userApi = {
   current: getCurrentUser,
-  getById,
   update: putUpdate,
   delete: deleteUser,
   updatePassword: postPasswordUpdate,

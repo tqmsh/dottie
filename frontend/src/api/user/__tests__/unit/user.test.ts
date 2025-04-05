@@ -41,19 +41,6 @@ describe('User API', () => {
     });
   });
 
-  describe('getUserById', () => {
-    it('should fetch a user by ID', async () => {
-      const mockId = '1';
-      const mockData = { id: mockId, name: 'Test User', email: 'test@example.com' };
-      (apiClient.get as any).mockResolvedValueOnce({ data: mockData });
-      
-      const result = await userApi.getById(mockId);
-      
-      expect(apiClient.get).toHaveBeenCalledWith(`/api/user/${mockId}`);
-      expect(result).toEqual(mockData);
-    });
-  });
-
   describe('updateUser', () => {
     it('should update a user profile', async () => {
       const mockId = '1';

@@ -23,7 +23,7 @@ describe('User ID endpoints', () => {
   // Only run tests if API is available
   const shouldSkipTests = () => process.env.SKIP_TESTS === 'true';
 
-  describe('PUT /api/user/:id', () => {
+  describe('PUT /api/user/me', () => {
     it('should update a user successfully', async () => {
       if (shouldSkipTests()) return;
 
@@ -32,7 +32,7 @@ describe('User ID endpoints', () => {
         email: 'updated@example.com'
       };
 
-      const response = await fetch(`${API_URL}/user/${TEST_USER_ID}`, {
+      const response = await fetch(`${API_URL}/user/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

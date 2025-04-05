@@ -7,18 +7,14 @@ const createMockServer = () => {
   const app = express();
   app.use(express.json());
   
-  // Mock PUT /api/user/:id endpoint
-  app.put('/api/user/:id', (req, res) => {
-    const { id } = req.params;
-    if (id === 'test-user-123') {
-      res.status(200).json({
-        id,
-        ...req.body,
-        updated_at: new Date().toISOString()
-      });
-    } else {
-      res.status(404).json({ error: 'User not found' });
-    }
+  // Mock PUT /api/user/me endpoint
+  app.put('/api/user/me', (req, res) => {
+    const id = 'test-user-123';
+    res.status(200).json({
+      id,
+      ...req.body,
+      updated_at: new Date().toISOString()
+    });
   });
 
   // Mock DELETE /api/user/:id endpoint
@@ -41,7 +37,7 @@ describe('User ID Endpoints - Unit Tests', () => {
   const app = createMockServer();
   const TEST_USER_ID = 'test-user-123';
   
-  describe('PUT /api/user/:id', () => {
+  describe('PUT /api/user/me', () => {
     it('should update a user successfully', async () => {
       const updateData = {
         name: 'Updated Test User',
@@ -49,7 +45,7 @@ describe('User ID Endpoints - Unit Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/user/${TEST_USER_ID}`)
+        .put(`/api/user/me`)
         .set('Authorization', 'Bearer test-token-123')
         .send(updateData);
         

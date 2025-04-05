@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { setupUser } from './api-user-setup';
 
 /**
- * Test for PUT /api/auth/users/:id endpoint
+ * Test for PUT /api/auth/users/me endpoint
  */
 test.describe('User API - Update User', () => {
   let authToken = null;
@@ -15,7 +15,7 @@ test.describe('User API - Update User', () => {
     userId = setup.userId;
   });
   
-  test('PUT /api/auth/users/:id - should update user', async ({ request }) => {
+  test('PUT /api/auth/users/me - should update user', async ({ request }) => {
     // Skip this test if no auth token or user ID is available
     test.skip(!authToken || !userId, 'No auth token or user ID available');
     
@@ -26,11 +26,11 @@ test.describe('User API - Update User', () => {
       username: `updated_user_${timestamp}`
     };
     
-    console.log('Updating user with ID:', userId);
+    console.log('Updating user');
     console.log('Update data:', updatedData);
     
     // Update user
-    const response = await request.put(`/api/auth/users/${userId}`, {
+    const response = await request.put(`/api/auth/users/me`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       },
