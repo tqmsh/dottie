@@ -5,10 +5,9 @@ export default function EndpointRow() {
   return (
     <BaseEndpointRow 
       method="PUT"
-      endpoint="/api/user/:id"
+      endpoint="/api/user/me"
       expectedOutput={{ message: "User updated" }}
       requiresAuth={true}
-      pathParams={["id"]}
       requiresParams={true}
       inputFields={[
         {
