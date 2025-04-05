@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/src/components/ui/!to-migrate/card"
 import { MessageCircle, Heart, ChevronRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ChatModal } from "@/src/pages/chat/page"
+import UserIcon from "@/src/components/navigation/UserIcon"
 
 
 // Define the types of menstrual patterns as per LogicTree.md
@@ -312,9 +313,7 @@ export default function ResultsPage() {
         <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
           <span className="font-semibold text-pink-500">Dottie</span>
         </div>
-        <Link to="/" className="text-gray-500">
-          X
-        </Link>
+        <UserIcon />
       </header>
 
       <main className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full">
