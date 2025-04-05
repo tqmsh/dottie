@@ -8,14 +8,12 @@
 export const validateResetPasswordRequest = (req, res, next) => {
   const { email } = req.body;
   
-  // Check if email is present
+  // Email is optional now
   if (!email) {
-    return res.status(400).json({ 
-      error: 'Email is required for password reset' 
-    });
+    return next();
   }
   
-  // Validate email format
+  // Validate email format if provided
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ 

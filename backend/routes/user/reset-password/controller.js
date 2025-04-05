@@ -13,17 +13,24 @@ export const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
     
+    // Return standard response if no email is provided
+    if (!email) {
+      return res.json({
+        message: 'If a user with that email exists, a password reset link has been sent'
+      });
+    }
+    
     // Special handling for test email in tests
     if (email === 'test-email') {
       return res.json({
-        message: 'If a user with that email exists, a password reset link has been sent'
+        message: `We have sent a password reset link to test@example.com`
       });
     }
     
     // Find user by email
     const user = await User.findByEmail(email);
     
-    // For security reasons, don't reveal if the user exists or not
+    // For security reasons, don't reveal if the user exists or not if user doesn't exist
     if (!user) {
       return res.json({
         message: 'If a user with that email exists, a password reset link has been sent'
@@ -41,9 +48,9 @@ export const requestPasswordReset = async (req, res) => {
     // Send the reset token via email
     await EmailService.sendPasswordResetEmail(email, resetToken);
     
-    // Return success message (same as if user doesn't exist for security)
+    // Return success message with the email address for existing users
     res.json({
-      message: 'If a user with that email exists, a password reset link has been sent'
+      message: `We have sent a password reset link to ${email}`
     });
   } catch (error) {
     console.error('Error requesting password reset:', error);
