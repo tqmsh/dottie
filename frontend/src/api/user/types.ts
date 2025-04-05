@@ -15,7 +15,7 @@ export interface PasswordUpdateRequest {
 }
 
 export interface PasswordResetRequest {
-  email: string;
+  email?: string;
 }
 
 export interface PasswordResetCompletion {
