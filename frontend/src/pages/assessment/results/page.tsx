@@ -7,6 +7,7 @@ import { ChatModal } from "@/src/pages/chat/page";
 import { toast } from "sonner";
 import { Assessment } from "@/src/api/assessment/types";
 import { postSend } from "@/src/api/assessment/requests/postSend/Request"; // Add this import
+import UserIcon from "@/src/components/navigation/UserIcon"
 
 // Define the types of menstrual patterns as per LogicTree.md
 type MenstrualPattern =
