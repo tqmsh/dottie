@@ -25,7 +25,7 @@ export default function AccountForm({ user }: AccountFormProps) {
     setIsLoading(true);
 
     try {
-      await userApi.update(user.id, formData);
+      await userApi.update(formData);
       toast.success('Account updated successfully');
     } catch (error) {
       console.error('Error updating account:', error);
