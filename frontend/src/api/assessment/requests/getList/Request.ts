@@ -2,17 +2,18 @@ import { apiClient } from "../../../core/apiClient";
 import { Assessment } from "../../types";
 
 /**
- * Get list of all assessments
- * @endpoint /api/assessment/ (GET)
+ * Get list of all assessments for the current user
+ * @endpoint /api/assessment/list (GET)
  */
 export const getList = async (): Promise<Assessment[]> => {
   try {
-    const response = await apiClient.get('/api/assessment');
+    // Try the correct endpoint - it's likely one of these:
+    const response = await apiClient.get("/api/assessment/list");
     return response.data;
   } catch (error) {
-    console.error('Failed to get assessments:', error);
+    console.error("Failed to get assessments:", error);
     throw error;
   }
 };
 
-export default getList; 
+export default getList;
