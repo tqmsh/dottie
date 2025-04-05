@@ -11,14 +11,18 @@ export default function EndpointRow() {
       requiresParams={true}
       inputFields={[
         {
-          name: "userData",
-          label: "User Data",
-          type: "json",
+          name: "name",
+          label: "Name",
+          type: "text",
           required: true,
-          defaultValue: JSON.stringify({
-            name: "Updated Name",
-            email: "updated@example.com"
-          }, null, 2)
+          defaultValue: `UpdatedUser_${Date.now()}`
+        },
+        {
+          name: "email",
+          label: "Email",
+          type: "text",
+          required: true,
+          defaultValue: `updated_${Date.now()}@example.com`
         }
       ]}
     />
