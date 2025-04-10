@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { userApi } from '@/src/api/user';
 import { User } from '@/src/api/auth/types';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/src/context/AuthContext';
 
 interface AccountFormProps {
   user: User;
@@ -12,8 +14,10 @@ export default function AccountForm({ user }: AccountFormProps) {
     name: user.name || '',
     email: user.email || '',
   });
-
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,43 +39,81 @@ export default function AccountForm({ user }: AccountFormProps) {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await userApi.delete(user.id);
+      toast.success('Account deleted successfully');
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error('Failed to delete account');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="name" className="block text-sm font-medium">
-          Full Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-      </div>
+    <div className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-sm font-medium">
+            Full Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
+        </div>
 
-      <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm font-medium">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-      </div>
+        <div className="space-y-2">
+          <label htmlFor="email" className="block text-sm font-medium">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
+        </div>
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full py-2 px-4 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50"
-      >
-        {isLoading ? 'Updating...' : 'Update Account'}
-      </button>
-    </form>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-2 px-4 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50"
+        >
+          {isLoading ? 'Updating...' : 'Update Account'}
+        </button>
+      </form>
+
+      <div className="border-t pt-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Danger Zone</h2>
+        <div className="bg-red-50 p-4 rounded-md border border-red-200">
+          <h3 className="text-sm font-medium text-red-800">Delete Account</h3>
+          <p className="mt-1 text-sm text-red-700">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isLoading}
+            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            {isLoading ? 'Deleting...' : 'Delete Account'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 } 
