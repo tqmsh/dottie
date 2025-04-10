@@ -19,7 +19,7 @@ export interface PasswordResetRequest {
 }
 
 export interface PasswordResetCompletion {
-  token: string;
+  email: string;
   newPassword: string;
   confirmPassword: string;
 } 
