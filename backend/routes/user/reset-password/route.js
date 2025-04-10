@@ -7,7 +7,7 @@ const router = express.Router();
 // POST - Request password reset (send email with token)
 router.post('/pw/reset', validateResetPasswordRequest, requestPasswordReset);
 
-// POST - Complete password reset with token and new password
+// POST - Complete password reset with new password
 router.post('/pw/reset-complete', validateResetPasswordCompletion, completePasswordReset);
 
 export default router; 
