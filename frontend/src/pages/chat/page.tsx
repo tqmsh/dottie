@@ -1,22 +1,15 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/!to-migrate/dialog"
 import { Button } from "@/src/components/ui/!to-migrate/button"
 import { Input } from "@/src/components/ui/!to-migrate/input"
 import { ScrollArea } from "@/src/components/ui/!to-migrate/scroll-area"
-import { Send, Loader2, X } from "lucide-react"
+import { Send, Loader2, X, MessageCircle } from "lucide-react"
 import { getAIFeedback } from "@/src/services/ai"
 
 interface ChatModalProps {
   isOpen: boolean
   onClose: () => void
-  userData: {
-    age: string
-    cycleLength: string
-    periodDuration: string
-    flowHeaviness: string
-    painLevel: string
-    symptoms: string[]
-  }
+  initialMessage?: string
 }
 
 interface Message {
@@ -24,20 +17,47 @@ interface Message {
   content: string
 }
 
-export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
+export function ChatModal({ isOpen, onClose, initialMessage }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages])
 
-    const userMessage = input.trim()
+  // Send initial message if provided
+  useEffect(() => {
+    if (isOpen && initialMessage && messages.length === 0) {
+      setMessages([{ role: 'user', content: initialMessage }])
+      handleSend(initialMessage)
+    }
+  }, [isOpen, initialMessage])
+
+  const handleSend = async (messageText?: string) => {
+    const textToSend = messageText || input.trim()
+    if (!textToSend || isLoading) return
+
+    const userMessage = textToSend
     setInput("")
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
 
     try {
+      // Get user data from session storage
+      const userData = {
+        age: sessionStorage.getItem("age") || "",
+        cycleLength: sessionStorage.getItem("cycleLength") || "",
+        periodDuration: sessionStorage.getItem("periodDuration") || "",
+        flowHeaviness: sessionStorage.getItem("flowLevel") || "",
+        painLevel: sessionStorage.getItem("painLevel") || "",
+        symptoms: JSON.parse(sessionStorage.getItem("symptoms") || "[]")
+      }
+      
       const aiResponse = await getAIFeedback(userData, userMessage)
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
     } catch (error) {
@@ -53,28 +73,38 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>Chat with Dottie</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-xl border-pink-100 shadow-lg">
+        <DialogHeader className="flex flex-row items-center justify-between p-4 border-b bg-gradient-to-r from-pink-50 to-white">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-pink-500" />
+            <DialogTitle className="text-lg font-bold text-pink-500">Chat with Dottie</DialogTitle>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-pink-100">
+            <X className="h-4 w-4 text-pink-500" />
           </Button>
         </DialogHeader>
-        <div className="flex flex-col h-[400px]">
-          <ScrollArea className="flex-1 pr-4">
+        <div className="flex flex-col h-[500px]">
+          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             <div className="space-y-4">
+              {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500">
+                  <MessageCircle className="h-12 w-12 text-pink-200 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Ask Dottie anything</h3>
+                  <p className="text-sm">I'm here to help with your menstrual health questions</p>
+                </div>
+              )}
               {messages.map((message, index) => (
                 <div
                   key={index}
                   className={`flex ${
                     message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
+                  } animate-fadeIn`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
+                    className={`max-w-[80%] rounded-xl p-3 ${
                       message.role === 'user'
                         ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        : 'bg-gray-50 text-gray-900 border border-gray-100'
                     }`}
                   >
                     {message.content}
@@ -82,23 +112,28 @@ export function ChatModal({ isOpen, onClose, userData }: ChatModalProps) {
                 </div>
               ))}
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 rounded-lg p-3">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex justify-start animate-fadeIn">
+                  <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <Loader2 className="h-4 w-4 animate-spin text-pink-500" />
                   </div>
                 </div>
               )}
             </div>
           </ScrollArea>
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 p-4 border-t bg-white">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               disabled={isLoading}
+              className="rounded-full border-gray-200 focus:border-pink-300 focus:ring-pink-200"
             />
-            <Button onClick={handleSend} disabled={isLoading}>
+            <Button 
+              onClick={() => handleSend()} 
+              disabled={isLoading}
+              className="rounded-full bg-pink-500 hover:bg-pink-600 text-white"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

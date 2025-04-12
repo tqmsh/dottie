@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/src/components/ui/!to-migrate/button";
 import { Card, CardContent } from "@/src/components/ui/!to-migrate/card";
-import { MessageCircle, Heart, ChevronRight } from "lucide-react";
+import { MessageCircle, Heart, ChevronRight, DotIcon, Save, Share2, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ChatModal } from "@/src/pages/chat/page";
 import { toast } from "sonner";
 import { Assessment } from "@/src/api/assessment/types";
-import { postSend } from "@/src/api/assessment/requests/postSend/Request"; // Add this import
+import { postSend } from "@/src/api/assessment/requests/postSend/Request";
 import UserIcon from "@/src/components/navigation/UserIcon"
 
 // Define the types of menstrual patterns as per LogicTree.md
@@ -407,196 +407,122 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="flex items-center justify-between p-4 border-b">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-pink-50">
+      <header className="flex items-center justify-between p-6 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <img src="/chatb.png" alt="Dottie Logo" width={32} height={32} />
-          <span className="font-semibold text-pink-500">Dottie</span>
+          <DotIcon className="h-6 w-6 text-pink-500 fill-pink-500" />
+          <img src="/chatb.png" alt="Dottie Logo" className="w-10 h-10" />
+          <span className="font-bold text-xl text-pink-500">Dottie</span>
         </div>
         <UserIcon />
       </header>
 
-      <main className="flex-1 flex flex-col p-6 max-w-md mx-auto w-full">
-        <Card className="w-full mb-6">
-          <CardContent className="pt-6">
-            <div className="text-center mb-4">
-              <h1 className="text-xl font-bold mb-2">
-                Your Menstrual Pattern is {patternInfo.title}
-              </h1>
-              <p className="text-sm text-gray-600">{patternInfo.description}</p>
+      <main className="flex-1 p-6 max-w-4xl mx-auto w-full">
+        <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+          <div className="bg-pink-500 h-2 rounded-full w-full transition-all duration-500"></div>
+        </div>
+
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-3">Your Assessment Results</h1>
+          <p className="text-gray-600">Based on your responses, here's what we've found about your menstrual health.</p>
+        </div>
+
+        <Card className="w-full mb-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-pink-500 mb-2">{patternData[pattern].title}</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">{patternData[pattern].description}</p>
             </div>
 
-            <div className="flex gap-3 mb-4">
-              <Button
-                className="flex-1 bg-pink-500 hover:bg-pink-600"
-                onClick={() => setIsChatOpen(true)}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Ask Dottie
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={handleSaveResults}
-                disabled={isSaving}
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                {isSaving ? "Saving..." : "Save Results"}
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Age Range</h3>
+                <p className="text-gray-600">{age || "Not specified"}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Cycle Length</h3>
+                <p className="text-gray-600">{cycleLength || "Not specified"}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Period Duration</h3>
+                <p className="text-gray-600">{periodDuration || "Not specified"}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Flow Level</h3>
+                <p className="text-gray-600">{flowLevel || "Not specified"}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Pain Level</h3>
+                <p className="text-gray-600">{painLevel || "Not specified"}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="font-medium text-lg mb-2">Symptoms</h3>
+                <p className="text-gray-600">{symptoms.length > 0 ? symptoms.join(", ") : "None reported"}</p>
+              </div>
             </div>
 
-            <p className="text-xs text-center text-gray-500">
-              *According to the American College of Obstetricians and
-              Gynecologists
-            </p>
+            <h3 className="text-xl font-bold mb-4">Recommendations</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {patternData[pattern].recommendations.map((rec, index) => (
+                <div key={index} className="border rounded-xl p-4 hover:bg-pink-50 transition-colors duration-300">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">{rec.icon}</div>
+                    <div>
+                      <h4 className="font-medium text-lg">{rec.title}</h4>
+                      <p className="text-gray-600">{rec.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-4">Your Cycle Summary</h2>
-
-          <div className="space-y-6">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Age</span>
-                <span className="text-sm text-gray-500">
-                  {age || "Not provided"}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div
-                  key={`age-${age}`}
-                  className="bg-pink-500 h-2 rounded-full"
-                  style={{ width: getProgressWidth(age) }}
-                ></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Cycle Length</span>
-                <span className="text-sm text-gray-500">
-                  {cycleLength || "Not provided"}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div
-                  key={`cycle-${cycleLength}`}
-                  className="bg-pink-500 h-2 rounded-full"
-                  style={{ width: getProgressWidth(cycleLength) }}
-                ></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Period Duration</span>
-                <span className="text-sm text-gray-500">
-                  {periodDuration || "Not provided"}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div
-                  key={`period-${periodDuration}`}
-                  className="bg-pink-500 h-2 rounded-full"
-                  style={{ width: getProgressWidth(periodDuration) }}
-                ></div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium mb-2">Symptoms</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {symptoms.length > 0 ? (
-                  symptoms.map((symptom, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="h-4 w-4 rounded-sm bg-pink-100 flex items-center justify-center">
-                        <span className="text-pink-500 text-xs">✓</span>
-                      </div>
-                      <span className="text-sm">{symptom}</span>
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-sm text-gray-500">
-                    No symptoms selected
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Pain Level</span>
-                <span className="text-sm text-gray-500">
-                  {painLevel || "Not provided"}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div
-                  key={`pain-${painLevel}`}
-                  className="bg-pink-500 h-2 rounded-full"
-                  style={{ width: getProgressWidth(painLevel) }}
-                ></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">Flow Heaviness</span>
-                <span className="text-sm text-gray-500">
-                  {flowLevel || "Not provided"}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded-full">
-                <div
-                  key={`flow-${flowLevel}`}
-                  className="bg-pink-500 h-2 rounded-full"
-                  style={{ width: getProgressWidth(flowLevel) }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-4">
-            Personalized Recommendations
-          </h2>
-
-          <div className="space-y-4">
-            {patternInfo.recommendations.map((rec, index) => (
-              <div key={index} className="flex gap-3">
-                <div className="bg-pink-100 h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-pink-500">{rec.icon}</span>
-                </div>
-                <div>
-                  <h3 className="font-medium">{rec.title}</h3>
-                  <p className="text-sm text-gray-600">{rec.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Link to="/assessment/resources">
-          <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white">
-            View Resources & Next Steps
-            <ChevronRight className="h-4 w-4 ml-2" />
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <Button 
+            className="flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-6 py-6 text-lg"
+            onClick={() => setIsChatOpen(true)}
+          >
+            <MessageCircle className="h-5 w-5" />
+            Chat with Dottie
           </Button>
-        </Link>
+          <Button 
+            className="flex items-center justify-center gap-2 bg-white border border-pink-200 hover:bg-pink-50 text-pink-500 px-6 py-6 text-lg"
+            onClick={handleSaveResults}
+            disabled={isSaving}
+          >
+            <Save className="h-5 w-5" />
+            {isSaving ? "Saving..." : "Save Results"}
+          </Button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <Link to="/assessment/history">
+            <Button variant="outline" className="flex items-center px-6 py-6 text-lg">
+              View History
+            </Button>
+          </Link>
+
+          <div className="flex gap-4">
+            <Button variant="outline" className="flex items-center gap-2 px-6 py-6 text-lg">
+              <Share2 className="h-5 w-5" />
+              Share
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2 px-6 py-6 text-lg">
+              <Download className="h-5 w-5" />
+              Download
+            </Button>
+          </div>
+        </div>
       </main>
-      <ChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        userData={{
-          age,
-          cycleLength,
-          periodDuration,
-          flowHeaviness: flowLevel,
-          painLevel,
-          symptoms,
-        }}
-      />
+
+      {isChatOpen && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          initialMessage={`Hi! I've just completed my menstrual health assessment. My results show: ${patternData[pattern].title}. Can you tell me more about what this means?`}
+        />
+      )}
     </div>
   );
 }
