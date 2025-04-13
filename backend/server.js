@@ -23,7 +23,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? 'https://dottie-app.com' 
+    ? ['https://dottie-app.com', 'https://dottie-lmcreans-projects.vercel.app'] 
     : ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }));
