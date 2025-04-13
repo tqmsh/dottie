@@ -6,7 +6,7 @@ import { getAuthToken, setAuthToken, setRefreshToken, TOKEN_KEYS } from './token
  * This instance has all the common configurations and interceptors
  */
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
   },
